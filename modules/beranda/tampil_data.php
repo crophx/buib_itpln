@@ -29,7 +29,7 @@ else { ?>
             </div>
             <div class="col-lg-9 heroes-text px-xl-5">
                 <h2 class="text-success mb-2">Selamat datang kembali <span><?php echo $_SESSION['nama_user']; ?></span> di <span> Website <?php echo $data['nama']; ?></span></h2>
-                <h4 class="text-muted mb-4">BUIB adalah Sistem Informasi Pengelolaan Arsip Digital Dokumen Keuangan yang digunakan untuk mengelola penyimpanan arsip dalam bentuk dokumen elektronik yang memberikan efisiensi dan keamanan penyimpanan arsip, serta mempermudah dalam mencari informasi arsip.</h4>
+                <h4 class="text-muted mb-4">Dashsboard Kerja adalah Sistem Informasi Pengelolaan Arsip Digital Dokumen dan juga antarmuka atau alat digital yang dirancang untuk memberikan karyawan ikhtisar komprehensif tentang berbagai aspek pekerjaan, kinerja, dan informasi organisasi yang relevan</h4>
                 <a href="?module=arsip" class="btn btn-success btn-round px-4 mr-2 mb-3 mb-lg-0">
                     <span class="btn-label"><i class="fas fa-folder-open mr-2"></i></span> Arsip Dokumen
                 </a>
@@ -190,7 +190,7 @@ else { ?>
                             <div class="row align-items-center">
                                 <div class="col-icon">
                                     <div class="icon-big text-center bubble-shadow-small">
-                                        <i class="fas fa-camera" style="color: violet;"></i>
+                                        <i class="fas fa-clone" style="color: antiquewhite;"></i>
                                     </div>
                                 </div>
                                 <div class="col col-stats ml-3 ml-sm-0">
