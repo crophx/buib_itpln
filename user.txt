@@ -1,0 +1,11 @@
+Hak Akses = Administrator
+Username : administrator
+Password : 123
+
+Hak Akses = Bendahara
+Username : bendahara
+Password : 123
+
+Hak Akses = Pengguna
+Username : pengguna
+Password : 123

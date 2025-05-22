@@ -1,0 +1,18 @@
+.text-brand {
+  color: #ee5050 !important;
+}
+
+.error-img {
+  width: 430px;
+  height: auto;
+}
+
+.error-text {
+  font-size: 25px;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+footer {
+  font-size: 16px;
+}

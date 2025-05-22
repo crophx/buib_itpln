@@ -1,0 +1,163 @@
+body,
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6,
+p,
+.navbar,
+.brand,
+.btn-simple,
+.alert,
+a,
+.td-name,
+td,
+button.close {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-family: 'Lato', sans-serif;
+}
+
+body {
+  font-size: 13px;
+  color: #575962;
+}
+
+h1,
+.h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-top: 0rem;
+}
+
+h2,
+.h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-top: 0rem;
+  margin-bottom: 0.5rem;
+}
+
+h3,
+.h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-top: 0rem;
+  margin-bottom: 0.5rem;
+}
+
+h4,
+.h4 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 0rem;
+  margin-bottom: 0.5rem;
+}
+
+hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 2px solid #e3e6f0;
+}
+
+.bg-secondary {
+  background-color: #435ebe !important;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.text-white {
+  color: #fff !important;
+}
+
+.text-dark {
+  color: #5a5c69 !important;
+}
+
+a.text-dark:hover,
+a.text-dark:focus {
+  color: #373840 !important;
+}
+
+.mt-4 {
+  margin-top: 1.5rem !important;
+}
+
+.mt-5 {
+  margin-top: 2rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #858796;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem;
+  vertical-align: top;
+  border-top: 1px solid #e3e6f0;
+}
+
+.table thead th {
+  vertical-align: middle;
+  border-bottom: 2px solid #e3e6f0;
+}
+
+.table tbody+tbody {
+  border-top: 2px solid #e3e6f0;
+}
+
+.table-sm th,
+.table-sm td {
+  padding: 0.3rem;
+}
+
+.table-bordered {
+  border: 1px solid #e3e6f0;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #e3e6f0;
+}
+
+.table-bordered thead th,
+.table-bordered thead td {
+  border-bottom-width: 2px;
+}
+
+.badge {
+  color: #ffffff !important;
+  border-radius: 50px;
+  margin-left: auto;
+  line-height: 1;
+  padding: 4px 10px;
+  vertical-align: middle;
+  font-weight: 400;
+  font-size: 11px;
+  border: 1px solid #ddd;
+}
