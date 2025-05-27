@@ -1,14 +1,3 @@
-<!-- Sistem Informasi Pengelolaan Arsip Digital Dokumen Keuangan (SIPADU)
-**************************************************************************
-* Developer   : Indra Styawantoro
-* Company     : Pustaka Koding
-* Release     : September 2023
-* Update      : -
-* Website     : pustakakoding.com
-* E-mail      : pustaka.koding@gmail.com
-* WhatsApp    : +62-813-7778-3334
--->
-
 <?php
 session_start();      // mengaktifkan session
 
@@ -190,7 +179,7 @@ else {
 				<footer class="footer">
 					<div class="container-fluid">
 						<div class="copyright ml-auto">
-							<span>Copyright &copy; 2023 - <a href="https://pustakakoding.com/" class="text-brand">Pustaka Koding</a>. All rights reserved.</span>
+							<span>Copyright &copy; 2025 - <a href="https://pustakakoding.com/" class="text-brand">Badan Usaha dan Inkubasi Bisnis</a>. All rights reserved.</span>
 						</div>
 					</div>
 				</footer>
