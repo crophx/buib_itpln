@@ -80,8 +80,8 @@ $data = mysqli_fetch_assoc($query);
 
 				<!-- footer -->
 				<div class="login-footer mt-5">
-					<span class="msg">&copy; 2023 -</span>
-					<a href="https://pustakakoding.com/" class="text-brand">Pustaka Koding</a>
+					<span class="msg">&copy; 2025 -</span>
+					<a href="https://pustakakoding.com/" class="text-brand">Badan Usaha dan Inkubasi Bisnis</a>
 				</div>
 			</form>
 		</div>

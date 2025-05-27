@@ -48,28 +48,33 @@ else {
 		// panggil file form ubah jenis
 		include "modules/jenis/form_ubah.php";
 	}
-	// jika module yang dipilih "profil" dan hak akses "Administrator"
-	elseif ($_GET['module'] == 'profil' && $_SESSION['hak_akses'] == 'Administrator') {
+	// jika module yang dipilih "pengajuan"
+	elseif ($_GET['module'] == 'pengajuan_surat') {
+		// panggil file form ubah jenis
+		include "modules/pengajuan_surat/tampil_data.php";
+	}
+	// jika module yang dipilih "profil" dan hak akses "SuperAdmin", "BUIB"
+	elseif ($_GET['module'] == 'profil' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB'])) {
 		// panggil file tampil data profil
 		include "modules/profil/tampil_data.php";
 	}
-	// jika module yang dipilih "form_ubah_profil" dan hak akses "Administrator"
-	elseif ($_GET['module'] == 'form_ubah_profil' && $_SESSION['hak_akses'] == 'Administrator') {
+	// jika module yang dipilih "form_ubah_profil" dan hak akses "SuperAdmin", "BUIB"
+	elseif ($_GET['module'] == 'form_ubah_profil' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB'])) {
 		// panggil file form ubah profil
 		include "modules/profil/form_ubah.php";
 	}
-	// jika module yang dipilih "user" dan hak akses "Administrator"
-	elseif ($_GET['module'] == 'user' && $_SESSION['hak_akses'] == 'Administrator') {
+	// jika module yang dipilih "user" dan hak akses "SuperAdmin"
+	elseif ($_GET['module'] == 'user' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'SuperAdmin', 'BUIB'])) {
 		// panggil file tampil data user
 		include "modules/user/tampil_data.php";
 	}
-	// jika module yang dipilih "form_entri_user" dan hak akses "Administrator"
-	elseif ($_GET['module'] == 'form_entri_user' && $_SESSION['hak_akses'] == 'Administrator') {
+	// jika module yang dipilih "form_entri_user" dan hak akses "SuperAdmin"
+	elseif ($_GET['module'] == 'form_entri_user' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'SuperAdmin', 'BUIB'])) {
 		// panggil file form entri user
 		include "modules/user/form_entri.php";
 	}
-	// jika module yang dipilih "form_ubah_user" dan hak akses "Administrator"
-	elseif ($_GET['module'] == 'form_ubah_user' && $_SESSION['hak_akses'] == 'Administrator') {
+	// jika module yang dipilih "form_ubah_user" dan hak akses "SuperAdmin"
+	elseif ($_GET['module'] == 'form_ubah_user' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'SuperAdmin', 'BUIB'])) {
 		// panggil file form ubah user
 		include "modules/user/form_ubah.php";
 	}

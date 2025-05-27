@@ -12,6 +12,13 @@ else {
 	// panggil file "database.php" untuk koneksi ke database
 	require_once "../../config/database.php";
 
+	// ambil enum hak_akses dari tabel
+	$query = mysqli_query($mysqli, "SHOW COLUMNS FROM tbl_user WHERE Field = 'hak_akses'");
+	$data = mysqli_fetch_assoc($query);
+
+	preg_match("/^enum\('(.*)'\)$/", $data['Type'], $matches);
+	$enum_values = explode("','", $matches[1]);
+
 	// mengecek data hasil submit dari form
 	if (isset($_POST['simpan'])) {
 		// ambil data hasil submit dari form

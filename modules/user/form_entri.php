@@ -6,7 +6,15 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 	header('location: 404.html');
 }
 // jika file di include oleh file lain, tampilkan isi file
-else { ?>
+else {
+	require_once("config/database.php");
+
+	// Ambil enum hak_akses
+	$query = mysqli_query($mysqli, "SHOW COLUMNS FROM tbl_user WHERE Field = 'hak_akses'");
+	$data = mysqli_fetch_assoc($query);
+	preg_match("/^enum\('(.*)'\)$/", $data['Type'], $matches);
+	$enum_values = explode("','", $matches[1]);
+?>
 	<div class="panel-header">
 		<div class="page-inner py-4">
 			<div class="page-header">
@@ -55,9 +63,9 @@ else { ?>
 						<label>Hak Akses <span class="text-danger">*</span></label>
 						<select name="hak_akses" class="form-control select2-single" autocomplete="off" required>
 							<option selected disabled value="">-- Pilih --</option>
-							<option value="Administrator">Administrator</option>
-							<option value="Bendahara">Bendahara</option>
-							<option value="Pengguna">Pengguna</option>
+							<?php foreach ($enum_values as $value): ?>
+								<option value="<?= $value ?>"><?= $value ?></option>
+							<?php endforeach; ?>
 						</select>
 						<div class="invalid-feedback">Hak akses tidak boleh kosong.</div>
 					</div>

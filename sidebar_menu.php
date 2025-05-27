@@ -8,8 +8,8 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 // jika file di include oleh file lain, tampilkan isi file
 else {
 	// pengecekan hak akses untuk menampilkan menu sesuai dengan hak akses
-	// jika hak akses = Administrator, tampilkan menu
-	if ($_SESSION['hak_akses'] == 'Administrator') {
+	// jika hak akses = SuperAdmin, tampilkan menu
+	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
@@ -88,6 +88,53 @@ else {
 		<?php
 		}
 		
+		// jika menu profil instansi (tampil data / form ubah) dipilih, menu profil instansi aktif
+		if ($_GET['module'] == 'pengajuan_surat') { ?>
+			<li class="nav-section">
+				<span class="sidebar-mini-icon">
+					<i class="fa fa-ellipsis-h"></i>
+				</span>
+				<h4 class="text-section">Surat</h4>
+			</li>
+
+			<li class="nav-item ">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-window-restore"></i>
+					<p>Pengajuan Surat</p>
+				</a>
+			</li>
+			<li class="nav-item ">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-envelope"></i>
+					<p>Pengajuan</p>
+				</a>
+			</li>
+			<li class="nav-item ">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-folder"></i>
+					<p>Riwayat Pengajuan</p>
+				</a>
+			</li>
+		<?php
+		}
+		// jika tidak dipilih, menu profil instansi tidak aktif
+		else { ?>
+			<li class="nav-section">
+				<span class="sidebar-mini-icon">
+					<i class="fa fa-ellipsis-h"></i>
+				</span>
+				<h4 class="text-section">Surat</h4>
+			</li>
+
+			<li class="nav-item">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-window-restore"></i>
+					<p>Pengajuan Surat</p>
+				</a>
+			</li>
+		<?php
+		}
+
 		// jika menu profil instansi (tampil data / form ubah) dipilih, menu profil instansi aktif
 		if ($_GET['module'] == 'profil' || $_GET['module'] == 'form_ubah_profil') { ?>
 			<li class="nav-section">
@@ -179,8 +226,8 @@ else {
 		<?php
 		}
 	}
-	// jika hak akses = Bendahara, tampilkan menu
-	elseif ($_SESSION['hak_akses'] == 'Bendahara') {
+	// jika hak akses = BUIB, tampilkan menu
+	elseif (in_array($_SESSION['hak_akses'], haystack: ['Pimpinan', 'SekretarisPimpinan'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
