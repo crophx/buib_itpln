@@ -33,26 +33,76 @@ else { ?>
             <!-- form entri data -->
             <form action="modules/arsip/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <div class="card-body">
-                    <div class="form-group col-lg-4">
-                        <label>Jenis Dokumen <span class="text-danger">*</span></label>
-                        <select name="jenis_dokumen" class="form-control select2-single" autocomplete="off" required>
-                            <option selected disabled value="">-- Pilih --</option>
-                            <?php
-                            // sql statement untuk menampilkan data dari tabel "tbl_jenis"
-                            $query_jenis = mysqli_query($mysqli, "SELECT * FROM tbl_jenis ORDER BY nama_jenis ASC")
-                                                                  or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
-                            // ambil data hasil query
-                            while ($data_jenis = mysqli_fetch_assoc($query_jenis)) {
-                                // tampilkan data
-                                echo "<option value='$data_jenis[id_jenis]'>$data_jenis[nama_jenis]</option>";
-                            }
-                            ?>
-                        </select>
-                        <div class="invalid-feedback">Jenis dokumen tidak boleh kosong.</div>
+                    <div class="row">
+                        <div class="col-lg-4 pr-lg-0">
+                            <div class="form-group">
+                                <label>Jenis Dokumen <span class="text-danger">*</span></label>
+                                <select name="jenis_dokumen" class="form-control select2-single" autocomplete="off" required>
+                                    <option selected disabled value="">-- Pilih --</option>
+                                    <?php
+                                    // sql statement untuk menampilkan data dari tabel "tbl_jenis"
+                                    $query_jenis = mysqli_query($mysqli, "SELECT * FROM tbl_jenis ORDER BY nama_jenis ASC")
+                                                                        or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+                                    // ambil data hasil query
+                                    while ($data_jenis = mysqli_fetch_assoc($query_jenis)) {
+                                        // tampilkan data
+                                        echo "<option value='$data_jenis[id_jenis]'>$data_jenis[nama_jenis]</option>";
+                                    }
+                                    ?>
+                                </select>
+                                <div class="invalid-feedback">Jenis dokumen tidak boleh kosong.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 pr-lg-0">
+                            <div class="form-group">
+                                <label>No Dokumen <span class="text-danger">*</span></label>
+                                <input type="text" name="no-dokumen" class="form-control" autocomplete="off" required>
+                                <div class="invalid-feedback">No Dokumen tidak boleh kosong.</div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- No. Dokumen
+                    <div class="col-lg-4 pr-lg-0">
+                            <label>No Dokumen <span class="text-danger">*</span></label>
+                            <input type="text" name="no-dokumen" class="form-control" autocomplete="off" required>
+                            <div class="invalid-feedback">No Dokumen tidak boleh kosong.</div>
+                    </div> 
+                    -->
+                    
+                        <div class="form-group col-lg-4">
+                            <label>Tipe Kerjasama<span class="text-danger">*</span></label>
+                                <select name="Tipe_kerjasama" class="form-control select2-single" autocomplete="off" required>
+                                    <option selected disabled value="">-- Pilih --</option>
+                                    <option value="Akademik">Akademik</option>
+                                    <option value="Non-Akademik">Non-Akademik</option>
+                                </select>
+                                <div class="invalid-feedback">Tipe Kerjasama Tidak Boleh Kosong.</div>
+                        </div>
+
+
                     <div class="row">
-                        <div class="col-lg-2 pr-lg-0">
+                        <div class="col-lg-4 pr-lg-0">
+                            <div class="form-group">
+                                <label>Nama Pihak Pertama <span class="text-danger">*</span></label>
+                                <input type="text" name="pihak-pertama" class="form-control" autocomplete="off" required>
+                                <div class="invalid-feedback">Nama Pihak Pertama Tidak Boleh Kosong.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 pr-lg-0">
+                            <div class="form-group">
+                                <label>Nama Pihak Kedua <span class="text-danger">*</span></label>
+                                <input type="text" name="pihak-kedua" class="form-control" autocomplete="off" required>
+                                <div class="invalid-feedback">Nama Pihak Kedua Tidak Boleh Kosong.</div>
+                            </div>
+                        </div>
+                    </div>
+                            
+
+                    <div class="row">
+                        <div class="col-lg-4 pr-lg-0">
                             <div class="form-group">
                                 <label>Bulan <span class="text-danger">*</span></label>
                                 <select name="bulan" class="form-control select2-single" autocomplete="off" required>
@@ -74,7 +124,7 @@ else { ?>
                             </div>
                         </div>
 
-                        <div class="col-lg-2 pr-lg-0">
+                        <div class="col-lg-4 pr-lg-0">
                             <div class="form-group">
                                 <label>Tahun <span class="text-danger">*</span></label>
                                 <input type="text" name="tahun" class="form-control" maxlength="4" autocomplete="off" onKeyPress="return goodchars(event,'0123456789',this)" required>
