@@ -99,7 +99,66 @@ else { ?>
                                 </div>
                                 <div class="col col-stats ml-3 ml-sm-0">
                                     <div class="numbers">
-                                        <a href="" style="color: inherit; text-decoration: none;"><h4 class="card-tittle">Bagian Kerja Internasional (BKI)</h4></a>
+                                        <h4 class="card-tittle">Bagian Kerja Internasional (BKI)</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- menampilkan button BUIB aplikasi -->
+                <div class="col-sm-12 col-md-4">
+                    <a href="?module=buib" class="text-decoration-none">
+                        <div class="card card-stats card-round card-hover">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-icon">
+                                        <div class="icon-big text-center bubble-shadow-small">
+                                            <i class="fas fa-clone" style="color: antiquewhite; inheritance: none;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col col-stats ml-3 ml-sm-0">
+                                        <div class="numbers">
+                                            <h4 class="card-tittle text-dark">BUIB</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <!-- menampilkan button LENTERA aplikasi -->
+                <div class="col-sm-12 col-md-4">
+                    <div class="card card-stats card-round">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-icon">
+                                    <div class="icon-big text-center bubble-shadow-small">
+                                        <i class="fas fa-leaf" style="color: green;"></i>
+                                    </div>
+                                </div>
+                                <div class="col col-stats ml-3 ml-sm-0">
+                                    <div class="numbers">
+                                        <h4 class="card-tittle">LENTERA</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- menampilkan button Training Center (TC) aplikasi -->
+                <div class="col-sm-12 col-md-4">
+                    <div class="card card-stats card-round">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-icon">
+                                    <div class="icon-big text-center bubble-shadow-small">
+                                        <i class="fas fa-camera" style="color: violet;"></i>
+                                    </div>
+                                </div>
+                                <div class="col col-stats ml-3 ml-sm-0">
+                                    <div class="numbers">
+                                        <h4 class="card-tittle">Training Center (TC)</h4>
                                     </div>
                                 </div>
                             </div>
@@ -168,43 +227,95 @@ else { ?>
                             </div>
                         </div>
                     </div>
+                </div>                
+            </div>
+        <?php } ?>
+        
+        <!-- Chart container untuk menampilkan data arsip per jenis dokumen -->
+        <div class="row mt-2">
+            <!-- Bar Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-chart-bar mr-2"></i> Jumlah Arsip Per Jenis Dokumen (Bar Chart)</div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="barChart" style="width: 100%; height: 400px;"></canvas>
+                    </div>
                 </div>
             </div>
-        <?php }?>
+            
+            <!-- Pie Chart -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-chart-pie mr-2"></i> Distribusi Arsip Per Jenis Dokumen (Pie Chart)</div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="pieChart" style="width: 100%; height: 400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- tampilkan informasi jumlah data arsip per jenis dokumen -->
+        <!-- Tabel sebagai backup/detail view -->
         <div class="card mt-2">
             <div class="card-header">
-                <!-- judul tabel -->
-                <div class="card-title"><i class="fas fa-info-circle mr-2"></i> Jumlah Arsip Per Jenis Dokumen</div>
+                <div class="card-title"><i class="fas fa-table mr-2"></i> Detail Jumlah Arsip Per Jenis Dokumen</div>
+                <div class="card-tools">
+                    <button class="btn btn-sm btn-secondary" onclick="toggleTable()">
+                        <i class="fas fa-eye" id="toggleIcon"></i> <span id="toggleText">Sembunyikan Tabel</span>
+                    </button>
+                </div>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="tableContainer">
                 <div class="table-responsive">
-                    <!-- tabel untuk menampilkan data dari database -->
                     <table id="basic-datatables" class="display table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Jenis Dokumen</th>
                                 <th class="text-center">Jumlah</th>
+                                <th class="text-center">Persentase</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             // variabel untuk nomor urut tabel
                             $no = 1;
+                            $total_arsip = 0;
+                            
+                            // hitung total arsip terlebih dahulu
+                            $total_query = mysqli_query($mysqli, "SELECT COUNT(*) as total FROM tbl_arsip")
+                                                               or die('Ada kesalahan pada query total arsip : ' . mysqli_error($mysqli));
+                            $total_data = mysqli_fetch_assoc($total_query);
+                            $total_arsip = $total_data['total'];
+                            
                             // sql statement untuk menampilkan jumlah data dari tabel "tbl_arsip" dan tabel "tbl_jenis", dikelompokan berdasarkan "jenis_dokumen"
                             $query = mysqli_query($mysqli, "SELECT COUNT(*) as jumlah, b.nama_jenis 
                                                             FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
                                                             GROUP BY a.jenis_dokumen ORDER BY jumlah DESC")
                                                             or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+                            
+                            // simpan data untuk chart
+                            $chart_labels = [];
+                            $chart_data = [];
+                            $chart_colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#4BC0C0'];
+                            
                             // ambil data hasil query
-                            while ($data = mysqli_fetch_assoc($query)) { ?>
+                            while ($data = mysqli_fetch_assoc($query)) {
+                                $persentase = $total_arsip > 0 ? round(($data['jumlah'] / $total_arsip) * 100, 1) : 0;
+                                
+                                // simpan untuk chart
+                                $chart_labels[] = $data['nama_jenis'];
+                                $chart_data[] = $data['jumlah'];
+                                ?>
                                 <!-- tampilkan data -->
                                 <tr>
                                     <td width="50" class="text-center"><?php echo $no++; ?></td>
                                     <td width="200"><?php echo $data['nama_jenis']; ?></td>
                                     <td width="80" class="text-center"><?php echo $data['jumlah']; ?></td>
+                                    <td width="100" class="text-center"><?php echo $persentase; ?>%</td>
                                 </tr>
                             <?php } ?>
                         </tbody>
@@ -213,4 +324,115 @@ else { ?>
             </div>
         </div>
     </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <script>
+        // Data untuk chart dari PHP
+        const chartLabels = <?php echo json_encode($chart_labels); ?>;
+        const chartData = <?php echo json_encode($chart_data); ?>;
+        const chartColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#4BC0C0'];
+
+        // Bar Chart
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Jumlah Arsip',
+                    data: chartData,
+                    backgroundColor: chartColors.slice(0, chartLabels.length),
+                    borderColor: chartColors.slice(0, chartLabels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + ' dokumen';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        // Pie Chart
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: chartColors.slice(0, chartLabels.length),
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' dokumen (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function untuk toggle table visibility
+        function toggleTable() {
+            const tableContainer = document.getElementById('tableContainer');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const toggleText = document.getElementById('toggleText');
+            
+            if (tableContainer.style.display === 'none') {
+                tableContainer.style.display = 'block';
+                toggleIcon.className = 'fas fa-eye';
+                toggleText.textContent = 'Sembunyikan Tabel';
+            } else {
+                tableContainer.style.display = 'none';
+                toggleIcon.className = 'fas fa-eye-slash';
+                toggleText.textContent = 'Tampilkan Tabel';
+            }
+        }
+    </script>
+
 <?php } ?>
