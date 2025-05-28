@@ -15,14 +15,14 @@ else {
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
 					<div class="page-header">
 						<!-- judul halaman -->
-						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Arsip Dokumen</h4>
+						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Pengajuan Surat</h4>
 						<!-- breadcrumbs -->
 						<ul class="breadcrumbs">
 							<li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
 							<li class="separator"><i class="flaticon-right-arrow"></i></li>
-							<li class="nav-item"><a href="?module=arsip">Arsip</a></li>
+							<li class="nav-item"><a href="?module=arsip">Surat</a></li>
 							<li class="separator"><i class="flaticon-right-arrow"></i></li>
-							<li class="nav-item"><a>Data</a></li>
+							<li class="nav-item"><a>Pengajuan</a></li>
 						</ul>
 					</div>
 					<div class="ml-md-auto py-2 py-md-0">
@@ -39,7 +39,7 @@ else {
 			<div class="card">
 				<div class="card-header">
 					<!-- judul tabel -->
-					<div class="card-title">Data Arsip Dokumen</div>
+					<div class="card-title">List Pengajuan Surat</div>
 				</div>
 				<div class="card-body">
 					<div class="table-responsive">
@@ -106,7 +106,6 @@ else {
 												</div>
 											</div>
 										</td>
-										
 									</tr>
 								<?php } ?>
 							</tbody>

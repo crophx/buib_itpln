@@ -34,7 +34,7 @@ else { ?>
                         </div>
                         <div>
                             <h4 class="lh-2 text-dark mb-3">Copyright</h4>
-                            <p>&copy; 2023 - <a href="https://pustakakoding.com/" target="_blank" class="text-brand text-decoration-none">Pustaka Koding</a> - Indra Styawantoro. All rights reserved.</p>
+                            <p>&copy;  - <a href="https://pustakakoding.com/" target="_blank" class="text-brand text-decoration-none">Badan Usaha dan Inkubasi Bisnis</a> - Indra Styawantoro. All rights reserved.</p>
                         </div>
                     </div>
                 </div>

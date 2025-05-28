@@ -1,10 +1,12 @@
 <IfModule mod_rewrite.c>
 RewriteEngine on
 
-# Membuat halaman khusus yang berisi pesan kesalahan 
+# Membuat halaman khusus yang berisi pesan kesalahan
+
 ErrorDocument 404 http://localhost/Pustaka-Koding/Project-PHP/PHP-MySQLi/sistem-informasi-pengelolaan-arsip-digital-dokumen-keuangan/404.html
 ErrorDocument 403 http://localhost/Pustaka-Koding/Project-PHP/PHP-MySQLi/sistem-informasi-pengelolaan-arsip-digital-dokumen-keuangan/403.html
 
 # Memproteksi direktori pada aplikasi
+
 Options All -Indexes
 </IfModule>
