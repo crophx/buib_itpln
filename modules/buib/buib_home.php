@@ -9,7 +9,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
-	if ($_SESSION['hak_akses'] == 'Administrator' || $_SESSION['hak_akses'] == 'Bendahara') { 
+	if ($_SESSION['hak_akses'] == 'SuperAdmin' || $_SESSION['hak_akses'] == 'BUIB') { 
 		
 		// Query untuk mengambil semua data yang diperlukan
 		$main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_jenis 
