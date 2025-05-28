@@ -28,7 +28,7 @@ else {
 					<div class="ml-md-auto py-2 py-md-0">
 						<!-- button entri data -->
 						<a href="?module=form_entri_arsip" class="btn btn-success btn-round">
-							<span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data
+							<span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Ajukan Surat
 						</a>
 					</div>
 				</div>

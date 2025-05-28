@@ -132,6 +132,18 @@ else {
 					<p>Pengajuan Surat</p>
 				</a>
 			</li>
+			<li class="nav-item ">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-envelope"></i>
+					<p>Pengajuan</p>
+				</a>
+			</li>
+			<li class="nav-item ">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-folder"></i>
+					<p>Riwayat Pengajuan</p>
+				</a>
+			</li>
 		<?php
 		}
 
