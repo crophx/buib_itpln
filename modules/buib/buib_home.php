@@ -318,7 +318,7 @@ else {
                                         <span class="badge badge-<?php echo $status_class; ?>"><?php echo $status; ?></span>
                                     </td>
                                     <td class="text-center">
-                                        <a href="?modul=tampil_detail_buib&id=<?php echo $data['id_buib']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
+                                        <a href="?module=tampil_detail_buib&id=<?php echo $data['id_buib']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
                                             <i class="far fa-file-alt"></i>
                                         </a>
                                     </td>
