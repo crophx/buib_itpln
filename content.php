@@ -13,6 +13,26 @@ else {
 		// panggil file tampil data beranda
 		include "modules/beranda/tampil_data.php";
 	}
+	// jika module yang dipilih "buib"
+	elseif ($_GET['module'] == 'buib') {
+		// panggil file tampil home buib
+		include "modules/buib/buib_home.php";
+	}
+	// jika module yang dipilih "form entri buib"
+	elseif ($_GET['module'] == 'form_entri_buib') {
+		// panggil file tampil entri data buib
+		include "modules/buib/form_entri.php";
+	}
+	// jika module yang dipilih "form ubah buib"
+	elseif ($_GET['module'] == 'form_ubah_buib') {
+		// panggil file tampil entri data buib
+		include "modules/buib/form_ubah.php";
+	}
+	// jika module yang dipilih "tampil buib"
+	elseif ($_GET['module'] == 'tampil_detail_buib') {
+		// panggil file tampil entri data buib
+		include "modules/buib/tampil_detail.php";
+	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {
 		// panggil file tampil data arsip
