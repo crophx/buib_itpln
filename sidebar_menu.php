@@ -9,7 +9,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan menu sesuai dengan hak akses
 	// jika hak akses = SuperAdmin, tampilkan menu
-	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB'])) {
+	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
@@ -239,7 +239,7 @@ else {
 		}
 	}
 	// jika hak akses = BUIB, tampilkan menu
-	elseif (in_array($_SESSION['hak_akses'], haystack: ['Pimpinan', 'SekretarisPimpinan'])) {
+	elseif (in_array($_SESSION['hak_akses'], haystack: ['BKI', 'BKS', 'TC', 'PusatBisnis'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
