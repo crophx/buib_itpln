@@ -104,9 +104,9 @@ else {
 				</a>
 			</li>
 			<li class="nav-item ">
-				<a href="?module=pengajuan_surat">
+				<a href="?module=antrian_surat">
 					<i class="fas fa-envelope"></i>
-					<p>Pengajuan</p>
+					<p>Antrian Pengajuan</p>
 				</a>
 			</li>
 			<li class="nav-item ">
@@ -133,9 +133,9 @@ else {
 				</a>
 			</li>
 			<li class="nav-item ">
-				<a href="?module=pengajuan_surat">
+				<a href="?module=antrian_surat">
 					<i class="fas fa-envelope"></i>
-					<p>Pengajuan</p>
+					<p>Antrian Pengajuan</p>
 				</a>
 			</li>
 			<li class="nav-item ">

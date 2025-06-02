@@ -73,6 +73,11 @@ else {
 		// panggil file form ubah jenis
 		include "modules/pengajuan_surat/tampil_data.php";
 	}
+	// jika module yang dipilih "antrian_surat" dan hak akses "SuperAdmin", "BUIB", "Pimpinan", "SekretarisPimpinan"
+	elseif ($_GET['module'] == 'antrian_surat' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil data profil
+		include "modules/antrian_surat/tampil_data.php";
+	}
 	// jika module yang dipilih "profil" dan hak akses "SuperAdmin", "BUIB"
 	elseif ($_GET['module'] == 'profil' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB'])) {
 		// panggil file tampil data profil

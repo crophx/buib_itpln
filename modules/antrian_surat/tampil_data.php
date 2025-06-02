@@ -15,7 +15,7 @@ else {
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
 					<div class="page-header">
 						<!-- judul halaman -->
-						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Pengajuan Surat</h4>
+						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i>Antrian Surat Pengajuan</h4>
 						<!-- breadcrumbs -->
 						<ul class="breadcrumbs">
 							<li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
