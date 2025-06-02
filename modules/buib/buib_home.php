@@ -487,7 +487,7 @@ else {
                         </tbody>
                         <tfoot>
                             <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                <td class="text-center" colspan="2">
+                                <td class="text-center" colspan="3">
                                     <strong>TOTAL RENCANA</strong>
                                 </td>
                                 <td class="text-right" style="color: #28a745; font-size: 1.1em;">
