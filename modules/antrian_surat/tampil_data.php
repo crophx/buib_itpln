@@ -9,13 +9,13 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = SuperAdmin atau hak akses = Pimpinan, atau hak akses = SekretarisPimpinan, tampilkan konten
-	if (in_array($_SESSION['hak_akses'], haystack: ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'Lemtera', 'PusatBisnis'])) { ?>
+	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) { ?>
 		<div class="panel-header">
 			<div class="page-inner py-45">
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
 					<div class="page-header">
 						<!-- judul halaman -->
-						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Pengajuan Surat</h4>
+						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i>Antrian Surat Pengajuan</h4>
 						<!-- breadcrumbs -->
 						<ul class="breadcrumbs">
 							<li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
