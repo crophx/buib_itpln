@@ -13,7 +13,7 @@ else {
 		
 		// Query untuk mengambil semua data yang diperlukan
 		$main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_jenis 
-										  FROM tbl_buib as a 
+										  FROM tbl_bks as a 
 										  INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
 										  ORDER BY a.tgl_upload DESC")
 										  or die('Error pada query data BUIB: ' . mysqli_error($mysqli));
@@ -75,7 +75,7 @@ else {
 					</div>
 					<div class="ml-md-auto py-2 py-md-0">
 						<!-- button entri data -->
-						<a href="?module=form_entri_buib" class="btn btn-success btn-round">
+						<a href="?module=form_entri_bks" class="btn btn-success btn-round">
 							<span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data
 						</a>
 					</div>
@@ -96,7 +96,7 @@ else {
                                     <option value="all">Semua Tahun</option>
                                     <?php
                                     // Query untuk mendapatkan daftar tahun
-                                    $tahun_query = mysqli_query($mysqli, "SELECT DISTINCT YEAR(tgl_upload) as tahun FROM tbl_buib ORDER BY tahun DESC")
+                                    $tahun_query = mysqli_query($mysqli, "SELECT DISTINCT YEAR(tgl_upload) as tahun FROM tbl_bks ORDER BY tahun DESC")
                                                                  or die('Error pada query tahun: ' . mysqli_error($mysqli));
                                     while($tahun_data = mysqli_fetch_assoc($tahun_query)) {
                                         echo "<option value='".$tahun_data['tahun']."'>".$tahun_data['tahun']."</option>";
@@ -266,7 +266,7 @@ else {
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="fas fa-table mr-2"></i>Detail Data BUIB
+                    <i class="fas fa-table mr-2"></i>Detail Data BKS
                 </div>
                 <div class="card-tools">
                     <button class="btn btn-sm btn-info" onclick="toggleDetailView()">
@@ -276,10 +276,10 @@ else {
                 </div>
             </div>
 
-            <!-- Tampil Data TABLE BUIB-->
+            <!-- Tampil Data TABLE BKS-->
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="buibDataTable" class="display table table-bordered table-striped table-hover">
+                    <table id="bksDataTable" class="display table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
@@ -318,22 +318,22 @@ else {
                                         <span class="badge badge-<?php echo $status_class; ?>"><?php echo $status; ?></span>
                                     </td>
                                     <td class="text-center">
-                                        <a href="?module=tampil_detail_buib&id=<?php echo $data['id_buib']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
+                                        <a href="?module=tampil_detail_bks&id=<?php echo $data['id_bks']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
                                             <i class="far fa-file-alt"></i>
                                         </a>
                                     </td>
                                     <td width="80" class="text-center">
                                         <div>
                                             <!-- button ubah data -->
-                                            <a href="?module=form_ubah_buib&id=<?php echo $data['id_buib']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Ubah">
+                                            <a href="?module=form_ubah_bks&id=<?php echo $data['id_bks']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Ubah">
                                                 <i class="fas fa-pencil-alt fa-sm"></i>
                                             </a>
                                             <!-- button hapus data -->
-                                            <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapus<?php echo $data['id_buib']; ?>" data-tooltip="tooltip" data-placement="top" title="Hapus">
+                                            <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapus<?php echo $data['id_bks']; ?>" data-tooltip="tooltip" data-placement="top" title="Hapus">
                                                 <i class="fas fa-trash fa-sm"></i>
                                             </a>
                                             <!-- Modal Hapus -->
-                                            <div class="modal fade" id="modalHapus<?php echo $data['id_buib']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal fade" id="modalHapus<?php echo $data['id_bks']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog" role="document">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -342,7 +342,7 @@ else {
                                                         <div class="modal-body text-left">Anda yakin ingin menghapus data arsip dokumen <strong><?php echo $data['nama_jenis']; ?></strong> Waktu <strong><?php echo $data['tgl_upload']; ?></strong>?</div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                            <a href="modules/buib/proses_hapus.php?id=<?php echo $data['id_buib']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                            <a href="modules/bks/proses_hapus.php?id=<?php echo $data['id_bks']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -561,11 +561,11 @@ else {
         // Initialize semua saat DOM ready
         $(document).ready(function() {
             // Initialize DataTable dengan destroy option untuk refresh
-            if ($.fn.DataTable.isDataTable('#buibDataTable')) {
-                $('#buibDataTable').DataTable().destroy();
+            if ($.fn.DataTable.isDataTable('#bksDataTable')) {
+                $('#bksDataTable').DataTable().destroy();
             }
             
-            $('#buibDataTable').DataTable({
+            $('#bksDataTable').DataTable({
                 "pageLength": 25,
                 "order": [[ 7, "desc" ]],
                 "columnDefs": [
@@ -601,7 +601,7 @@ else {
 					// Refresh halaman setelah notifikasi untuk memperbarui chart dan tabel
 					setTimeout(function() {
 						// Hapus parameter dari URL dan refresh
-						window.history.replaceState({}, document.title, window.location.pathname + '?module=buib');
+						window.history.replaceState({}, document.title, window.location.pathname + '?module=bks');
 						location.reload();
 					}, 2000);
 				}
@@ -617,7 +617,7 @@ else {
 					
 					// Refresh halaman setelah notifikasi
 					setTimeout(function() {
-						window.history.replaceState({}, document.title, window.location.pathname + '?module=buib');
+						window.history.replaceState({}, document.title, window.location.pathname + '?module=bks');
 						location.reload();
 					}, 2000);
 				}
@@ -633,7 +633,7 @@ else {
 					
 					// Refresh halaman setelah notifikasi
 					setTimeout(function() {
-						window.history.replaceState({}, document.title, window.location.pathname + '?module=buib');
+						window.history.replaceState({}, document.title, window.location.pathname + '?module=bks');
 						location.reload();
 					}, 2000);
 				}
