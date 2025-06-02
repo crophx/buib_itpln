@@ -10,6 +10,7 @@ else {
 	// pengecekan hak akses untuk menampilkan menu sesuai dengan hak akses
 	// jika hak akses = SuperAdmin, tampilkan menu
 	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
+	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
@@ -88,7 +89,7 @@ else {
 		<?php
 		}
 		
-		// jika menu profil instansi (tampil data / form ubah) dipilih, menu profil instansi aktif
+		// jika menu pengajuan surat dipilih, menu profil instansi aktif
 		if ($_GET['module'] == 'pengajuan_surat') { ?>
 			<li class="nav-section">
 				<span class="sidebar-mini-icon">
@@ -97,7 +98,7 @@ else {
 				<h4 class="text-section">Surat</h4>
 			</li>
 
-			<li class="nav-item ">
+			<li class="nav-item active">
 				<a href="?module=pengajuan_surat">
 					<i class="fas fa-window-restore"></i>
 					<p>Pengajuan Surat</p>
@@ -318,43 +319,43 @@ else {
 		<?php
 		}
 
-		// jika menu tentang aplikasi dipilih, menu tentang aplikasi aktif
-		if ($_GET['module'] == 'tentang') { ?>
+		// jika menu pengajuan surat dipilih, menu profil instansi aktif
+		if ($_GET['module'] == 'pengajuan_surat') { ?>
 			<li class="nav-section">
 				<span class="sidebar-mini-icon">
 					<i class="fa fa-ellipsis-h"></i>
 				</span>
-				<h4 class="text-section">Bantuan</h4>
+				<h4 class="text-section">Surat</h4>
 			</li>
 
 			<li class="nav-item active">
-				<a href="?module=tentang">
-					<i class="fas fa-info-circle"></i>
-					<p>Tentang Aplikasi</p>
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-window-restore"></i>
+					<p>Pengajuan Surat</p>
 				</a>
 			</li>
 		<?php
 		}
-		// jika tidak dipilih, menu tentang aplikasi tidak aktif
+		// jika tidak dipilih, menu profil instansi tidak aktif
 		else { ?>
 			<li class="nav-section">
 				<span class="sidebar-mini-icon">
 					<i class="fa fa-ellipsis-h"></i>
 				</span>
-				<h4 class="text-section">Bantuan</h4>
+				<h4 class="text-section">Surat</h4>
 			</li>
 
 			<li class="nav-item">
-				<a href="?module=tentang">
-					<i class="fas fa-info-circle"></i>
-					<p>Tentang Aplikasi</p>
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-window-restore"></i>
+					<p>Pengajuan Surat</p>
 				</a>
 			</li>
 		<?php
 		}
 	}
-	// jika hak akses = Pengguna, tampilkan menu
-	elseif ($_SESSION['hak_akses'] == 'Pengguna') {
+	// jika hak akses = user, tampilkan menu
+	elseif ($_SESSION['hak_akses'] == 'user') {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
@@ -412,40 +413,6 @@ else {
 		<?php
 		}
 
-		// jika menu tentang aplikasi dipilih, menu tentang aplikasi aktif
-		if ($_GET['module'] == 'tentang') { ?>
-			<li class="nav-section">
-				<span class="sidebar-mini-icon">
-					<i class="fa fa-ellipsis-h"></i>
-				</span>
-				<h4 class="text-section">Bantuan</h4>
-			</li>
-
-			<li class="nav-item active">
-				<a href="?module=tentang">
-					<i class="fas fa-info-circle"></i>
-					<p>Tentang Aplikasi</p>
-				</a>
-			</li>
-		<?php
-		}
-		// jika tidak dipilih, menu tentang aplikasi tidak aktif
-		else { ?>
-			<li class="nav-section">
-				<span class="sidebar-mini-icon">
-					<i class="fa fa-ellipsis-h"></i>
-				</span>
-				<h4 class="text-section">Bantuan</h4>
-			</li>
-
-			<li class="nav-item">
-				<a href="?module=tentang">
-					<i class="fas fa-info-circle"></i>
-					<p>Tentang Aplikasi</p>
-				</a>
-			</li>
-		<?php
-		}
 	}
 }
 ?>
