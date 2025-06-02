@@ -14,21 +14,13 @@ else {
         // Ambil data hasil query
         $data = mysqli_fetch_assoc($query);
         
-        // Cek apakah data ditemukan
-        if (!$data) {
-            echo "<script>alert('Data tidak ditemukan!'); window.location.href='?module=buib';</script>";
-            exit;
-        }
-    } else {
-        echo "<script>alert('ID tidak valid!'); window.location.href='?module=buib';</script>";
-        exit;
     }
 ?>
     <div class="panel-header">
-        <div class="page-inner py-4">
-            <div class="page-header">
+        <div class="page-inner py-45">
+            <div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
                 <!-- Judul Halaman -->
-                <h4 class="page-title"><i class="fas fa-eye mr-2"></i> Detail Dokumen BUIB</h4>
+                <h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Detail Dokumen BUIB</h4>
                 <!-- breadcrumbs -->
                 <ul class="breadcrumbs">
                     <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>

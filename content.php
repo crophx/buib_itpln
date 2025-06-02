@@ -13,6 +13,7 @@ else {
 		// panggil file tampil data beranda
 		include "modules/beranda/tampil_data.php";
 	}
+	// -- MODULE BUIB -- //
 	// jika module yang dipilih "buib"
 	elseif ($_GET['module'] == 'buib') {
 		// panggil file tampil home buib
@@ -32,6 +33,11 @@ else {
 	elseif ($_GET['module'] == 'tampil_detail_buib') {
 		// panggil file tampil entri data buib
 		include "modules/buib/tampil_detail.php";
+	}
+	// -- MODULE BKS -- //
+	elseif ($_GET['module'] == 'bks') {
+		// panggil file tampil home bks
+		include "modules/bks/bks_home.php";
 	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {
