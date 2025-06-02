@@ -10,7 +10,7 @@ else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = SuperAdmin atau hak akses = Pimpinan, atau hak akses = SekretarisPimpinan, tampilkan konten
 	if (in_array($_SESSION['hak_akses'], haystack: ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'Lemtera', 'PusatBisnis'])) { ?>
-		<div class="panel-header">
+		<div class="panel-header">0
 			<div class="page-inner py-45">
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
 					<div class="page-header">

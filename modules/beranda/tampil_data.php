@@ -38,7 +38,7 @@ else { ?>
 
         <?php
         // pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
-        // jika hak akses = Administrator, tampilkan konten
+        // jika hak akses = SuperAdmin, tampilkan konten
         if ($_SESSION['hak_akses'] == 'SuperAdmin') { ?>
             <!-- tampilkan informasi jumlah data arsip, jenis, dan pengguna -->
             <div class="row mt-5">
@@ -147,13 +147,15 @@ else { ?>
                 </div>
                 <!-- menampilkan button Bagian Kerja Sama (BKS) aplikasi -->
                 <div class="col-sm-12 col-md-4">
-                    <a href="?module=bks" class="text-decoration-none">
+                    <a href="?module=bks"
+                    class="text-decoration-none"
+                    style="text-decoration: none; outline: none; box-shadow: none; color: inherit;">
                         <div class="card card-stats card-round">
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col-icon">
                                         <div class="icon-big text-center bubble-shadow-small">
-                                            <i class="fas fa-clone" style="color: antiquewhite; inheritance: none;"></i>
+                                            <i class="fas fa-clone" style="color: antiquewhite;"></i>
                                         </div>
                                     </div>
                                     <div class="col col-stats ml-3 ml-sm-0">
@@ -187,7 +189,8 @@ else { ?>
                 </div>
                 <!-- menampilkan button BUIB aplikasi -->
                 <div class="col-sm-12 col-md-4">
-                    <a href="?module=buib" class="text-decoration-none">
+                    <a href="?module=buib" class="text-decoration-none"
+                    style="text-decoration: none; outline: none; box-shadow: none; color: inherit;">
                         <div class="card card-stats card-round card-hover">
                             <div class="card-body">
                                 <div class="row align-items-center">
