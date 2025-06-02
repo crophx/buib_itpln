@@ -39,6 +39,11 @@ else {
 		// panggil file tampil home bks
 		include "modules/bks/bks_home.php";
 	}
+	// jika module yang dipilih "form entri buib"
+	elseif ($_GET['module'] == 'form_entri_bks') {
+		// panggil file tampil entri data buib
+		include "modules/bks/form_entri.php";
+	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {
 		// panggil file tampil data arsip

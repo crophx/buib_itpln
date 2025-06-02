@@ -9,14 +9,14 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
-	if ($_SESSION['hak_akses'] == 'SuperAdmin' || $_SESSION['hak_akses'] == 'BUIB') { 
+	if ($_SESSION['hak_akses'] == 'SuperAdmin' || $_SESSION['hak_akses'] == 'BKS') { 
 		
 		// Query untuk mengambil semua data yang diperlukan
 		$main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_jenis 
 										  FROM tbl_bks as a 
 										  INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
 										  ORDER BY a.tgl_upload DESC")
-										  or die('Error pada query data BUIB: ' . mysqli_error($mysqli));
+										  or die('Error pada query data BKS: ' . mysqli_error($mysqli));
 		
 		// Data untuk charts dan summary
 		$yearly_data = [];

@@ -153,7 +153,7 @@ else { ?>
                                 <div class="row align-items-center">
                                     <div class="col-icon">
                                         <div class="icon-big text-center bubble-shadow-small">
-                                            <i class="fas fa-clone" style="color: antiquewhite; inheritance: none;"></i>
+                                            <i class="fas fa-clone" style="color: antiquewhite;"></i>
                                         </div>
                                     </div>
                                     <div class="col col-stats ml-3 ml-sm-0">
@@ -193,7 +193,7 @@ else { ?>
                                 <div class="row align-items-center">
                                     <div class="col-icon">
                                         <div class="icon-big text-center bubble-shadow-small">
-                                            <i class="fas fa-clone" style="color: antiquewhite; inheritance: none;"></i>
+                                            <i class="fas fa-clone" style="color: antiquewhite;"></i>
                                         </div>
                                     </div>
                                     <div class="col col-stats ml-3 ml-sm-0">
@@ -218,7 +218,7 @@ else { ?>
                                 </div>
                                 <div class="col col-stats ml-3 ml-sm-0">
                                     <div class="numbers">
-                                        <h4 class="card-tittle">LENTERA</h4>
+                                        <h4 class="card-tittle">LEMTERA</h4>
                                     </div>
                                 </div>
                             </div>
