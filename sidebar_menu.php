@@ -10,7 +10,6 @@ else {
 	// pengecekan hak akses untuk menampilkan menu sesuai dengan hak akses
 	// jika hak akses = SuperAdmin, tampilkan menu
 	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
-	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
