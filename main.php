@@ -76,7 +76,7 @@ else {
 					<a href="?module=beranda" class="logo">
 						<div class="navbar-brand">
 							<span><img src="assets/img/<?php echo $data['logo']; ?>" alt="Logo" width="45px" class="img-brand"></span>
-							<span class="text-white fw-bold mx-1">BUIB</span>
+							<span class="text-white fw-bold mx-1">WAREK IV</span>
 						</div>
 					</a>
 					<!-- Navbar Toggler -->

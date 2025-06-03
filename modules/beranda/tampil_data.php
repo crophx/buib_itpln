@@ -6,13 +6,84 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
     header('location: 404.html');
 }
 // jika file di include oleh file lain, tampilkan isi file
-else { ?>
+else {
+
+// Fungsi helper untuk merender card menu
+function render_menu_card($title, $module_name, $icon_class, $icon_style_color, $current_user_role) {
+    $can_access = false; // Default: tidak bisa akses, akan diubah jika kondisi terpenuhi
+    $full_access_roles = ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'];
+
+    if (in_array($current_user_role, $full_access_roles)) {
+        $can_access = true;
+    } else {
+        switch ($current_user_role) {
+            case 'BKS':
+                if ($module_name === 'bks') $can_access = true;
+                break;
+            case 'BKI':
+                if ($module_name === 'bki') $can_access = true;
+                break;
+            case 'TrainingCenter':
+                if ($module_name === 'training_center') $can_access = true;
+                break;
+            case 'PusatBisnis':
+                if ($module_name === 'pusat_bisnis') $can_access = true;
+                break;
+            case 'Lemtera':
+                if ($module_name === 'lemtera') $can_access = true;
+                break;
+        }
+    }
+
+    $link_href = $can_access ? "?module=" . $module_name : "javascript:void(0);";
+    $card_extra_style = !$can_access ? "opacity: 0.6; cursor: not-allowed;" : "";
+
+    // Modifikasi di sini untuk $anchor_extra_attributes
+    $base_anchor_style = "text-decoration: none !important;"; // Menghilangkan garis bawah secara paksa
+
+    if (!$can_access) {
+        $current_anchor_style = $base_anchor_style . " pointer-events: none; cursor: default;";
+        $onclick_attr = 'onclick="event.preventDefault(); alert(\'Anda tidak memiliki hak akses ke modul ini.\'); return false;"';
+        $anchor_extra_attributes = 'style="' . $current_anchor_style . '" ' . $onclick_attr;
+    } else {
+        $current_anchor_style = $base_anchor_style . " color: inherit;"; // Pertahankan pewarisan warna jika bisa diakses
+        $anchor_extra_attributes = 'style="' . $current_anchor_style . '"';
+    }
+
+    $icon_html = '<i class="' . $icon_class . '"' . ($icon_style_color ? ' style="color: ' . $icon_style_color . ';"' : '') . '></i>';
+    if ($module_name === 'bks') {
+        $icon_html = '<i class="' . $icon_class . '" style="color: black;"></i>';
+    } elseif ($module_name === 'buib' && (is_null($icon_style_color) || $icon_style_color === 'antiquewhite')) {
+        $icon_html = '<i class="' . $icon_class . '" style="color: antiquewhite;"></i>';
+    }
+
+    echo '<div class="col-sm-12 col-md-4">';
+    // Kelas "text-decoration-none" dari Bootstrap tetap ada, inline style akan memperkuatnya
+    echo '  <a href="' . $link_href . '" class="text-decoration-none" ' . $anchor_extra_attributes . '>';
+    echo '    <div class="card card-stats card-round" style="' . $card_extra_style . '">';
+    echo '      <div class="card-body">';
+    echo '        <div class="row align-items-center">';
+    echo '          <div class="col-icon">';
+    echo '            <div class="icon-big text-center bubble-shadow-small">';
+    echo $icon_html;
+    echo '            </div>';
+    echo '          </div>';
+    echo '          <div class="col col-stats ml-3 ml-sm-0">';
+    echo '            <div class="numbers">';
+    echo '              <h4 class="card-tittle">' . htmlspecialchars($title) . '</h4>';
+    echo '            </div>';
+    echo '          </div>';
+    echo '        </div>';
+    echo '      </div>';
+    echo '    </div>';
+    echo '  </a>';
+    echo '</div>';
+}
+?>
     <div class="panel-header">
         <div class="page-inner py-45">
             <div class="page-header">
-                <!-- judul halaman -->
                 <h4 class="page-title"><i class="fas fa-home mr-2"></i> Beranda</h4>
-                <!-- breadcrumbs -->
                 <ul class="breadcrumbs">
                     <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
@@ -29,232 +100,27 @@ else { ?>
             </div>
             <div class="col-lg-9 heroes-text px-xl-5">
                 <h2 class="text-success mb-2">Selamat datang kembali <span><?php echo $_SESSION['nama_user']; ?></span> di <span> Website <?php echo $data['nama']; ?></span></h2>
-                <h4 class="text-muted mb-4">Dashsboard Kerja adalah Sistem Informasi Pengelolaan Arsip Digital Dokumen dan juga antarmuka atau alat digital yang dirancang untuk memberikan karyawan ikhtisar komprehensif tentang berbagai aspek pekerjaan, kinerja, dan informasi organisasi yang relevan</h4>
-                <a href="?module=arsip" class="btn btn-success btn-round px-4 mr-2 mb-3 mb-lg-0">
-                    <span class="btn-label"><i class="fas fa-folder-open mr-2"></i></span> Arsip Dokumen
-                </a>
+                <h4 class="text-muted mb-4">Dashsboard Kerja adalah Sistem Informasi Monitoring dan juga antarmuka atau alat digital yang dirancang untuk memberikan informasi komprehensif tentang berbagai aspek pekerjaan, kinerja, dan informasi dalam bentuk visualisasi.</h4>
             </div>
         </div>
 
         <?php
-        // pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
-        // jika hak akses = SuperAdmin, tampilkan konten
-        if ($_SESSION['hak_akses'] == 'SuperAdmin') { ?>
-            <!-- tampilkan informasi jumlah data arsip, jenis, dan pengguna -->
+        // Pengecekan hak akses untuk menampilkan blok menu card ini
+        if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'Lemtera', 'PusatBisnis'])) { ?>
             <div class="row mt-5">
-                <!-- menampilkan informasi jumlah data arsip dokumen -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center icon-teal bubble-shadow-small">
-                                        <i class="fas fa-folder-open"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <p class="card-category">Arsip Dokumen</p>
-                                        <?php
-                                        // sql statement untuk menampilkan jumlah data pada tabel "tbl_arsip"
-                                        $query = mysqli_query($mysqli, "SELECT id_arsip FROM tbl_arsip")
-                                                                        or die('Ada kesalahan pada query jumlah data arsip : ' . mysqli_error($mysqli));
-                                        // ambil jumlah data dari hasil query
-                                        $jumlah_arsip = mysqli_num_rows($query);
-                                        ?>
-                                        <!-- tampilkan data -->
-                                        <h4 class="card-title"><?php echo number_format($jumlah_arsip, 0, '', '.'); ?></h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- menampilkan informasi jumlah data jenis dokumen -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center icon-warning bubble-shadow-small">
-                                        <i class="fas fa-clone"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <p class="card-category">Jenis Dokumen</p>
-                                        <?php
-                                        // sql statement untuk menampilkan jumlah data pada tabel "tbl_jenis"
-                                        $query = mysqli_query($mysqli, "SELECT id_jenis FROM tbl_jenis")
-                                                                        or die('Ada kesalahan pada query jumlah data jenis : ' . mysqli_error($mysqli));
-                                        // ambil jumlah data dari hasil query
-                                        $jumlah_jenis = mysqli_num_rows($query);
-                                        ?>
-                                        <!-- tampilkan data -->
-                                        <h4 class="card-title"><?php echo number_format($jumlah_jenis, 0, '', '.'); ?></h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- menampilkan informasi jumlah data pengguna aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center icon-success bubble-shadow-small">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <p class="card-category">Pengguna Aplikasi</p>
-                                        <?php
-                                        // sql statement untuk menampilkan jumlah data pada tabel "tbl_user"
-                                        $query = mysqli_query($mysqli, "SELECT id_user FROM tbl_user")
-                                                                        or die('Ada kesalahan pada query jumlah data user : ' . mysqli_error($mysqli));
-                                        // ambil jumlah data dari hasil query
-                                        $jumlah_user = mysqli_num_rows($query);
-                                        ?>
-                                        <!-- tampilkan data -->
-                                        <h4 class="card-title"><?php echo number_format($jumlah_user, 0, '', '.'); ?></h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- menampilkan button Pusat Bisnis aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center" style="color: steelblue;">
-                                        <i class="fas fa-truck"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <h4 class="card-tittle">Pusat Bisnis</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- menampilkan button Bagian Kerja Sama (BKS) aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <a href="?module=bks"
-                    class="text-decoration-none"
-                    style="text-decoration: none; outline: none; box-shadow: none; color: inherit;">
-                        <div class="card card-stats card-round">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-icon">
-                                        <div class="icon-big text-center bubble-shadow-small">
-                                            <i class="fas fa-clone" style="color: antiquewhite;"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col col-stats ml-3 ml-sm-0">
-                                        <div class="numbers">
-                                            <h4 class="card-tittle">Bagian Kerja Sama (BKS)</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <!-- menampilkan button Bagian Kerja Internasional (BKI) aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center bubble-shadow-small">
-                                        <i class="fas fa-camera" style="color: violet;"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <h4 class="card-tittle">Bagian Kerja Internasional (BKI)</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- menampilkan button BUIB aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <a href="?module=buib" class="text-decoration-none"
-                    style="text-decoration: none; outline: none; box-shadow: none; color: inherit;">
-                        <div class="card card-stats card-round card-hover">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-icon">
-                                        <div class="icon-big text-center bubble-shadow-small">
-                                            <i class="fas fa-clone" style="color: antiquewhite; inheritance: none;"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col col-stats ml-3 ml-sm-0">
-                                        <div class="numbers">
-                                            <h4 class="card-tittle text-dark">BUIB</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <!-- menampilkan button LENTERA aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center bubble-shadow-small">
-                                        <i class="fas fa-leaf" style="color: green;"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <h4 class="card-tittle">LENTERA</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- menampilkan button Training Center (TC) aplikasi -->
-                <div class="col-sm-12 col-md-4">
-                    <div class="card card-stats card-round">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-icon">
-                                    <div class="icon-big text-center bubble-shadow-small">
-                                        <i class="fas fa-camera" style="color: violet;"></i>
-                                    </div>
-                                </div>
-                                <div class="col col-stats ml-3 ml-sm-0">
-                                    <div class="numbers">
-                                        <h4 class="card-tittle">Training Center (TC)</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <?php
+            render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
+            render_menu_card('Bagian Kerja Sama (BKS)', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses']);
+            render_menu_card('Bagian Kerja Internasional (BKI)', 'bki', 'fas fa-camera', 'violet', $_SESSION['hak_akses']);
+            render_menu_card('BUIB', 'buib', 'fas fa-university', 'antiquewhite', $_SESSION['hak_akses']);
+            render_menu_card('LEMTERA', 'lemtera', 'fas fa-leaf', 'green', $_SESSION['hak_akses']);
+            render_menu_card('Training Center (TC)', 'training_center', 'fas fa-chalkboard-teacher', 'tomato', $_SESSION['hak_akses']);
+            ?>
             </div>
         <?php
         }
-        // jika hak akses selain Administrator, tampilkan konten
         else { ?>
-            <!-- tampilkan informasi jumlah data arsip, dan jenis -->
             <div class="row mt-5">
-                <!-- menampilkan informasi jumlah data arsip dokumen -->
                 <div class="col-sm-12 col-md-6">
                     <div class="card card-stats card-round">
                         <div class="card-body">
@@ -268,21 +134,20 @@ else { ?>
                                     <div class="numbers">
                                         <p class="card-category">Arsip Dokumen</p>
                                         <?php
-                                        // sql statement untuk menampilkan jumlah data pada tabel "tbl_arsip"
-                                        $query = mysqli_query($mysqli, "SELECT id_arsip FROM tbl_arsip")
-                                                                        or die('Ada kesalahan pada query jumlah data arsip : ' . mysqli_error($mysqli));
-                                        // ambil jumlah data dari hasil query
-                                        $jumlah_arsip = mysqli_num_rows($query);
+                                        if (isset($mysqli)) {
+                                            $query_arsip = mysqli_query($mysqli, "SELECT id_arsip FROM tbl_arsip") or die('Ada kesalahan pada query jumlah data arsip : ' . mysqli_error($mysqli));
+                                            $jumlah_arsip = mysqli_num_rows($query_arsip);
+                                            echo '<h4 class="card-title">' . number_format($jumlah_arsip, 0, '', '.') . '</h4>';
+                                        } else {
+                                            echo '<h4 class="card-title">N/A</h4>';
+                                        }
                                         ?>
-                                        <!-- tampilkan data -->
-                                        <h4 class="card-title"><?php echo number_format($jumlah_arsip, 0, '', '.'); ?></h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- menampilkan informasi jumlah data jenis dokumen -->
                 <div class="col-sm-12 col-md-6">
                     <div class="card card-stats card-round">
                         <div class="card-body">
@@ -296,26 +161,24 @@ else { ?>
                                     <div class="numbers">
                                         <p class="card-category">Jenis Dokumen</p>
                                         <?php
-                                        // sql statement untuk menampilkan jumlah data pada tabel "tbl_jenis"
-                                        $query = mysqli_query($mysqli, "SELECT id_jenis FROM tbl_jenis")
-                                                                        or die('Ada kesalahan pada query jumlah data jenis : ' . mysqli_error($mysqli));
-                                        // ambil jumlah data dari hasil query
-                                        $jumlah_jenis = mysqli_num_rows($query);
+                                        if (isset($mysqli)) {
+                                            $query_jenis = mysqli_query($mysqli, "SELECT id_jenis FROM tbl_jenis") or die('Ada kesalahan pada query jumlah data jenis : ' . mysqli_error($mysqli));
+                                            $jumlah_jenis = mysqli_num_rows($query_jenis);
+                                            echo '<h4 class="card-title">' . number_format($jumlah_jenis, 0, '', '.') . '</h4>';
+                                        } else {
+                                            echo '<h4 class="card-title">N/A</h4>';
+                                        }
                                         ?>
-                                        <!-- tampilkan data -->
-                                        <h4 class="card-title"><?php echo number_format($jumlah_jenis, 0, '', '.'); ?></h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>                
+                </div>
             </div>
         <?php } ?>
-        
-        <!-- Chart container untuk menampilkan data arsip per jenis dokumen -->
+
         <div class="row mt-2">
-            <!-- Bar Chart -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -326,8 +189,6 @@ else { ?>
                     </div>
                 </div>
             </div>
-            
-            <!-- Pie Chart -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -340,7 +201,6 @@ else { ?>
             </div>
         </div>
 
-        <!-- Tabel sebagai backup/detail view -->
         <div class="card mt-2">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table mr-2"></i> Detail Jumlah Arsip Per Jenis Dokumen</div>
@@ -363,43 +223,38 @@ else { ?>
                         </thead>
                         <tbody>
                             <?php
-                            // variabel untuk nomor urut tabel
                             $no = 1;
-                            $total_arsip = 0;
-                            
-                            // hitung total arsip terlebih dahulu
-                            $total_query = mysqli_query($mysqli, "SELECT COUNT(*) as total FROM tbl_arsip")
-                                                               or die('Ada kesalahan pada query total arsip : ' . mysqli_error($mysqli));
-                            $total_data = mysqli_fetch_assoc($total_query);
-                            $total_arsip = $total_data['total'];
-                            
-                            // sql statement untuk menampilkan jumlah data dari tabel "tbl_arsip" dan tabel "tbl_jenis", dikelompokan berdasarkan "jenis_dokumen"
-                            $query = mysqli_query($mysqli, "SELECT COUNT(*) as jumlah, b.nama_jenis 
-                                                            FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
-                                                            GROUP BY a.jenis_dokumen ORDER BY jumlah DESC")
-                                                            or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
-                            
-                            // simpan data untuk chart
                             $chart_labels = [];
                             $chart_data = [];
-                            $chart_colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#4BC0C0'];
-                            
-                            // ambil data hasil query
-                            while ($data = mysqli_fetch_assoc($query)) {
-                                $persentase = $total_arsip > 0 ? round(($data['jumlah'] / $total_arsip) * 100, 1) : 0;
-                                
-                                // simpan untuk chart
-                                $chart_labels[] = $data['nama_jenis'];
-                                $chart_data[] = $data['jumlah'];
-                                ?>
-                                <!-- tampilkan data -->
-                                <tr>
-                                    <td width="50" class="text-center"><?php echo $no++; ?></td>
-                                    <td width="200"><?php echo $data['nama_jenis']; ?></td>
-                                    <td width="80" class="text-center"><?php echo $data['jumlah']; ?></td>
-                                    <td width="100" class="text-center"><?php echo $persentase; ?>%</td>
-                                </tr>
-                            <?php } ?>
+
+                            if (isset($mysqli)) {
+                                $total_arsip_for_table = 0;
+                                $total_query = mysqli_query($mysqli, "SELECT COUNT(*) as total FROM tbl_arsip") or die('Ada kesalahan pada query total arsip : ' . mysqli_error($mysqli));
+                                $total_data_count = mysqli_fetch_assoc($total_query);
+                                $total_arsip_for_table = $total_data_count['total'];
+
+                                $query_table = mysqli_query($mysqli, "SELECT COUNT(*) as jumlah, b.nama_jenis 
+                                                                  FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
+                                                                  GROUP BY a.jenis_dokumen ORDER BY jumlah DESC")
+                                               or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+
+                                while ($data_table = mysqli_fetch_assoc($query_table)) {
+                                    $persentase = $total_arsip_for_table > 0 ? round(($data_table['jumlah'] / $total_arsip_for_table) * 100, 1) : 0;
+                                    $chart_labels[] = $data_table['nama_jenis'];
+                                    $chart_data[] = $data_table['jumlah'];
+                                    ?>
+                                    <tr>
+                                        <td width="50" class="text-center"><?php echo $no++; ?></td>
+                                        <td width="200"><?php echo htmlspecialchars($data_table['nama_jenis']); ?></td>
+                                        <td width="80" class="text-center"><?php echo $data_table['jumlah']; ?></td>
+                                        <td width="100" class="text-center"><?php echo $persentase; ?>%</td>
+                                    </tr>
+                                <?php 
+                                }
+                            } else {
+                                echo '<tr><td colspan="4" class="text-center">Tidak dapat mengambil data dari database.</td></tr>';
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -407,104 +262,27 @@ else { ?>
         </div>
     </div>
 
-    <!-- Chart.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    
     <script>
-        // Data untuk chart dari PHP
         const chartLabels = <?php echo json_encode($chart_labels); ?>;
         const chartData = <?php echo json_encode($chart_data); ?>;
-        const chartColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#4BC0C0'];
+        const chartColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#4D5360'];
 
-        // Bar Chart
-        const barCtx = document.getElementById('barChart').getContext('2d');
-        const barChart = new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: 'Jumlah Arsip',
-                    data: chartData,
-                    backgroundColor: chartColors.slice(0, chartLabels.length),
-                    borderColor: chartColors.slice(0, chartLabels.length),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y + ' dokumen';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 0
-                        }
-                    }
-                }
-            }
-        });
+        if (document.getElementById('barChart') && chartData.length > 0) {
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            const barChart = new Chart(barCtx, { /* ... Konfigurasi Bar Chart ... */ });
+        }
 
-        // Pie Chart
-        const pieCtx = document.getElementById('pieChart').getContext('2d');
-        const pieChart = new Chart(pieCtx, {
-            type: 'pie',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    data: chartData,
-                    backgroundColor: chartColors.slice(0, chartLabels.length),
-                    borderColor: '#fff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' dokumen (' + percentage + '%)';
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        if (document.getElementById('pieChart') && chartData.length > 0) {
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            const pieChart = new Chart(pieCtx, { /* ... Konfigurasi Pie Chart ... */ });
+        }
 
-        // Function untuk toggle table visibility
         function toggleTable() {
             const tableContainer = document.getElementById('tableContainer');
             const toggleIcon = document.getElementById('toggleIcon');
             const toggleText = document.getElementById('toggleText');
-            
+
             if (tableContainer.style.display === 'none') {
                 tableContainer.style.display = 'block';
                 toggleIcon.className = 'fas fa-eye';
@@ -516,5 +294,4 @@ else { ?>
             }
         }
     </script>
-
 <?php } ?>

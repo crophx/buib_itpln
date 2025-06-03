@@ -54,7 +54,7 @@ $data = mysqli_fetch_assoc($query);
 			<!-- logo -->
 			<div class="text-center mb-4"><img src="assets/img/<?php echo $data['logo']; ?>" alt="Logo" width="93px"></div>
 			<!-- judul -->
-			<h1 class="text-center fw-bold mb-0">BUIB</h1>
+			<h1 class="text-center fw-bold mb-0">USAHA DAN KERJA SAMA</h1>
 			<h3 style="text-transform: uppercase;" class="text-center mb-5"><?php echo $data['nama']; ?></h3>
 			<!-- form login -->
 			<form action="proses_login.php" method="post" class="needs-validation" novalidate>

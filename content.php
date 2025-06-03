@@ -15,27 +15,37 @@ else {
 	}
 	// -- MODULE BUIB -- //
 	// jika module yang dipilih "buib"
-	elseif ($_GET['module'] == 'buib') {
+	elseif ($_GET['module'] == 'buib' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil home buib
 		include "modules/buib/buib_home.php";
 	}
 	// jika module yang dipilih "form entri buib"
-	elseif ($_GET['module'] == 'form_entri_buib') {
+	elseif ($_GET['module'] == 'form_entri_buib' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data buib
 		include "modules/buib/form_entri.php";
 	}
 	// jika module yang dipilih "form ubah buib"
-	elseif ($_GET['module'] == 'form_ubah_buib') {
+	elseif ($_GET['module'] == 'form_ubah_buib' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data buib
 		include "modules/buib/form_ubah.php";
 	}
 	// jika module yang dipilih "tampil buib"
-	elseif ($_GET['module'] == 'tampil_detail_buib') {
+	elseif ($_GET['module'] == 'tampil_detail_buib' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data buib
 		include "modules/buib/tampil_detail.php";
 	}
+	// -- MODULE Pusat Bisnis -- //
+	elseif ($_GET['module'] == 'pusat_bisnis' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'PusatBisnis'])) {
+		// panggil file tampil home bks
+		include "modules/bks/bks_home.php";
+	}
 	// -- MODULE BKS -- //
-	elseif ($_GET['module'] == 'bks') {
+	elseif ($_GET['module'] == 'bks' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
+		// panggil file tampil home bks
+		include "modules/bks/bks_home.php";
+	}
+	// -- MODULE BKI -- //
+	elseif ($_GET['module'] == 'bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKI'])) {
 		// panggil file tampil home bks
 		include "modules/bks/bks_home.php";
 	}
