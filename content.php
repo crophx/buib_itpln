@@ -24,6 +24,16 @@ else {
 		// panggil file tampil entri data buib
 		include "modules/buib/form_entri.php";
 	}
+	// jika module yang dipilih "form entri buib"
+	elseif ($_GET['module'] == 'form_entri_realisasi_buib') {
+		// panggil file tampil entri data buib
+		include "modules/buib/form_entri_realisasi.php";
+	}
+	// jika module yang dipilih "form entri rk buib"
+	elseif ($_GET['module'] == 'form_entri_rk_buib' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil entri data buib
+		include "modules/buib/form_entri_rk.php";
+	}
 	// jika module yang dipilih "form ubah buib"
 	elseif ($_GET['module'] == 'form_ubah_buib' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data buib

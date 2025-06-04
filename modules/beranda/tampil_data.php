@@ -177,7 +177,6 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
                 </div>
             </div>
         <?php } ?>
-
         <div class="row mt-2">
             <div class="col-md-6">
                 <div class="card">
@@ -291,6 +290,23 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
                 tableContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-eye-slash';
                 toggleText.textContent = 'Tampilkan Tabel';
+            }
+        }
+
+        // Function untuk toggle target table visibility
+        function toggleTargetTable() {
+            const targetTableContainer = document.getElementById('targetTableContainer');
+            const toggleTargetIcon = document.getElementById('toggleTargetIcon');
+            const toggleTargetText = document.getElementById('toggleTargetText');
+            
+            if (targetTableContainer.style.display === 'none') {
+                targetTableContainer.style.display = 'block';
+                toggleTargetIcon.className = 'fas fa-eye';
+                toggleTargetText.textContent = 'Sembunyikan Tabel';
+            } else {
+                targetTableContainer.style.display = 'none';
+                toggleTargetIcon.className = 'fas fa-eye-slash';
+                toggleTargetText.textContent = 'Tampilkan Tabel';
             }
         }
     </script>

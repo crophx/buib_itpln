@@ -1,25 +1,21 @@
 <?php
-// mencegah direct access file PHP agar file PHP tidak bisa diakses secara langsung dari browser dan hanya dapat dijalankan ketika di include oleh file lain
-// jika file diakses secara langsung
-if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
-    // alihkan ke halaman error 404
+if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)){
     header('location: 404.html');
 }
-// jika file di include oleh file lain, tampilkan isi file
+
 else { ?>
     <div class="panel-header">
         <div class="page-inner py-4">
             <div class="page-header">
-                <!-- judul halaman -->
-                <h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Input Dokumen BUIB</h4>
-                <!-- breadcrumbs -->
-                <ul class="breadcrumbs">
-                    <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
-                    <li class="separator"><i class="flaticon-right-arrow"></i></li>
-                    <li class="nav-item"><a href="?module=buib">Data BUIB</a></li>
-                    <li class="separator"><i class="flaticon-right-arrow"></i></li>
-                    <li class="nav-item"><a>Entri</a></li>
-                </ul>
+            <!--Judul Halaman-->
+            <h4 class="page-title"><i class="fas fa-folder-open mr-2"></i>Ipunt Dokumen BKS</h4>
+            <ul class="breadcrumbs">
+                <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
+                <li class="separator"><i class="flaticon-right-arrow"></i></li>
+                <li class="nav-item"><a href="?module=bks">Data BKS</a></li>
+                <li class="separator"><i class="flaticon-right-arrow"></i></li>
+                <li class="nav-item">Entri</li>
+            </ul>
             </div>
         </div>
     </div>
@@ -28,10 +24,10 @@ else { ?>
         <div class="card">
             <div class="card-header">
                 <!--Judul Form-->
-                <div class="card-title">Entri Data BUIB</div>
+                <div class="card-title">Entri Data bks</div>
             </div>
             <!--Form Entri Data-->
-            <form action="modules/buib/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form action="modules/bks/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-6">
@@ -95,7 +91,7 @@ else { ?>
                         <div class="col-lg-4">
                             <div class="form-group">
                                 <label>Dokumen <span class="text-danger">*</span></label>
-                                <input type="file" accept=".pdf" name="dokumen_buib" class="form-control" autocomplete="off" required>
+                                <input type="file" accept=".pdf" name="dokumen_bks" class="form-control" autocomplete="off" required>
                                 <div class="invalid-feedback">Dokumen tidak boleh kosong.</div>
                                 <small class="form-text text-primary pt-1">
                                     Keterangan : <br>
@@ -128,7 +124,7 @@ else { ?>
                     <!-- button simpan data -->
                     <input type="submit" name="simpan" value="Simpan" class="btn btn-success btn-round pl-4 pr-4 mr-2">
                     <!-- button kembali ke halaman tampil data -->
-                    <a href="?module=buib" class="btn btn-default btn-round pl-4 pr-4">Batal</a>
+                    <a href="?module=bks" class="btn btn-default btn-round pl-4 pr-4">Batal</a>
                 </div>
             </form>
         </div>
@@ -147,7 +143,9 @@ else { ?>
             });
         });
     </script>
-    
-<?php }
 
+
+<?php
+}
 ?>
+
