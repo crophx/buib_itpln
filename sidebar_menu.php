@@ -239,7 +239,7 @@ else {
 		}
 	}
 	// jika hak akses = BUIB, tampilkan menu
-	elseif (in_array($_SESSION['hak_akses'], haystack: ['BKI', 'BKS', 'TC', 'PusatBisnis'])) {
+	elseif (in_array($_SESSION['hak_akses'], haystack: ['BKI', 'BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>

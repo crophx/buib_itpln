@@ -106,7 +106,7 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
 
         <?php
         // Pengecekan hak akses untuk menampilkan blok menu card ini
-        if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'Lemtera', 'PusatBisnis'])) { ?>
+        if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'LEMTERA', 'PusatBisnis'])) { ?>
             <div class="row mt-5">
             <?php
             render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
