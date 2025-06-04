@@ -24,6 +24,11 @@ else {
 		// panggil file tampil entri data buib
 		include "modules/buib/form_entri.php";
 	}
+	// jika module yang dipilih "form entri buib"
+	elseif ($_GET['module'] == 'form_entri_rk_buib') {
+		// panggil file tampil entri data buib
+		include "modules/buib/form_entri.php";
+	}
 	// jika module yang dipilih "form ubah buib"
 	elseif ($_GET['module'] == 'form_ubah_buib') {
 		// panggil file tampil entri data buib
@@ -39,10 +44,20 @@ else {
 		// panggil file tampil home bks
 		include "modules/bks/bks_home.php";
 	}
-	// jika module yang dipilih "form entri buib"
+	// jika module yang dipilih "form entri bks"
 	elseif ($_GET['module'] == 'form_entri_bks') {
-		// panggil file tampil entri data buib
+		// panggil file tampil entri data bks
 		include "modules/bks/form_entri.php";
+	}
+	// jika module yang dipilih "form ubah bks"
+	elseif ($_GET['module'] == 'form_ubah_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/form_ubah.php";
+	}
+	// jika module yang dipilih "tampil bks"
+	elseif ($_GET['module'] == 'tampil_detail_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/tampil_detail.php";
 	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {

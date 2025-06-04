@@ -310,6 +310,20 @@ else { ?>
             </div>
         <?php } ?>
         
+        <!-- Chart Target vs Realisasi Per Divisi -->
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-chart-line mr-2"></i> Perbandingan Target vs Realisasi Per Divisi</div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="targetRealisasiChart" style="width: 100%; height: 400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Chart container untuk menampilkan data arsip per jenis dokumen -->
         <div class="row mt-2">
             <!-- Bar Chart -->
@@ -333,6 +347,103 @@ else { ?>
                     <div class="card-body">
                         <canvas id="pieChart" style="width: 100%; height: 400px;"></canvas>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Detail Target vs Realisasi -->
+        <div class="card mt-2">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-table mr-2"></i> Detail Target vs Realisasi Per Divisi</div>
+                <div class="card-tools">
+                    <button class="btn btn-sm btn-secondary" onclick="toggleTargetTable()">
+                        <i class="fas fa-eye" id="toggleTargetIcon"></i> <span id="toggleTargetText">Sembunyikan Tabel</span>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" id="targetTableContainer">
+                <div class="table-responsive">
+                    <table id="target-datatables" class="display table table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-center">No.</th>
+                                <th class="text-center">Divisi</th>
+                                <th class="text-center">Target (Rp)</th>
+                                <th class="text-center">Realisasi (Rp)</th>
+                                <th class="text-center">Persentase Tercapai</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $no_target = 1;
+                            $divisi_data = [];
+                            
+                            // Query untuk BUIB
+                            $query_buib = mysqli_query($mysqli, "SELECT SUM(target_nominal) as total_target, SUM(realisasi_nominal) as total_realisasi 
+                                                                FROM tbl_buib as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis")
+                                                               or die('Ada kesalahan pada query BUIB : ' . mysqli_error($mysqli));
+                            $data_buib = mysqli_fetch_assoc($query_buib);
+                            $target_buib = $data_buib['total_target'] ? $data_buib['total_target'] : 0;
+                            $realisasi_buib = $data_buib['total_realisasi'] ? $data_buib['total_realisasi'] : 0;
+                            
+                            // Query untuk BKS
+                            $query_bks = mysqli_query($mysqli, "SELECT SUM(target_nominal) as total_target, SUM(realisasi_nominal) as total_realisasi 
+                                                               FROM tbl_bks as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis")
+                                                              or die('Ada kesalahan pada query BKS : ' . mysqli_error($mysqli));
+                            $data_bks = mysqli_fetch_assoc($query_bks);
+                            $target_bks = $data_bks['total_target'] ? $data_bks['total_target'] : 0;
+                            $realisasi_bks = $data_bks['total_realisasi'] ? $data_bks['total_realisasi'] : 0;
+                            
+                            // Query untuk BKI
+                            $query_bki = mysqli_query($mysqli, "SELECT SUM(target_nominal) as total_target, SUM(realisasi_nominal) as total_realisasi 
+                                                               FROM tbl_bki as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis")
+                                                              or die('Ada kesalahan pada query BKI : ' . mysqli_error($mysqli));
+                            $data_bki = mysqli_fetch_assoc($query_bki);
+                            $target_bki = $data_bki['total_target'] ? $data_bki['total_target'] : 0;
+                            $realisasi_bki = $data_bki['total_realisasi'] ? $data_bki['total_realisasi'] : 0;
+                            
+                            // Simpan data untuk chart
+                            $divisi_names = ['BUIB', 'BKS', 'BKI'];
+                            $target_data = [$target_buib, $target_bks, $target_bki];
+                            $realisasi_data = [$realisasi_buib, $realisasi_bks, $realisasi_bki];
+                            
+                            // Tampilkan data dalam tabel
+                            $divisions = [
+                                ['name' => 'BUIB', 'target' => $target_buib, 'realisasi' => $realisasi_buib],
+                                ['name' => 'BKS', 'target' => $target_bks, 'realisasi' => $realisasi_bks],
+                                ['name' => 'BKI', 'target' => $target_bki, 'realisasi' => $realisasi_bki]
+                            ];
+                            
+                            foreach ($divisions as $division) {
+                                $persentase = $division['target'] > 0 ? round(($division['realisasi'] / $division['target']) * 100, 1) : 0;
+                                $status = '';
+                                $status_class = '';
+                                
+                                if ($persentase >= 100) {
+                                    $status = 'Target Tercapai';
+                                    $status_class = 'badge-success';
+                                } elseif ($persentase >= 75) {
+                                    $status = 'Mendekati Target';
+                                    $status_class = 'badge-warning';
+                                } else {
+                                    $status = 'Belum Tercapai';
+                                    $status_class = 'badge-danger';
+                                }
+                                ?>
+                                <tr>
+                                    <td width="50" class="text-center"><?php echo $no_target++; ?></td>
+                                    <td width="150" class="text-center"><strong><?php echo $division['name']; ?></strong></td>
+                                    <td width="200" class="text-right"><?php echo 'Rp ' . number_format($division['target'], 0, ',', '.'); ?></td>
+                                    <td width="200" class="text-right"><?php echo 'Rp ' . number_format($division['realisasi'], 0, ',', '.'); ?></td>
+                                    <td width="150" class="text-center"><?php echo $persentase; ?>%</td>
+                                    <td width="150" class="text-center">
+                                        <span class="badge <?php echo $status_class; ?>"><?php echo $status; ?></span>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -408,6 +519,59 @@ else { ?>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <script>
+        // Data untuk chart Target vs Realisasi
+        const divisiNames = <?php echo json_encode($divisi_names); ?>;
+        const targetData = <?php echo json_encode($target_data); ?>;
+        const realisasiData = <?php echo json_encode($realisasi_data); ?>;
+
+        // Chart Target vs Realisasi
+        const targetCtx = document.getElementById('targetRealisasiChart').getContext('2d');
+        const targetRealisasiChart = new Chart(targetCtx, {
+            type: 'bar',
+            data: {
+                labels: divisiNames,
+                datasets: [{
+                    label: 'Target',
+                    data: targetData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Realisasi',
+                    data: realisasiData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         // Data untuk chart dari PHP
         const chartLabels = <?php echo json_encode($chart_labels); ?>;
         const chartData = <?php echo json_encode($chart_data); ?>;
@@ -510,6 +674,23 @@ else { ?>
                 tableContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-eye-slash';
                 toggleText.textContent = 'Tampilkan Tabel';
+            }
+        }
+
+        // Function untuk toggle target table visibility
+        function toggleTargetTable() {
+            const targetTableContainer = document.getElementById('targetTableContainer');
+            const toggleTargetIcon = document.getElementById('toggleTargetIcon');
+            const toggleTargetText = document.getElementById('toggleTargetText');
+            
+            if (targetTableContainer.style.display === 'none') {
+                targetTableContainer.style.display = 'block';
+                toggleTargetIcon.className = 'fas fa-eye';
+                toggleTargetText.textContent = 'Sembunyikan Tabel';
+            } else {
+                targetTableContainer.style.display = 'none';
+                toggleTargetIcon.className = 'fas fa-eye-slash';
+                toggleTargetText.textContent = 'Tampilkan Tabel';
             }
         }
     </script>
