@@ -16,7 +16,7 @@ else { ?>
                 <ul class="breadcrumbs">
                     <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
-                    <li class="nav-item"><a href="?module=buib">Data Rencana Kegiatan</a></li>
+                    <li class="nav-item"><a href="?module=bks">Data Rencana Kegiatan</a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
                     <li class="nav-item"><a>Entri</a></li>
                 </ul>
@@ -34,33 +34,21 @@ else { ?>
                     </div>
                     <!-- button kembali -->
                     <div class="button-container">
-                        <a href="?module=buib" class="btn btn-secondary btn-round">
+                        <a href="?module=bks" class="btn btn-secondary btn-round">
                             <span class="btn-label"><i class="fa fa-arrow-left mr-2"></i></span> Kembali
                         </a>
                     </div>
                 </div>
             </div>
             <!--Form Entri Data-->
-            <form action="modules/buib/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form action="modules/bks/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label>Deputy BUIB <span class="text-danger">*</span></label>
-                                <select name="deputy_buib" class="form-control select2-single" autocomplete="off" required>
-                                    <option selected disabled value="">-- Pilih Deputy --</option>
-                                    <?php
-                                    // sql statement untuk menampilkan data deputy dari tabel program atau tabel terpisah
-                                    $deputy_query = mysqli_query($mysqli, "SELECT DISTINCT nama_program FROM tbl_program_buib WHERE nama_program LIKE '%Deputy%' ORDER BY nama_program ASC")
-                                                                or die('Error pada query deputy: ' . mysqli_error($mysqli));
-                                    // ambil data hasil query
-                                    while ($deputy_data = mysqli_fetch_assoc($deputy_query)) {
-                                        // tampilkan data
-                                        echo "<option value='".$deputy_data['nama_program']."'>".$deputy_data['nama_program']."</option>";
-                                    }
-                                    ?>
-                                </select>
-                                <div class="invalid-feedback">Deputy BUIB tidak boleh kosong.</div>
+                                <label>Deputy bks <span class="text-danger">*</span></label>
+                                <input name="nama_program" class="form-control" autocomplete="off" required>
+                                <div class="invalid-feedback">Deputy bks tidak boleh kosong.</div>
                             </div>
                         </div>
 
@@ -85,7 +73,7 @@ else { ?>
                         </div>
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <label>Detail Tanggal <span class="text-danger">*</span></label>
+                                <label>Tanggal Input <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="text" name="tgl_input" class="form-control datepicker" placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>" required>
                                     <div class="input-group-append">
@@ -99,7 +87,7 @@ else { ?>
                             </div>
                         </div>
 
-                        <!-- <div class="col-lg-4">
+                        <div class="col-lg-4">
                             <div class="form-group">
                                 <label>Bulan <span class="text-danger">*</span></label>
                                 <select name="bulan" class="form-control" autocomplete="off" required>
@@ -135,7 +123,7 @@ else { ?>
                                 </select>
                                 <div class="invalid-feedback">Tahun tidak boleh kosong.</div>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
 
                     <div class="row">
@@ -159,7 +147,7 @@ else { ?>
                     <!-- button reset form -->
                     <input type="reset" value="Reset" class="btn btn-warning btn-round pl-4 pr-4 mr-2">
                     <!-- button kembali ke halaman tampil data -->
-                    <a href="?module=buib" class="btn btn-default btn-round pl-4 pr-4">Batal</a>
+                    <a href="?module=bks" class="btn btn-default btn-round pl-4 pr-4">Batal</a>
                 </div>
             </form>
         </div>
