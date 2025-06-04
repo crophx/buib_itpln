@@ -314,12 +314,6 @@ else {
                 <div class="card-title">
                     <i class="fas fa-table mr-2"></i>Detail Data Realisasi Jan-April 2025
                 </div>
-                <div class="card-tools">
-                    <button class="btn btn-sm btn-info" onclick="toggleDetailView()">
-                        <i class="fas fa-expand-alt" id="detailToggleIcon"></i>
-                        <span id="detailToggleText">Detail View</span>
-                    </button>
-                </div>
             </div>
         <!-- Tampil Data Realisasi -->
             <div class="card-body">
@@ -410,12 +404,6 @@ else {
             <div class="card-header">
                 <div class="card-title">
                     <i class="fas fa-table mr-2"></i>Rencana Kegiatan 2025
-                </div>
-                <div class="card-tools">
-                    <button class="btn btn-sm btn-info" onclick="toggleDetailView()">
-                        <i class="fas fa-expand-alt" id="detailToggleIcon"></i>
-                        <span id="detailToggleText">Detail View</span>
-                    </button>
                 </div>
             </div>
         <!-- Tampil Data Table Rencana Kegiatan 2025 --> 
