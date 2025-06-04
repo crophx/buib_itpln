@@ -1,86 +1,189 @@
 <?php
 session_start();
 
+// Cek apakah user sudah login
 if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
     // alihkan ke halaman login dan tampilkan pesan peringatan login
     header('location: ../../login.php?pesan=2');
+    exit();
 }
-
-else{
+else {
     require_once "../../config/database.php";
 
-    // mengecek data hasil submit dari form
-    if (isset($_POST['simpan'])) {
-        // ambil data hasil submit dari form
-        $mitra              = mysqli_real_escape_string($mysqli, $_POST['mitra']);
-        $no_dokumen         = mysqli_real_escape_string($mysqli, $_POST['no_dokumen']);
-        $jenis_dokumen      = mysqli_real_escape_string($mysqli, $_POST['jenis_dokumen']);
-        $target_nominal     = mysqli_real_escape_string($mysqli, trim($_POST['target_nominal']));
-        $realisasi_nominal  = mysqli_real_escape_string($mysqli, trim($_POST['realisasi_nominal']));
-        $tgl_upload         = mysqli_real_escape_string($mysqli, $_POST['tgl_upload']);
-
-        // ambil data file dokumen elektronik hasil submit dari form
-        $nama_file          = $_FILES['dokumen_buib']['name'];
-        $ukuran_file        = $_FILES['dokumen_buib']['size'];
-        $tipe_file          = $_FILES['dokumen_buib']['type'];
-        $tmp_file           = $_FILES['dokumen_buib']['tmp_name'];
-        // tentukan tipe file dokumen yang diperbolehkan
-        $allowed_extensions = array('pdf');
-        // seleksi tipe file dari input edoc
-        $file_parts         = explode(".", $nama_file);
-        $extension          = strtolower(end($file_parts));
-        // enkripsi nama file
-        $nama_file_enkripsi = sha1(md5(time() . $nama_file)) . '.' . $extension;
-        // tentukan direktori penyimpanan file dokumen
-        $path               = "../../dokumen/buib/" . $nama_file_enkripsi;
-
-        // Convert date format from DD/MM/YYYY to MySQL format YYYY-MM-DD
-        if (!empty($tgl_upload)) {
-            $date_parts = explode('/', $tgl_upload);
+    // Fungsi untuk konversi format tanggal
+    function convertDateFormat($tgl_input) {
+        if (!empty($tgl_input)) {
+            $date_parts = explode('/', $tgl_input);
             if (count($date_parts) == 3) {
-                // Assuming format is DD/MM/YYYY
-                $tgl_upload_mysql = $date_parts[2] . '-' . $date_parts[1] . '-' . $date_parts[0];
-            } else {
-                // If not in expected format, use current date
-                $tgl_upload_mysql = date('Y-m-d');
+                // Format yang diharapkan adalah DD/MM/YYYY
+                return $date_parts[2] . '-' . $date_parts[1] . '-' . $date_parts[0];
             }
+        }
+        return date('Y-m-d');
+    }
+
+    // Fungsi untuk mendapatkan ID program
+    function getProgramId($mysqli, $deputy_buib) {
+        $program_query = mysqli_query($mysqli, "SELECT id_program FROM tbl_program_buib WHERE nama_program = '$deputy_buib' LIMIT 1")
+                                    or die('Error pada query program: ' . mysqli_error($mysqli));
+        
+        if (mysqli_num_rows($program_query) == 0) {
+            return false;
+        }
+        
+        $program_data = mysqli_fetch_assoc($program_query);
+        return $program_data['id_program'];
+    }
+
+    // Cek apakah form realisasi yang disubmit
+    if (isset($_POST['simpan_realisasi'])) {
+        
+        // === PROSES FORM REALISASI ===
+        
+        // Ambil data dari form realisasi
+        $deputy_buib       = mysqli_real_escape_string($mysqli, $_POST['deputy_buib']);
+        $kegiatan          = mysqli_real_escape_string($mysqli, $_POST['kegiatan']);
+        $realisasi_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['realisasi_nominal'])));
+        $bulan             = mysqli_real_escape_string($mysqli, $_POST['bulan']);
+        $tahun             = mysqli_real_escape_string($mysqli, $_POST['tahun']);
+        $tgl_input         = mysqli_real_escape_string($mysqli, $_POST['tgl_input']);
+
+        // Konversi format tanggal
+        $tgl_input_mysql = convertDateFormat($tgl_input);
+
+        // Validasi input wajib
+        if (empty($deputy_buib) || empty($kegiatan) || empty($realisasi_nominal) || 
+            empty($bulan) || empty($tahun) || empty($tgl_input)) {
+            header('location: ../../main.php?module=buib&pesan=7');
+            exit();
+        }
+
+        // Validasi bahwa realisasi nominal adalah angka
+        if (!is_numeric($realisasi_nominal) || $realisasi_nominal <= 0) {
+            header('location: ../../main.php?module=buib&pesan=8');
+            exit();
+        }
+
+        // Dapatkan ID program
+        $program_buib = getProgramId($mysqli, $deputy_buib);
+        if ($program_buib === false) {
+            header('location: ../../main.php?module=buib&pesan=10');
+            exit();
+        }
+
+        // Buat keterangan program
+        $keterangan_program = $kegiatan;
+
+        // Cek apakah data sudah ada
+        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_buib 
+                                          WHERE program_buib = '$program_buib' 
+                                          AND keterangan_program = '$keterangan_program'")
+                                          or die('Error pada query cek data: ' . mysqli_error($mysqli));
+
+        if (mysqli_num_rows($cek_data) > 0) {
+            header('location: ../../main.php?module=realisasi&pesan=9');
+            exit();
+        }
+
+        // Insert data realisasi
+        $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_buib (
+                                            keterangan_program, 
+                                            target_nominal, 
+                                            realisasi_nominal, 
+                                            tgl_surat, 
+                                            program_buib
+                                        ) VALUES (
+                                            '$keterangan_program', 
+                                            0, 
+                                            '$realisasi_nominal', 
+                                            '$tgl_input_mysql', 
+                                            '$program_buib'
+                                        )")
+                                        or die('Ada kesalahan pada query insert realisasi: ' . mysqli_error($mysqli));
+
+        if ($insert) {
+            header('location: ../../main.php?module=buib&pesan=1');
         } else {
-            $tgl_upload_mysql = date('Y-m-d');
+            header('location: ../../main.php?module=buib&pesan=3');
+        }
+    }
+    
+    // Cek apakah form rencana kegiatan yang disubmit
+    elseif (isset($_POST['simpan_rencana'])) {
+        
+        // === PROSES FORM RENCANA KEGIATAN ===
+        
+        // Ambil data dari form rencana kegiatan
+        $deputy_buib    = mysqli_real_escape_string($mysqli, $_POST['deputy_buib']);
+        $kegiatan       = mysqli_real_escape_string($mysqli, $_POST['kegiatan']);
+        $target_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['target_nominal'])));
+        $bulan          = mysqli_real_escape_string($mysqli, $_POST['bulan']);
+        $tahun          = mysqli_real_escape_string($mysqli, $_POST['tahun']);
+        $tgl_input      = mysqli_real_escape_string($mysqli, $_POST['tgl_input']);
+
+        // Konversi format tanggal
+        $tgl_input_mysql = convertDateFormat($tgl_input);
+
+        // Validasi input wajib
+        if (empty($deputy_buib) || empty($kegiatan) || empty($target_nominal) || 
+            empty($bulan) || empty($tahun) || empty($tgl_input)) {
+            header('location: ../../main.php?module=rencana&pesan=7');
+            exit();
         }
 
-        // mengecek tipe file dan ukuran file dokumen sebelum diunggah
-        // jika tipe file yang diunggah sesuai dengan "allowed_extensions"
-        if (in_array($extension, $allowed_extensions)) {
-            // jika ukuran file yang diunggah <= 10 Mb
-            if ($ukuran_file <= 10000000) {
-                // lakukan proses unggah file
-                // jika file berhasil diunggah
-                if (move_uploaded_file($tmp_file, $path)) {
-                    // sql statement untuk insert data ke tabel "tbl_buib"
-                    $insert = mysqli_query($mysqli, "INSERT INTO tbl_buib(mitra, no_dokumen, jenis_dokumen, target_nominal, realisasi_nominal, tgl_upload, dokumen_buib) 
-                                                     VALUES('$mitra', '$no_dokumen', '$jenis_dokumen', '$target_nominal', '$realisasi_nominal', '$tgl_upload_mysql', '$nama_file_enkripsi')")
-                                                     or die('Ada kesalahan pada query insert : ' . mysqli_error($mysqli));
-                    // cek query
-                    // jika proses insert berhasil
-                    if ($insert) {
-                        header('location:../../main.php?module=buib&pesan=1');
-                    }
-                }
-                else {
-                    // gagal upload file
-                    header('location:../../main.php?module=buib&pesan=6');
-                }
-            }
-            else{
-                // alihkan ke halaman arsip dan tampilkan pesan gagal unggah file
-                header('location:../../main.php?module=buib&pesan=5');
-            }
-        }
-        else{
-            // alihkan ke halaman arsip dan tampilkan pesan gagal unggah file
-            header('location: ../../main.php?module=buib&pesan=4');
+        // Validasi bahwa target nominal adalah angka
+        if (!is_numeric($target_nominal) || $target_nominal <= 0) {
+            header('location: ../../main.php?module=rencana&pesan=8');
+            exit();
         }
 
+        // Dapatkan ID program
+        $program_buib = getProgramId($mysqli, $deputy_buib);
+        if ($program_buib === false) {
+            header('location: ../../main.php?module=rencana&pesan=10');
+            exit();
+        }
+
+        // Buat keterangan program
+        $keterangan_program = $kegiatan;
+
+        // Cek apakah data sudah ada
+        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_buib 
+                                          WHERE program_buib = '$program_buib' 
+                                          AND keterangan_program = '$keterangan_program'")
+                                          or die('Error pada query cek data: ' . mysqli_error($mysqli));
+
+        if (mysqli_num_rows($cek_data) > 0) {
+            header('location: ../../main.php?module=rencana&pesan=9');
+            exit();
+        }
+
+        // Insert data rencana kegiatan
+        $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_buib (
+                                            keterangan_program, 
+                                            target_nominal, 
+                                            realisasi_nominal, 
+                                            tgl_surat, 
+                                            program_buib
+                                        ) VALUES (
+                                            '$keterangan_program', 
+                                            '$target_nominal', 
+                                            0, 
+                                            '$tgl_input_mysql', 
+                                            '$program_buib'
+                                        )")
+                                        or die('Ada kesalahan pada query insert rencana: ' . mysqli_error($mysqli));
+
+        if ($insert) {
+            header('location: ../../main.php?module=buib&pesan=1');
+        } else {
+            header('location: ../../main.php?module=buib&pesan=3');
+        }
+    }
+    
+    // Jika tidak ada form yang disubmit atau form tidak dikenali
+    else {
+        header('location: ../../main.php?module=buib&pesan=2');
     }
 }
 ?>
