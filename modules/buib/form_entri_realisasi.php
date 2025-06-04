@@ -83,6 +83,21 @@ else { ?>
                                 <small class="form-text text-muted">Masukkan angka tanpa titik atau koma</small>
                             </div>
                         </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label>Detail Tanggal <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="text" name="tgl_input" class="form-control datepicker" placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="invalid-feedback">Tanggal input tidak boleh kosong.</div>
+                                <small class="form-text text-muted">Pilih tanggal input dengan mengklik pada kalender</small>
+                            </div>
+                        </div>
 
                         <div class="col-lg-4">
                             <div class="form-group">
@@ -124,21 +139,7 @@ else { ?>
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label>Tanggal Input <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="text" name="tgl_input" class="form-control datepicker" placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>" required>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">
-                                            <i class="fa fa-calendar-alt"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="invalid-feedback">Tanggal input tidak boleh kosong.</div>
-                                <small class="form-text text-muted">Pilih tanggal input dengan mengklik pada kalender</small>
-                            </div>
-                        </div>
+                        
                     </div>
 
                     <!-- Info Box untuk menampilkan persentase otomatis -->
