@@ -29,7 +29,7 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
             case 'PusatBisnis':
                 if ($module_name === 'pusat_bisnis') $can_access = true;
                 break;
-            case 'Lemtera':
+            case 'LEMTERA':
                 if ($module_name === 'lemtera') $can_access = true;
                 break;
         }

@@ -63,7 +63,7 @@ else {
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
 					<div class="page-header">
 						<!-- judul halaman -->
-						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Badan Usaha dan Inkubasi Bisnis</h4>
+						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Badan Kerjasama Internasional (BKI)</h4>
 						<!-- breadcrumbs -->
 						<ul class="breadcrumbs">
 							<li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>

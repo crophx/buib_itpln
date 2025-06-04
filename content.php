@@ -36,8 +36,8 @@ else {
 	}
 	// -- MODULE Pusat Bisnis -- //
 	elseif ($_GET['module'] == 'pusat_bisnis' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'PusatBisnis'])) {
-		// panggil file tampil home bks
-		include "modules/bks/bks_home.php";
+		// panggil file tampil home pusat_bisnis
+		include "modules/pusat_bisnis/pusat_bisnis_home.php";
 	}
 	// -- MODULE BKS -- //
 	elseif ($_GET['module'] == 'bks' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
@@ -46,8 +46,18 @@ else {
 	}
 	// -- MODULE BKI -- //
 	elseif ($_GET['module'] == 'bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKI'])) {
-		// panggil file tampil home bks
-		include "modules/bks/bks_home.php";
+		// panggil file tampil home bki
+		include "modules/bki/bki_home.php";
+	}
+	// -- MODULE LEMTERA -- //
+	elseif ($_GET['module'] == 'lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
+		// panggil file tampil home lemtera
+		include "modules/lemtera/lemtera_home.php";
+	}
+	// -- MODULE Training Center -- //
+	elseif ($_GET['module'] == 'training_center' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'TrainingCenter'])) {
+		// panggil file tampil home training_center
+		include "modules/training_center/training_center_home.php";
 	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {
