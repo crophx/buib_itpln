@@ -101,15 +101,6 @@ else {
 							<li class="nav-item"><a>Data RK BUIB</a></li>
 						</ul>
 					</div>
-<<<<<<< HEAD
-					<div class="ml-md-auto py-2 py-md-0">
-						<!-- button entri data -->
-						<a href="?module=form_entri_rk_buib" class="btn btn-success btn-round">
-							<span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data RK
-						</a>
-					</div>
-=======
->>>>>>> feature/fitur_nabilla
 				</div>
 			</div>
 		</div>
