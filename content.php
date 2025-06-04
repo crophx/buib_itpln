@@ -109,6 +109,16 @@ else {
 		// panggil file tampil entri data bki
 		include "modules/training_center/form_entri_rk.php";
 	}
+	// jika module yang dipilih "form ubah bks"
+	elseif ($_GET['module'] == 'form_ubah_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/form_ubah.php";
+	}
+	// jika module yang dipilih "tampil bks"
+	elseif ($_GET['module'] == 'tampil_detail_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/tampil_detail.php";
+	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {
 		// panggil file tampil data arsip
