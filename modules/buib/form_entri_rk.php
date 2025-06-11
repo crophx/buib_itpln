@@ -99,7 +99,7 @@ else { ?>
                             </div>
                         </div>
 
-                        <!-- <div class="col-lg-4">
+                        <div class="col-lg-4">
                             <div class="form-group">
                                 <label>Bulan <span class="text-danger">*</span></label>
                                 <select name="bulan" class="form-control" autocomplete="off" required>
@@ -135,7 +135,7 @@ else { ?>
                                 </select>
                                 <div class="invalid-feedback">Tahun tidak boleh kosong.</div>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
 
                     <div class="row">

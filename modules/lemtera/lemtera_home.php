@@ -9,7 +9,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
-	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan'])) { 
+	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Lemtera', 'Pimpinan', 'SekretarisPimpinan'])) { 
 		
 		// Query untuk mengambil semua data dari tbl_rk_lemtera (tanpa join)
 		$main_query = mysqli_query($mysqli, "SELECT * FROM tbl_rk_lemtera ORDER BY tgl_surat DESC")

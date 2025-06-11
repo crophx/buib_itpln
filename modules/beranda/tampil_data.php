@@ -8,8 +8,8 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 // jika file di include oleh file lain, tampilkan isi file
 else {
 
-// Fungsi helper untuk merender card menu
-function render_menu_card($title, $module_name, $icon_class, $icon_style_color, $current_user_role) {
+// Fungsi helper untuk merender card menu dengan support URL eksternal
+function render_menu_card($title, $module_name, $icon_class, $icon_style_color, $current_user_role, $external_url = null) {
     $can_access = false; // Default: tidak bisa akses, akan diubah jika kondisi terpenuhi
     $full_access_roles = ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'];
 
@@ -35,7 +35,20 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
         }
     }
 
-    $link_href = $can_access ? "?module=" . $module_name : "javascript:void(0);";
+    // Tentukan link href berdasarkan apakah ada external_url atau tidak
+    if ($can_access) {
+        if ($external_url) {
+            $link_href = $external_url;
+            $target_attr = 'target="_blank"'; // Buka di tab baru untuk URL eksternal
+        } else {
+            $link_href = "?module=" . $module_name;
+            $target_attr = '';
+        }
+    } else {
+        $link_href = "javascript:void(0);";
+        $target_attr = '';
+    }
+
     $card_extra_style = !$can_access ? "opacity: 0.6; cursor: not-allowed;" : "";
 
     // Modifikasi di sini untuk $anchor_extra_attributes
@@ -47,7 +60,7 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
         $anchor_extra_attributes = 'style="' . $current_anchor_style . '" ' . $onclick_attr;
     } else {
         $current_anchor_style = $base_anchor_style . " color: inherit;"; // Pertahankan pewarisan warna jika bisa diakses
-        $anchor_extra_attributes = 'style="' . $current_anchor_style . '"';
+        $anchor_extra_attributes = 'style="' . $current_anchor_style . '" ' . $target_attr;
     }
 
     $icon_html = '<i class="' . $icon_class . '"' . ($icon_style_color ? ' style="color: ' . $icon_style_color . ';"' : '') . '></i>';
@@ -110,7 +123,7 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
             <div class="row mt-5">
             <?php
             render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
-            render_menu_card('Bagian Kerja Sama (BKS)', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses']);
+            render_menu_card('Bagian Kerja Sama (BKS)', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses'], 'https://dasker.itpln.ac.id/');
             render_menu_card('Bagian Kerja Internasional (BKI)', 'bki', 'fas fa-camera', 'violet', $_SESSION['hak_akses']);
             render_menu_card('BUIB', 'buib', 'fas fa-university', 'antiquewhite', $_SESSION['hak_akses']);
             render_menu_card('LEMTERA', 'lemtera', 'fas fa-leaf', 'green', $_SESSION['hak_akses']);
@@ -177,89 +190,6 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
                 </div>
             </div>
         <?php } ?>
-        <div class="row mt-2">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fas fa-chart-bar mr-2"></i> Jumlah Arsip Per Jenis Dokumen (Bar Chart)</div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="barChart" style="width: 100%; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fas fa-chart-pie mr-2"></i> Distribusi Arsip Per Jenis Dokumen (Pie Chart)</div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="pieChart" style="width: 100%; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mt-2">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-table mr-2"></i> Detail Jumlah Arsip Per Jenis Dokumen</div>
-                <div class="card-tools">
-                    <button class="btn btn-sm btn-secondary" onclick="toggleTable()">
-                        <i class="fas fa-eye" id="toggleIcon"></i> <span id="toggleText">Sembunyikan Tabel</span>
-                    </button>
-                </div>
-            </div>
-            <div class="card-body" id="tableContainer">
-                <div class="table-responsive">
-                    <table id="basic-datatables" class="display table table-bordered table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No.</th>
-                                <th class="text-center">Jenis Dokumen</th>
-                                <th class="text-center">Jumlah</th>
-                                <th class="text-center">Persentase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $no = 1;
-                            $chart_labels = [];
-                            $chart_data = [];
-
-                            if (isset($mysqli)) {
-                                $total_arsip_for_table = 0;
-                                $total_query = mysqli_query($mysqli, "SELECT COUNT(*) as total FROM tbl_arsip") or die('Ada kesalahan pada query total arsip : ' . mysqli_error($mysqli));
-                                $total_data_count = mysqli_fetch_assoc($total_query);
-                                $total_arsip_for_table = $total_data_count['total'];
-
-                                $query_table = mysqli_query($mysqli, "SELECT COUNT(*) as jumlah, b.nama_jenis 
-                                                                  FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
-                                                                  GROUP BY a.jenis_dokumen ORDER BY jumlah DESC")
-                                               or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
-
-                                while ($data_table = mysqli_fetch_assoc($query_table)) {
-                                    $persentase = $total_arsip_for_table > 0 ? round(($data_table['jumlah'] / $total_arsip_for_table) * 100, 1) : 0;
-                                    $chart_labels[] = $data_table['nama_jenis'];
-                                    $chart_data[] = $data_table['jumlah'];
-                                    ?>
-                                    <tr>
-                                        <td width="50" class="text-center"><?php echo $no++; ?></td>
-                                        <td width="200"><?php echo htmlspecialchars($data_table['nama_jenis']); ?></td>
-                                        <td width="80" class="text-center"><?php echo $data_table['jumlah']; ?></td>
-                                        <td width="100" class="text-center"><?php echo $persentase; ?>%</td>
-                                    </tr>
-                                <?php 
-                                }
-                            } else {
-                                echo '<tr><td colspan="4" class="text-center">Tidak dapat mengambil data dari database.</td></tr>';
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
@@ -269,12 +199,53 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
 
         if (document.getElementById('barChart') && chartData.length > 0) {
             const barCtx = document.getElementById('barChart').getContext('2d');
-            const barChart = new Chart(barCtx, { /* ... Konfigurasi Bar Chart ... */ });
+            const barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Jumlah Arsip',
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderColor: chartColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
         if (document.getElementById('pieChart') && chartData.length > 0) {
             const pieCtx = document.getElementById('pieChart').getContext('2d');
-            const pieChart = new Chart(pieCtx, { /* ... Konfigurasi Pie Chart ... */ });
+            const pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
         }
 
         function toggleTable() {

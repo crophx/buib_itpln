@@ -9,7 +9,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
-	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'training_center', 'Pimpinan', 'SekretarisPimpinan'])) { 
+	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'TrainingCenter', 'Pimpinan', 'SekretarisPimpinan'])) { 
 		
 		// Query untuk mengambil semua data dari tbl_rk_training_center (tanpa join)
 		$main_query = mysqli_query($mysqli, "SELECT * FROM tbl_rk_training_center ORDER BY tgl_surat DESC")
@@ -88,7 +88,7 @@ else {
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
 					<div class="page-header">
 						<!-- judul halaman -->
-						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> training_center</h4>
+						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Training Center</h4>
 						<!-- breadcrumbs -->
 						<ul class="breadcrumbs">
 							<li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
