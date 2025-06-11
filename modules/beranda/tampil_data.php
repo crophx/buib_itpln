@@ -8,8 +8,8 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 // jika file di include oleh file lain, tampilkan isi file
 else {
 
-// Fungsi helper untuk merender card menu
-function render_menu_card($title, $module_name, $icon_class, $icon_style_color, $current_user_role) {
+// Fungsi helper untuk merender card menu dengan support URL eksternal
+function render_menu_card($title, $module_name, $icon_class, $icon_style_color, $current_user_role, $external_url = null) {
     $can_access = false; // Default: tidak bisa akses, akan diubah jika kondisi terpenuhi
     $full_access_roles = ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'];
 
@@ -35,7 +35,20 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
         }
     }
 
-    $link_href = $can_access ? "?module=" . $module_name : "javascript:void(0);";
+    // Tentukan link href berdasarkan apakah ada external_url atau tidak
+    if ($can_access) {
+        if ($external_url) {
+            $link_href = $external_url;
+            $target_attr = 'target="_blank"'; // Buka di tab baru untuk URL eksternal
+        } else {
+            $link_href = "?module=" . $module_name;
+            $target_attr = '';
+        }
+    } else {
+        $link_href = "javascript:void(0);";
+        $target_attr = '';
+    }
+
     $card_extra_style = !$can_access ? "opacity: 0.6; cursor: not-allowed;" : "";
 
     // Modifikasi di sini untuk $anchor_extra_attributes
@@ -47,7 +60,7 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
         $anchor_extra_attributes = 'style="' . $current_anchor_style . '" ' . $onclick_attr;
     } else {
         $current_anchor_style = $base_anchor_style . " color: inherit;"; // Pertahankan pewarisan warna jika bisa diakses
-        $anchor_extra_attributes = 'style="' . $current_anchor_style . '"';
+        $anchor_extra_attributes = 'style="' . $current_anchor_style . '" ' . $target_attr;
     }
 
     $icon_html = '<i class="' . $icon_class . '"' . ($icon_style_color ? ' style="color: ' . $icon_style_color . ';"' : '') . '></i>';
@@ -110,17 +123,73 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
             <div class="row mt-5">
             <?php
             render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
-            render_menu_card('Bagian Kerja Sama (BKS)', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses']);
+            render_menu_card('Bagian Kerja Sama (BKS)', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses'], 'https://dasker.itpln.ac.id/');
             render_menu_card('Bagian Kerja Internasional (BKI)', 'bki', 'fas fa-camera', 'violet', $_SESSION['hak_akses']);
             render_menu_card('BUIB', 'buib', 'fas fa-university', 'antiquewhite', $_SESSION['hak_akses']);
             render_menu_card('LEMTERA', 'lemtera', 'fas fa-leaf', 'green', $_SESSION['hak_akses']);
             render_menu_card('Training Center (TC)', 'training_center', 'fas fa-chalkboard-teacher', 'tomato', $_SESSION['hak_akses']);
             ?>
             </div>
+        <?php
+        }
+        else { ?>
+            <div class="row mt-5">
+                <div class="col-sm-12 col-md-6">
+                    <div class="card card-stats card-round">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-icon">
+                                    <div class="icon-big text-center icon-teal bubble-shadow-small">
+                                        <i class="fas fa-folder-open"></i>
+                                    </div>
+                                </div>
+                                <div class="col col-stats ml-3 ml-sm-0">
+                                    <div class="numbers">
+                                        <p class="card-category">Arsip Dokumen</p>
+                                        <?php
+                                        if (isset($mysqli)) {
+                                            $query_arsip = mysqli_query($mysqli, "SELECT id_arsip FROM tbl_arsip") or die('Ada kesalahan pada query jumlah data arsip : ' . mysqli_error($mysqli));
+                                            $jumlah_arsip = mysqli_num_rows($query_arsip);
+                                            echo '<h4 class="card-title">' . number_format($jumlah_arsip, 0, '', '.') . '</h4>';
+                                        } else {
+                                            echo '<h4 class="card-title">N/A</h4>';
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="card card-stats card-round">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-icon">
+                                    <div class="icon-big text-center icon-warning bubble-shadow-small">
+                                        <i class="fas fa-clone"></i>
+                                    </div>
+                                </div>
+                                <div class="col col-stats ml-3 ml-sm-0">
+                                    <div class="numbers">
+                                        <p class="card-category">Jenis Dokumen</p>
+                                        <?php
+                                        if (isset($mysqli)) {
+                                            $query_jenis = mysqli_query($mysqli, "SELECT id_jenis FROM tbl_jenis") or die('Ada kesalahan pada query jumlah data jenis : ' . mysqli_error($mysqli));
+                                            $jumlah_jenis = mysqli_num_rows($query_jenis);
+                                            echo '<h4 class="card-title">' . number_format($jumlah_jenis, 0, '', '.') . '</h4>';
+                                        } else {
+                                            echo '<h4 class="card-title">N/A</h4>';
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         <?php } ?>
-        <div class="card mt-2">
-        </div>
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
@@ -130,12 +199,53 @@ function render_menu_card($title, $module_name, $icon_class, $icon_style_color, 
 
         if (document.getElementById('barChart') && chartData.length > 0) {
             const barCtx = document.getElementById('barChart').getContext('2d');
-            const barChart = new Chart(barCtx, { /* ... Konfigurasi Bar Chart ... */ });
+            const barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Jumlah Arsip',
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderColor: chartColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
         if (document.getElementById('pieChart') && chartData.length > 0) {
             const pieCtx = document.getElementById('pieChart').getContext('2d');
-            const pieChart = new Chart(pieCtx, { /* ... Konfigurasi Pie Chart ... */ });
+            const pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
         }
 
         function toggleTable() {
