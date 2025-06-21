@@ -104,6 +104,16 @@ else {
 		// panggil file tampil entri data training center
 		include "modules/training_center/form_entri_realisasi.php";
 	}
+	// jika module yang dipilih "form entri TERKONTRAK training center"
+	elseif ($_GET['module'] == 'form_entri_terkontrak_training_center') {
+		// panggil file tampil entri data TERKONTRAK training center
+		include "modules/training_center/form_entri_terkontrak.php";
+	}
+	// jika module yang dipilih "form entri ONGOING training center"
+	elseif ($_GET['module'] == 'form_entri_ongoing_training_center') {
+		// panggil file tampil entri data TERKONTRAK training center
+		include "modules/training_center/form_entri_ongoing.php";
+	}
 	// jika module yang dipilih "form entri rk training center"
 	elseif ($_GET['module'] == 'form_entri_rk_training_center' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data bki

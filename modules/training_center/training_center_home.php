@@ -24,13 +24,14 @@ else {
         $monthly_data = [];
         $program_data = [];
         $keterangan_data = [];
+        $kategori_data = [];
         $total_target_calc = 0;
         $total_realisasi_calc = 0;
         $total_kontrak_calc = 0;
         $total_ongoing_calc = 0;
         $total_doc_calc = 0;
         $table_data = [];
-        $realized_data = [];
+        $Realisasi_data = [];
         $target_data = [];
         $kontrak_data = [];
         $ongoing_data = [];
@@ -107,7 +108,7 @@ else {
             
             // Pisahkan data berdasarkan kondisi REALISASI
             if ($data['realisasi_nominal'] > 0) {
-                $realized_data[] = $data;
+                $Realisasi_data[] = $data;
             }
             
             // Untuk target_data
@@ -125,6 +126,26 @@ else {
                 $ongoing_data[] = $data;
             }
         }
+        // Proses data untuk menghitung jumlah per kategori
+        while ($data = mysqli_fetch_assoc($main_query)) {
+            $kategori_nama = $data['nama_kategori'];
+            
+            // Hitung jumlah data per kategori
+            if (!isset($kategori_data[$kategori_nama])) {
+                $kategori_data[$kategori_nama] = [
+                    'count' => 0,
+                    'realisasi' => 0,
+                    'target' => 0
+                ];
+            }
+            
+            $kategori_data[$kategori_nama]['count']++;
+            $kategori_data[$kategori_nama]['realisasi'] += $data['realisasi_nominal'];
+            $kategori_data[$kategori_nama]['target'] += $data['target_nominal'];
+        }
+
+        // Reset pointer query lagi untuk penggunaan selanjutnya
+        mysqli_data_seek($main_query, 0);
 
         // Urutkan data bulanan dan hitung akumulatif
         ksort($months_data);
@@ -338,12 +359,12 @@ else {
 
         <!-- Charts Row 2 -->
         <div class="row mb-4">
-            <!-- Bar Chart - Target vs Realisasi per Program -->
-            <div class="col-md-6">
+            <!-- Bar Chart - Target vs Realisasi per Bulan -->
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="fas fa-chart-bar mr-2"></i>Target vs Realisasi per Deputy training_center
+                            <i class="fas fa-chart-bar mr-2"></i>Target vs Realisasi Kumulatif Per Bulan
                         </div>
                     </div>
                     <div class="card-body">
@@ -353,7 +374,7 @@ else {
             </div>
             
             <!-- Bar Chart - Realisasi per Keterangan Program -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">
@@ -361,7 +382,7 @@ else {
                         </div>
                     </div>
                     <div class="card-body">
-                        <canvas id="keteranganChart" style="width: 100%; height: 400px;"></canvas>
+                        <canvas id="kategoriChart" style="width: 100%; height: 400px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -371,7 +392,7 @@ else {
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="fas fa-table mr-2"></i>Detail Data Realisasi Jan-April 2025
+                    <i class="fas fa-table mr-2"></i>Detail Data Realisasi
                 </div>
                 <div class="ml-md-auto py-2 py-md-0">
                     <!-- button entri data -->
@@ -383,22 +404,21 @@ else {
         <!-- Tampil Data Realisasi -->
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="realizedDataTable" class="display table table-bordered table-striped table-hover">
+                    <table id="RealisasiDataTable" class="display table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
-                                <th class="text-center">Deputy training_center</th>
-                                <th class="text-center">Kegiatan</th>
+                                <th class="text-center">Nama Program</th>
+                                <th class="text-center">Peserta</th>
                                 <th class="text-center">Realisasi</th>
                                 <th class="text-center">Bulan</th>
-                                <!-- <th class="text-center">Status</th> -->
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $no1 = 1;
-                            foreach ($realized_data as $data) {
+                            foreach ($Realisasi_data as $data) {
                                 $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
                                 $status = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
                                 $status_class = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
@@ -407,22 +427,202 @@ else {
                                 <tr>
                                     <td width="30" class="text-center"><?php echo $no1++; ?></td>
                                     <td><?php echo htmlspecialchars($data['nama_program']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
+                                    <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
                                     <td class="text-right">Rp <?php echo number_format($data['realisasi_nominal'], 0, ',', '.'); ?></td>
                                     <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
-                                    <!--<td width="120" class="text-center">
-                                        <span class="badge badge-<?php echo $status_class; ?>"><?php echo $status; ?></span>
-                                    </td> -->
                                     <td width="80" class="text-center">
-                                        <a href="?module=form_ubah_rk_training_center&id=<?php echo $data['id']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-tooltip="tooltip" title="Ubah">
+                                        <!-- Button Edit Realisasi -->
+                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahRealisasi<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusRealized<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
+                                        <!-- Form Modal Edit Realisasi -->
+                                        <div class="modal fade" id="modalUbahRealisasi<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalRealisasiLabel<?php echo $data['id']; ?>" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <!-- Modal Header -->
+                                                    <div class="modal-header btn-success text-white">
+                                                        <h5 class="modal-title font-weight-bold" id="modalRealisasiLabel<?php echo $data['id']; ?>">
+                                                            <i class="fas fa-edit mr-2"></i>Edit Data Realisasi
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <form action="modules/training_center/proses_ubah.php" method="POST" id="formUbahRealisasi<?php echo $data['id']; ?>">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+                                                            
+                                                            <!-- Row 1: Edit Realisasi Program -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="text" autocomplete="off"
+                                                                            class="form-control" 
+                                                                            id="nama_program<?php echo $data['id']; ?>" 
+                                                                            name="nama_program" 
+                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
+                                                                            placeholder="Masukkan nama program"
+                                                                            required>                       
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Row 1: Edit Realisasi Kategori -->
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="kategori_tc<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-tags mr-1 text-success"></i>Kategori TC <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" 
+                                                                                id="kategori_tc<?php echo $data['id']; ?>" 
+                                                                                name="kategori_tc" 
+                                                                                required>
+                                                                            <option value="">-- Pilih Kategori --</option>
+                                                                            <?php
+                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori_tc ORDER BY nama_kategori ASC");
+                                                                            while ($kategori = mysqli_fetch_array($kategori_query)) {
+                                                                                $selected = ($kategori['id_kategori'] == $data['kategori_tc']) ? 'selected' : '';
+                                                                                echo "<option value='".$kategori['id_kategori']."' ".$selected.">".$kategori['nama_kategori']."</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 2: Nominal Realisasi & Tanggal -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="realisasi_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Realisasi <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" autocomplete="off"
+                                                                                class="form-control currency" 
+                                                                                id="realisasi_nominal<?php echo $data['id']; ?>" 
+                                                                                name="realisasi_nominal" 
+                                                                                value="<?php echo number_format($data['realisasi_nominal'], 0, ',', '.'); ?>" 
+                                                                                placeholder="0"
+                                                                                required>
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-info-circle mr-1"></i>Ubah nominal realisasi
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="date" 
+                                                                            class="form-control" 
+                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
+                                                                            name="tgl_surat" 
+                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
+                                                                            required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 3: Status & Nominal Realisasi -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="status_tc<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" 
+                                                                                id="status_tc<?php echo $data['id']; ?>" 
+                                                                                name="status_tc" 
+                                                                                required>
+                                                                            <option value="">-- Pilih Status --</option>
+                                                                            <?php
+                                                                            $status_query = mysqli_query($mysqli, "SELECT * FROM tbl_status ORDER BY nama_status ASC");
+                                                                            while ($status = mysqli_fetch_array($status_query)) {
+                                                                                $selected = ($status['id_status'] == $data['status_tc']) ? 'selected' : '';
+                                                                                echo "<option value='".$status['id_status']."' ".$selected.">".$status['nama_status']."</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-check-circle mr-1"></i>Update jika terjadi perubahan status
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            
+                                                            </div>
+
+                                                            <!-- Row 4: Keterangan -->
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <div class="form-group">
+                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
+                                                                        </label>
+                                                                        <textarea class="form-control" 
+                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
+                                                                                name="keterangan_program" 
+                                                                                rows="3" 
+                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Data Sebelumnya -->
+                                                            <div class="alert alert-light border mt-3">
+                                                                <h6 class="mb-2">
+                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
+                                                                </h6>
+                                                                <div class="row small">
+                                                                    <div class="col-md-4">
+                                                                        <strong>Program:</strong><br>
+                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
+                                                                        <strong>Kategori:</strong><br>
+                                                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_kategori']); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Status:</strong><br>
+                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span><br><br>
+                                                                        <strong>Nominal:</strong><br>
+                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['realisasi_nominal'], 0, ',', '.'); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Tanggal:</strong><br>
+                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
+                                                                        <strong>Periode:</strong><br>
+                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Modal Footer button simpan edit realisasi-->
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                                <i class="fas fa-times mr-1"></i>Batal
+                                                            </button>
+                                                            <button type="submit" class="btn btn-success" name="ubahRealisasi">
+                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Button Hapus Realisasi-->
+                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusRealisasi<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
                                         
                                         <!-- Modal Hapus -->
-                                        <div class="modal fade" id="modalHapusRealized<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal fade" id="modalHapusRealisasi<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -465,12 +665,12 @@ else {
                 </div>
                 <div class="ml-md-auto py-2 py-md-0">
                     <!-- button entri data -->
-                    <a href="?module=form_entri_realisasi_training_center" class="btn btn-success btn-round">
+                    <a href="?module=form_entri_terkontrak_training_center" class="btn btn-success btn-round">
                         <span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data Terkontrak
                     </a>
 				</div>
             </div>
-        <!-- Tampil Data Kontrak -->
+            <!-- Tampil Data Kontrak -->
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="kontrakDataTable" class="display table table-bordered table-striped table-hover">
@@ -479,9 +679,11 @@ else {
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Nama Program</th>
                                 <th class="text-center">Peserta</th>
-                                <th class="text-center">Nominal</th>
                                 <th class="text-center">Bulan</th>
+                                <th class="text-center">Keterangan</th>
+                                <th class="text-center">Nominal Kontrak</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -497,23 +699,228 @@ else {
                                     <td width="30" class="text-center"><?php echo $no1++; ?></td>
                                     <td><?php echo htmlspecialchars($data['nama_program']); ?></td>
                                     <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?></td>
                                     <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
+                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
+                                    <td class="text-right">Rp <?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?></td>
                                     <td width="80" class="text-center">
-                                        <a href="?module=form_ubah_rk_training_center&id=<?php echo $data['id']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-tooltip="tooltip" title="Ubah">
+                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_status']); ?></span><br>
+                                    </td>
+                                    <td width="80" class="text-center">
+                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-toggle="modal" data-target="#modalUbahKontrak<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusRealized<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
+                                        <!-- Modal Edit Kontrak -->
+                                        <div class="modal fade" id="modalUbahKontrak<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUbahKontrakLabel<?php echo $data['id']; ?>" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <!-- Modal Header -->
+                                                    <div class="modal-header btn-success text-white">
+                                                        <h5 class="modal-title font-weight-bold" id="modalUbahKontrakLabel<?php echo $data['id']; ?>">
+                                                            <i class="fas fa-edit mr-2"></i>Edit Data Kontrak
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <form action="modules/training_center/proses_ubah.php" method="POST" id="formUbahKontrak<?php echo $data['id']; ?>">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+                                                            
+                                                            <!-- Row 1: Program & Kategori -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="text" autocomplete="off"
+                                                                            class="form-control" 
+                                                                            id="nama_program<?php echo $data['id']; ?>" 
+                                                                            name="nama_program" 
+                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
+                                                                            placeholder="Masukkan nama program"
+                                                                            required>                       
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="kategori_tc<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-tags mr-1 text-success"></i>Kategori TC <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" 
+                                                                                id="kategori_tc<?php echo $data['id']; ?>" 
+                                                                                name="kategori_tc" 
+                                                                                required>
+                                                                            <option value="">-- Pilih Kategori --</option>
+                                                                            <?php
+                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori_tc ORDER BY nama_kategori ASC");
+                                                                            while ($kategori = mysqli_fetch_array($kategori_query)) {
+                                                                                $selected = ($kategori['id_kategori'] == $data['kategori_tc']) ? 'selected' : '';
+                                                                                echo "<option value='".$kategori['id_kategori']."' ".$selected.">".$kategori['nama_kategori']."</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 2: Nominal Kontrak & Tanggal -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="kontrak_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" autocomplete="off"
+                                                                                class="form-control currency" 
+                                                                                id="kontrak_nominal<?php echo $data['id']; ?>" 
+                                                                                name="kontrak_nominal" 
+                                                                                value="<?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?>" 
+                                                                                placeholder="0"
+                                                                                required>
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="date" 
+                                                                            class="form-control" 
+                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
+                                                                            name="tgl_surat" 
+                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
+                                                                            required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 3: Status & Realisasi pada Edit Kontrak -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="status_tc<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" 
+                                                                                id="status_tc<?php echo $data['id']; ?>" 
+                                                                                name="status_tc" 
+                                                                                required>
+                                                                            <option value="">-- Pilih Status --</option>
+                                                                            <?php
+                                                                            $status_query = mysqli_query($mysqli, "SELECT * FROM tbl_status ORDER BY nama_status ASC");
+                                                                            while ($status = mysqli_fetch_array($status_query)) {
+                                                                                $selected = ($status['id_status'] == $data['status_tc']) ? 'selected' : '';
+                                                                                echo "<option value='".$status['id_status']."' ".$selected.">".$status['nama_status']."</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-check-circle mr-1"></i>Update jika sudah terealisasi
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="realisasi_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-bullseye mr-1 text-primary"></i>Realisasi Nominal
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-primary text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" 
+                                                                                class="form-control currency" 
+                                                                                id="realisasi_nominal<?php echo $data['id']; ?>" 
+                                                                                name="realisasi_nominal" 
+                                                                                value="<?php echo isset($data['realisasi_nominal']) ? number_format($data['realisasi_nominal'], 0, ',', '.') : ''; ?>" 
+                                                                                placeholder="0">
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-lightbulb mr-1"></i>Nominal yang sudah diterima
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 4: Keterangan Edit Kontrak-->
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <div class="form-group">
+                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
+                                                                        </label>
+                                                                        <textarea class="form-control" 
+                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
+                                                                                name="keterangan_program" 
+                                                                                rows="3" 
+                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Data Sebelumnya -->
+                                                            <div class="alert alert-light border mt-3">
+                                                                <h6 class="mb-2">
+                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
+                                                                </h6>
+                                                                <div class="row small">
+                                                                    <div class="col-md-4">
+                                                                        <strong>Program:</strong><br>
+                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
+                                                                        <strong>Kategori:</strong><br>
+                                                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_kategori']); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Status:</strong><br>
+                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span><br><br>
+                                                                        <strong>Nominal:</strong><br>
+                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Tanggal:</strong><br>
+                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
+                                                                        <strong>Periode:</strong><br>
+                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Modal Footer -->
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                                <i class="fas fa-times mr-1"></i>Batal
+                                                            </button>
+                                                            <button type="submit" class="btn btn-success" name="ubahKontrak">
+                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Modal Hapus Kontrak-->
+                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusKontrak<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
-                                        <!-- Modal Hapus -->
-                                        <div class="modal fade" id="modalHapusRealized<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <!-- Modal Hapus Kontrak-->
+                                        <div class="modal fade" id="modalHapusKontrak<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data RK training_center</h5>
+                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data Kontrak training_center</h5>
                                                     </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data RK training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
+                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data Kontrak training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
                                                         <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
@@ -525,10 +932,11 @@ else {
                                 </tr>
                             <?php } ?>
                         </tbody>
+                        <!-- FOOTER TOTAL TERKONTRAK -->
                         <tfoot>
                             <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                <td class="text-center" colspan="3">
-                                    <strong>TOTAL REALISASI</strong>
+                                <td class="text-center" colspan="5">
+                                    <strong>TOTAL KONTRAK</strong>
                                 </td>
                                 <td class="text-right" style="color: #28a745; font-size: 1.1em;">
                                     <strong>Rp <?php echo number_format($total_kontrak_calc, 0, ',', '.'); ?></strong>
@@ -543,6 +951,7 @@ else {
         </div>
 
         <!-- Tables Section Data OnGoing --->
+        
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -550,12 +959,11 @@ else {
                 </div>
                 <div class="ml-md-auto py-2 py-md-0">
                     <!-- button entri data -->
-                    <a href="?module=form_entri_realisasi_training_center" class="btn btn-success btn-round">
+                    <a href="?module=form_entri_ongoing_training_center" class="btn btn-success btn-round">
                         <span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data On-Going
                     </a>
 				</div>
             </div>
-        
         <!-- Tampil Data OnGoing -->
             <div class="card-body">
                 <div class="table-responsive">
@@ -565,9 +973,10 @@ else {
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Nama Program</th>
                                 <th class="text-center">Keterangan</th>
-                                <th class="text-center">Nominal</th>
                                 <th class="text-center">Bulan</th>
+                                <th class="text-center">Nominal On-Going</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -583,23 +992,254 @@ else {
                                     <td width="30" class="text-center"><?php echo $no1++; ?></td>
                                     <td><?php echo htmlspecialchars($data['nama_program']); ?></td>
                                     <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?></td>
                                     <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
+                                    <td class="text-right">Rp <?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?></td>
                                     <td width="80" class="text-center">
-                                        <a href="?module=form_ubah_rk_training_center&id=<?php echo $data['id']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-tooltip="tooltip" title="Ubah">
+                                        <span class="badge badge-danger"><?php echo htmlspecialchars($data['nama_status']); ?></span><br>
+                                    </td>
+                                    <td width="100" class="text-center">
+                                        <!-- Button Edit Ongoing -->
+                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahOngoing<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusRealized<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
+                                        <!-- Form Modal Edit Ongoing -->
+                                        <div class="modal fade" id="modalUbahOngoing<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUbahOngoingLabel<?php echo $data['id']; ?>" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <!-- Modal Header -->
+                                                    <div class="modal-header btn-success text-white">
+                                                        <h5 class="modal-title font-weight-bold" id="modalUbahOngoingLabel<?php echo $data['id']; ?>">
+                                                            <i class="fas fa-edit mr-2"></i>Edit Data On-Going
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <form action="modules/training_center/proses_ubah.php" method="POST" id="formUbahOngoing<?php echo $data['id']; ?>">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+                                                            
+                                                            <!-- Row 1: Edit Ongoing Program & Kategori -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="text" autocomplete="off"
+                                                                            class="form-control" 
+                                                                            id="nama_program<?php echo $data['id']; ?>" 
+                                                                            name="nama_program" 
+                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
+                                                                            placeholder="Masukkan nama program"
+                                                                            required>                       
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Row 1: Edit Ongoing Kategori -->
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="kategori_tc<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-tags mr-1 text-success"></i>Kategori TC <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" 
+                                                                                id="kategori_tc<?php echo $data['id']; ?>" 
+                                                                                name="kategori_tc" 
+                                                                                required>
+                                                                            <option value="">-- Pilih Kategori --</option>
+                                                                            <?php
+                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori_tc ORDER BY nama_kategori ASC");
+                                                                            while ($kategori = mysqli_fetch_array($kategori_query)) {
+                                                                                $selected = ($kategori['id_kategori'] == $data['kategori_tc']) ? 'selected' : '';
+                                                                                echo "<option value='".$kategori['id_kategori']."' ".$selected.">".$kategori['nama_kategori']."</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 2: Nominal Ongoing & Tanggal -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="ongoing_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" autocomplete="off"
+                                                                                class="form-control currency" 
+                                                                                id="ongoing_nominal<?php echo $data['id']; ?>" 
+                                                                                name="ongoing_nominal" 
+                                                                                value="<?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?>" 
+                                                                                placeholder="0"
+                                                                                required>
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                                <!--Edit Ongoing Tanggal-->
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="date" 
+                                                                            class="form-control" 
+                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
+                                                                            name="tgl_surat" 
+                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
+                                                                            required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 3: Kontrak Pada Edit Ongoing-->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="kontrak_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-bullseye mr-1 text-primary"></i>Kontrak Nominal
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-primary text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" autocomplete="off"
+                                                                                class="form-control currency" 
+                                                                                id="kontrak_nominal<?php echo $data['id']; ?>" 
+                                                                                name="kontrak_nominal" 
+                                                                                value="<?php echo isset($data['kontrak_nominal']) ? number_format($data['kontrak_nominal'], 0, ',', '.') : ''; ?>" 
+                                                                                placeholder="0">
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-lightbulb mr-1"></i>Kontrak yang sudah disepakati
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Row 3: Realisasi Pada Edit Ongoing-->
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="realisasi_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-bullseye mr-1 text-primary"></i>Realisasi Nominal
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-primary text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" autocomplete="off"
+                                                                                class="form-control currency" 
+                                                                                id="realisasi_nominal<?php echo $data['id']; ?>" 
+                                                                                name="realisasi_nominal" 
+                                                                                value="<?php echo isset($data['realisasi_nominal']) ? number_format($data['realisasi_nominal'], 0, ',', '.') : ''; ?>" 
+                                                                                placeholder="0">
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-lightbulb mr-1"></i>Nominal yang sudah diterima
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- Edit Status OnGoing -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="status_tc<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <select class="form-control" 
+                                                                                id="status_tc<?php echo $data['id']; ?>" 
+                                                                                name="status_tc" 
+                                                                                required>
+                                                                            <option value="">-- Pilih Status --</option>
+                                                                            <?php
+                                                                            $status_query = mysqli_query($mysqli, "SELECT * FROM tbl_status ORDER BY nama_status ASC");
+                                                                            while ($status = mysqli_fetch_array($status_query)) {
+                                                                                $selected = ($status['id_status'] == $data['status_tc']) ? 'selected' : '';
+                                                                                echo "<option value='".$status['id_status']."' ".$selected.">".$status['nama_status']."</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-check-circle mr-1"></i>Update jika sudah terealisasi
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Row 4: Edit Keterangan  Ongoing -->
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <div class="form-group">
+                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
+                                                                        </label>
+                                                                        <textarea class="form-control" 
+                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
+                                                                                name="keterangan_program" 
+                                                                                rows="3" 
+                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Data Ongoing Sebelumnya -->
+                                                            <div class="alert alert-light border mt-3">
+                                                                <h6 class="mb-2">
+                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
+                                                                </h6>
+                                                                <div class="row small">
+                                                                    <div class="col-md-4">
+                                                                        <strong>Program:</strong><br>
+                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
+                                                                        <strong>Kategori:</strong><br>
+                                                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_kategori']); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Status:</strong><br>
+                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span><br><br>
+                                                                        <strong>Nominal:</strong><br>
+                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Tanggal:</strong><br>
+                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
+                                                                        <strong>Periode:</strong><br>
+                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Modal Footer button simpan -->
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                                <i class="fas fa-times mr-1"></i>Batal
+                                                            </button>
+                                                            <button type="submit" class="btn btn-success" name="ubahOngoing">
+                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Modal Hapus ONgoing -->
+                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusOngoing<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
-                                        <!-- Modal Hapus -->
-                                        <div class="modal fade" id="modalHapusRealized<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal fade" id="modalHapusOngoing<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data RK training_center</h5>
+                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data OnGoing training_center</h5>
                                                     </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data RK training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
+                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data OnGoing training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
                                                         <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
@@ -611,9 +1251,10 @@ else {
                                 </tr>
                             <?php } ?>
                         </tbody>
+                        <!-- FOOTER TOTAL ONGOING-->
                         <tfoot>
                             <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                <td class="text-center" colspan="3">
+                                <td class="text-center" colspan="4">
                                     <strong>TOTAL OnGoing</strong>
                                 </td>
                                 <td class="text-right" style="color: #28a745; font-size: 1.1em;">
@@ -648,11 +1289,9 @@ else {
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
-                                <th class="text-center">Deputy training_center</th>
-                                <th class="text-center">Kegiatan</th>
+                                <th class="text-center">Nama Program</th>
+                                <th class="text-center">Keterangan</th>
                                 <th class="text-center">Target</th>
-                                <!-- <th class="text-center">Sisa Target</th> -->
-                                <!-- <th class="text-center">Tanggal</th> -->
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
@@ -663,9 +1302,8 @@ else {
                             foreach ($target_data as $data) {
                                 $sisa_target = $data['target_nominal'] - $data['realisasi_nominal'];
                                 $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-                                $status = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
-                                $status_class = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
-                                // Tentukan deputy class
+                                $status_persentase = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
+                                $status_persentase = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
                                 
                                 ?>
                                 <tr>
@@ -675,27 +1313,158 @@ else {
                                     </td>
                                     <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
                                     <td class="text-right">Rp <?php echo number_format($data['target_nominal'], 0, ',', '.'); ?></td>
-                                    <!-- <td class="text-right">Rp <?php echo number_format($sisa_target, 0, ',', '.'); ?></td> 
-                                    <td width="100" class="text-center"><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></td>-->
                                     <td width="120" class="text-center">
-                                        <span class="badge badge-<?php echo $status_class; ?>"><?php echo $status; ?></span>
+                                        <span class="badge badge-warning"><?php echo htmlspecialchars($data['nama_status']); ?></span><br>
                                     </td>
                                     <td width="80" class="text-center">
-                                        <a href="?module=form_ubah_rk_training_center&id=<?php echo $data['id']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-tooltip="tooltip" title="Ubah">
+                                        <!-- Button Edit Rencana -->
+                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahRencana<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
+                                        <!-- Form Modal Edit Rencana -->
+                                        <div class="modal fade" id="modalUbahRencana<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalRencanaLabel<?php echo $data['id']; ?>" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <!-- Modal Header -->
+                                                    <div class="modal-header btn-success text-white">
+                                                        <h5 class="modal-title font-weight-bold" id="modalRencanaLabel<?php echo $data['id']; ?>">
+                                                            <i class="fas fa-edit mr-2"></i>Edit Data Rencana
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+
+                                                    <form action="modules/training_center/proses_ubah.php" method="POST" id="formUbahRencana<?php echo $data['id']; ?>">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+                                                            
+                                                            <!-- Edit Nama Program Rencana-->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="text" autocomplete="off"
+                                                                            class="form-control" 
+                                                                            id="nama_program<?php echo $data['id']; ?>" 
+                                                                            name="nama_program" 
+                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
+                                                                            placeholder="Masukkan nama program"
+                                                                            required>                       
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Edit Nominal Rencana -->
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="target_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Rencana <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
+                                                                            </div>
+                                                                            <input type="text" autocomplete="off"
+                                                                                class="form-control currency" 
+                                                                                id="target_nominal<?php echo $data['id']; ?>" 
+                                                                                name="target_nominal" 
+                                                                                value="<?php echo number_format($data['target_nominal'], 0, ',', '.'); ?>" 
+                                                                                placeholder="0"
+                                                                                required>
+                                                                        </div>
+                                                                        <small class="form-text text-muted">
+                                                                            <i class="fas fa-info-circle mr-1"></i>Ubah nominal rencana
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!--Edit Tanggal Rencana -->
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
+                                                                        </label>
+                                                                        <input type="date" 
+                                                                            class="form-control" 
+                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
+                                                                            name="tgl_surat" 
+                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
+                                                                            required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Edit Keterangan Rencana -->
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <div class="form-group">
+                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
+                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
+                                                                        </label>
+                                                                        <textarea class="form-control" 
+                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
+                                                                                name="keterangan_program" 
+                                                                                rows="3" 
+                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Data Sebelumnya -->
+                                                            <div class="alert alert-light border mt-3">
+                                                                <h6 class="mb-2">
+                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
+                                                                </h6>
+                                                                <div class="row small">
+                                                                    <div class="col-md-4">
+                                                                        <strong>Program:</strong><br>
+                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
+                                                                        <strong>Status:</strong><br>
+                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        
+                                                                        <strong>Nominal:</strong><br>
+                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['target_nominal'], 0, ',', '.'); ?></span>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <strong>Tanggal:</strong><br>
+                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
+                                                                        <strong>Periode:</strong><br>
+                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Modal Footer button simpan edit rencana-->
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                                <i class="fas fa-times mr-1"></i>Batal
+                                                            </button>
+                                                            <button type="submit" class="btn btn-success" name="ubahRencana">
+                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Button hapus rencana -->
                                         <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusTarget<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
-                                        
                                         <!-- Modal Hapus -->
                                         <div class="modal fade" id="modalHapusTarget<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data RK training_center</h5>
+                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data Rencana Training Center</h5>
                                                     </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data RK training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
+                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data Rencana Training Center<strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
                                                         <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
@@ -733,29 +1502,72 @@ else {
     const yearlyData = <?php echo json_encode($yearly_data); ?>;
     const monthlyAccumulativeData = <?php echo json_encode($monthly_accumulative); ?>;
     const programData = <?php echo json_encode($program_data); ?>;
-    const keteranganData = <?php echo json_encode($keterangan_data); ?>;
+    const kategoriData = <?php echo json_encode($kategori_data); ?>; // Data kategori baru
 
     // Variabel untuk menyimpan instance chart
-    let lineChart, doughnutChart, barChart, keteranganChart;
+    let lineChart, doughnutChart, barChart, kategoriChart;
 
     // Function untuk inisialisasi semua chart
     function initializeCharts() {
+        console.log('Initializing all charts...');
+        
         // Destroy existing charts jika ada
-        if (lineChart) lineChart.destroy();
-        if (doughnutChart) doughnutChart.destroy();
-        if (barChart) barChart.destroy();
-        if (keteranganChart) keteranganChart.destroy();
+        if (lineChart) {
+            lineChart.destroy();
+            lineChart = null;
+        }
+        if (doughnutChart) {
+            doughnutChart.destroy();
+            doughnutChart = null;
+        }
+        if (barChart) {
+            barChart.destroy();
+            barChart = null;
+        
+        }
+        if (kategoriChart) {
+            kategoriChart.destroy();
+            kategoriChart = null;
+        }
+
+        // Panggil semua fungsi inisialisasi chart
+        try {
+            initializeLineChart();
+            initializeDoughnutChart();
+            initializeBarChart();
+            initializeKategoriChart();
+            console.log('All charts initialized successfully');
+        } catch (error) {
+            console.error('Error initializing charts:', error);
+        }
+    }
+
+    // Function untuk inisialisasi line chart
+    function initializeLineChart() {
+        console.log('Initializing line chart...');
+        
+        // Validasi data
+        if (!monthlyAccumulativeData || Object.keys(monthlyAccumulativeData).length === 0) {
+            console.error('Data monthlyAccumulativeData kosong atau tidak tersedia');
+            return;
+        }
 
         // Siapkan data untuk line chart dengan 4 garis
         const months = Object.keys(monthlyAccumulativeData).sort();
         const lineChartLabels = months.map(month => monthlyAccumulativeData[month].label);
-        const targetData = months.map(month => monthlyAccumulativeData[month].target);
-        const realisasiData = months.map(month => monthlyAccumulativeData[month].realisasi);
-        const terkontrakData = months.map(month => monthlyAccumulativeData[month].terkontrak);
-        const ongoingData = months.map(month => monthlyAccumulativeData[month].ongoing);
+        const targetData = months.map(month => monthlyAccumulativeData[month].target || 0);
+        const realisasiData = months.map(month => monthlyAccumulativeData[month].realisasi || 0);
+        const terkontrakData = months.map(month => monthlyAccumulativeData[month].terkontrak || 0);
+        const ongoingData = months.map(month => monthlyAccumulativeData[month].ongoing || 0);
+
+        // Cek apakah canvas element ada
+        const lineCtx = document.getElementById('lineChart');
+        if (!lineCtx) {
+            console.error('Canvas element lineChart tidak ditemukan');
+            return;
+        }
 
         // Line Chart - 4 Garis: Target, Realisasi, Terkontrak, Ongoing
-        const lineCtx = document.getElementById('lineChart').getContext('2d');
         lineChart = new Chart(lineCtx, {
             type: 'line',
             data: {
@@ -815,6 +1627,10 @@ else {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Progress Kumulatif Bulanan'
+                    },
                     legend: {
                         position: 'top',
                         labels: {
@@ -854,16 +1670,20 @@ else {
                 }
             }
         });
-
-        // Chart lainnya tetap sama
-        initializeDoughnutChart();
-        initializeBarChart();
-        initializeKeteranganChart();
+        
+        console.log('Line chart initialized successfully');
     }
 
     // Function untuk inisialisasi doughnut chart
     function initializeDoughnutChart() {
-        const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+        console.log('Initializing doughnut chart...');
+        
+        const doughnutCtx = document.getElementById('doughnutChart');
+        if (!doughnutCtx) {
+            console.error('Canvas element doughnutChart tidak ditemukan');
+            return;
+        }
+
         const totalTarget = <?php echo $total_target_calc; ?>;
         const totalRealisasi = <?php echo $total_realisasi_calc; ?>;
         const sisaTarget = totalTarget - totalRealisasi;
@@ -883,13 +1703,17 @@ else {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Progress Target vs Realisasi'
+                    },
                     legend: {
                         position: 'bottom'
                     },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const percentage = ((context.parsed / totalTarget) * 100).toFixed(1);
+                                const percentage = totalTarget > 0 ? ((context.parsed / totalTarget) * 100).toFixed(1) : 0;
                                 return context.label + ': Rp ' + context.parsed.toLocaleString('id-ID') + ' (' + percentage + '%)';
                             }
                         }
@@ -897,28 +1721,44 @@ else {
                 }
             }
         });
+        
+        console.log('Doughnut chart initialized successfully');
     }
 
     // Function untuk inisialisasi bar chart
     function initializeBarChart() {
-        const programLabels = Object.keys(programData);
-        const programTargetData = programLabels.map(program => programData[program].target);
-        const programRealisasiData = programLabels.map(program => programData[program].realisasi);
-
-        const barCtx = document.getElementById('barChart').getContext('2d');
+        console.log('Initializing bar chart...');
+        
+        // Validasi data
+        if (!monthlyAccumulativeData || Object.keys(monthlyAccumulativeData).length === 0) {
+            console.error('Data monthlyAccumulativeData kosong atau tidak tersedia');
+            return;
+        }
+        
+        const months = Object.keys(monthlyAccumulativeData).sort();
+        const monthlyLabels = months.map(month => monthlyAccumulativeData[month].label);
+        const monthlyTargetData = months.map(month => monthlyAccumulativeData[month].target || 0);
+        const monthlyRealisasiData = months.map(month => monthlyAccumulativeData[month].realisasi || 0);
+        
+        const barCtx = document.getElementById('barChart');
+        if (!barCtx) {
+            console.error('Canvas element barChart tidak ditemukan');
+            return;
+        }
+        
         barChart = new Chart(barCtx, {
             type: 'bar',
             data: {
-                labels: programLabels,
+                labels: monthlyLabels,
                 datasets: [{
-                    label: 'Target',
-                    data: programTargetData,
+                    label: 'Target Kumulatif',
+                    data: monthlyTargetData,
                     backgroundColor: 'rgba(255, 99, 132, 0.7)',
                     borderColor: '#FF6384',
                     borderWidth: 1
                 }, {
-                    label: 'Realisasi',
-                    data: programRealisasiData,
+                    label: 'Realisasi Kumulatif',
+                    data: monthlyRealisasiData,
                     backgroundColor: 'rgba(54, 162, 235, 0.7)',
                     borderColor: '#36A2EB',
                     borderWidth: 1
@@ -928,6 +1768,10 @@ else {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Target vs Realisasi Kumulatif Bulanan'
+                    },
                     legend: {  
                         position: 'top'
                     },
@@ -942,6 +1786,10 @@ else {
                 scales: {
                     y: {
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Nominal (Rupiah)'
+                        },
                         ticks: {
                             callback: function(value) {
                                 return 'Rp ' + value.toLocaleString('id-ID');
@@ -949,6 +1797,10 @@ else {
                         }
                     },
                     x: {
+                        title: {
+                            display: true,
+                            text: 'Bulan'
+                        },
                         ticks: {
                             maxRotation: 45,
                             minRotation: 0
@@ -957,37 +1809,58 @@ else {
                 }
             }
         });
+        
+        console.log('Bar chart initialized successfully');
     }
 
-    // Function lainnya tetap sama...
-    function initializeKeteranganChart() {
-        const keteranganCanvas = document.getElementById('keteranganChart');
-        if (!keteranganCanvas) {
-            console.warn('Canvas element untuk keteranganChart tidak ditemukan');
+    
+
+    // Function untuk initialize pie chart kategori
+    function initializeKategoriChart() {
+        console.log('Initializing kategori chart...');
+        console.log('kategoriData:', kategoriData);
+        
+        // Validasi data
+        if (!kategoriData || Object.keys(kategoriData).length === 0) {
+            console.error('Data kategoriData kosong atau tidak tersedia');
             return;
         }
-
-        const filteredKeteranganData = {};
-        Object.keys(keteranganData).forEach(keterangan => {
-            const realisasi = keteranganData[keterangan].realisasi || 0;
-            if (realisasi > 0) {
-                filteredKeteranganData[keterangan] = keteranganData[keterangan];
-            }
-        });
-
-        const keteranganLabels = Object.keys(filteredKeteranganData);
-        const keteranganRealisasiData = keteranganLabels.map(keterangan => filteredKeteranganData[keterangan].realisasi);
         
-        const colors = generateColors(keteranganLabels.length);
-
-        const keteranganCtx = keteranganCanvas.getContext('2d');
-        keteranganChart = new Chart(keteranganCtx, {
+        const kategoriCtx = document.getElementById('kategoriChart');
+        if (!kategoriCtx) {
+            console.error('Canvas element kategoriChart tidak ditemukan');
+            return;
+        }
+        
+        // Pastikan kita mendapatkan context 2D
+        const ctx = kategoriCtx.getContext('2d');
+        if (!ctx) {
+            console.error('Tidak dapat mendapatkan 2D context dari kategoriChart');
+            return;
+        }
+        
+        // Siapkan data untuk pie chart berdasarkan jumlah count
+        const kategoriLabels = Object.keys(kategoriData);
+        const kategoriCountData = kategoriLabels.map(kategori => {
+            const value = kategoriData[kategori].count || 0;
+            console.log(`Kategori: ${kategori}, Count: ${value}`);
+            return value;
+        });
+        
+        console.log('Kategori Labels:', kategoriLabels);
+        console.log('Kategori Count Data:', kategoriCountData);
+        
+        // Generate warna untuk setiap kategori
+        const colors = generateColors(kategoriLabels.length);
+        
+        // Buat chart dengan konfigurasi yang lebih sederhana
+        kategoriChart = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: keteranganLabels,
+                labels: kategoriLabels,
                 datasets: [{
-                    label: 'Realisasi per Keterangan',
-                    data: keteranganRealisasiData,
+                    label: 'Jumlah per Kategori',
+                    data: kategoriCountData,
                     backgroundColor: colors.background,
                     borderColor: colors.border,
                     borderWidth: 2
@@ -997,31 +1870,15 @@ else {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribusi Kategori Training Center'
+                    },
                     legend: {
-                        position: 'right',
+                        position: 'bottom',
                         labels: {
                             boxWidth: 12,
-                            padding: 10,
-                            generateLabels: function(chart) {
-                                const data = chart.data;
-                                if (data.labels.length && data.datasets.length) {
-                                    return data.labels.map((label, i) => {
-                                        const value = data.datasets[0].data[i];
-                                        const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        
-                                        return {
-                                            text: `${label} (${percentage}%)`,
-                                            fillStyle: data.datasets[0].backgroundColor[i],
-                                            strokeStyle: data.datasets[0].borderColor[i],
-                                            lineWidth: data.datasets[0].borderWidth,
-                                            hidden: isNaN(data.datasets[0].data[i]) || chart.getDatasetMeta(0).data[i].hidden,
-                                            index: i
-                                        };
-                                    });
-                                }
-                                return [];
-                            }
+                            padding: 10
                         }
                     },
                     tooltip: {
@@ -1029,21 +1886,23 @@ else {
                             label: function(context) {
                                 const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
                                 const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                                return context.label + ': Rp ' + context.parsed.toLocaleString('id-ID') + ' (' + percentage + '%)';
+                                return context.label + ': ' + context.parsed + ' item (' + percentage + '%)';
                             }
                         }
                     }
                 }
             }
         });
+        
+        console.log('Kategori chart initialized successfully');
     }
 
-    // Utility functions tetap sama
+    // Utility function untuk generate warna
     function generateColors(count) {
         const baseColors = [
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
-            '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+            '#FF9F40', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+            '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE'
         ];
         
         const backgroundColors = [];
@@ -1051,7 +1910,7 @@ else {
         
         for (let i = 0; i < count; i++) {
             const baseColor = baseColors[i % baseColors.length];
-            backgroundColors.push(baseColor + '80');
+            backgroundColors.push(baseColor + '80'); // Tambahkan transparansi
             borderColors.push(baseColor);
         }
         
@@ -1061,27 +1920,27 @@ else {
         };
     }
 
+    // Function untuk update semua chart
     function updateCharts() {
-        console.log('Updating charts...');
+        console.log('Updating all charts...');
         initializeCharts();
     }
 
+    // Function untuk refresh data
     function refreshData() {
+        console.log('Refreshing page...');
         location.reload();
     }
 
     // Initialize semua saat DOM ready
     $(document).ready(function() {
-        if ($.fn.DataTable.isDataTable('#realizedDataTable')) {
-            $('#realizedDataTable').DataTable().destroy();
+        if ($.fn.DataTable.isDataTable('#RealisasiDataTable')) {
+            $('#RealisasiDataTable').DataTable().destroy();
         }
         
-        $('#realizedDataTable').DataTable({
+        $('#RealisasiDataTable').DataTable({
             "pageLength": 25,
-            "order": [[ 4, "desc" ]],
-            "columnDefs": [
-                { "orderable": false, "targets": [0, 5] }
-            ]
+            "ordering": false
         });
 
         if ($.fn.DataTable.isDataTable('#kontrakDataTable')) {
@@ -1090,10 +1949,16 @@ else {
         
         $('#kontrakDataTable').DataTable({
             "pageLength": 25,
-            "order": [[ 4, "desc" ]],
-            "columnDefs": [
-                { "orderable": false, "targets": [0, 5] }
-            ]
+            "ordering": false
+        });
+
+        if ($.fn.DataTable.isDataTable('#OngoingDataTable')) {
+            $('#OngoingDataTable').DataTable().destroy();
+        }
+        
+        $('#OngoingDataTable').DataTable({
+            "pageLength": 25,
+            "ordering": false
         });
 
         if ($.fn.DataTable.isDataTable('#targetDataTable')) {
@@ -1102,15 +1967,13 @@ else {
         
         $('#targetDataTable').DataTable({
             "pageLength": 25,
-            "order": [[ 3, "desc" ]],
-            "columnDefs": [
-                { "orderable": false, "targets": [0, 5] }
-            ]
+            "ordering": false
         });
 
         // Initialize charts
         initializeCharts();
     });
+    
     </script>
 
     <script type="text/javascript">
