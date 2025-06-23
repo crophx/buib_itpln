@@ -28,31 +28,31 @@ else {
         // === PROSES FORM REALISASI ===
         
         // Ambil data dari form realisasi
-        $nama_program       = mysqli_real_escape_string($mysqli, $_POST['nama_program']);
-        $kegiatan          = mysqli_real_escape_string($mysqli, $_POST['kegiatan']);
+        $nama_program    = mysqli_real_escape_string($mysqli, $_POST['nama_program']);
+        $kategori_tc       = mysqli_real_escape_string($mysqli, $_POST['kategori_tc']);
         $realisasi_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['realisasi_nominal'])));
-        $bulan             = mysqli_real_escape_string($mysqli, $_POST['bulan']);
-        $tahun             = mysqli_real_escape_string($mysqli, $_POST['tahun']);
-        $tgl_input         = mysqli_real_escape_string($mysqli, $_POST['tgl_input']);
+        $jml_peserta = mysqli_real_escape_string($mysqli, $_POST['jml_peserta']);
+        $tempat_kegiatan = mysqli_real_escape_string($mysqli, $_POST['tempat_kegiatan']);
+        $tgl_surat      = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
+        $status_tc      = mysqli_real_escape_string($mysqli, $_POST['status_tc']);
+        $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
-        $tgl_input_mysql = convertDateFormat($tgl_input);
+        $tgl_input_mysql = convertDateFormat($tgl_surat);
 
         // Validasi input wajib
-        if (empty($nama_program) || empty($kegiatan) || empty($realisasi_nominal) || 
-            empty($bulan) || empty($tahun) || empty($tgl_input)) {
+        if (empty($nama_program) || empty($kategori_tc) || empty($realisasi_nominal) || empty($jml_peserta) ||
+            empty($tempat_kegiatan) || empty($tgl_input_mysql) || empty($status_tc) || empty($keterangan_program)) {
             header('location: ../../main.php?module=training_center&pesan=7');
             exit();
         }
 
-        // Validasi bahwa realisasi nominal adalah angka
+        // Validasi bahwa target ongoing adalah angka
         if (!is_numeric($realisasi_nominal) || $realisasi_nominal <= 0) {
             header('location: ../../main.php?module=training_center&pesan=8');
             exit();
         }
 
-        // Buat keterangan program
-        $keterangan_program = $kegiatan;
 
         // Cek apakah data sudah ada
         $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_training_center 
@@ -61,7 +61,7 @@ else {
                                           or die('Error pada query cek data: ' . mysqli_error($mysqli));
 
         if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=realisasi&pesan=9');
+            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -84,12 +84,12 @@ else {
                                             0, 
                                             '$realisasi_nominal', 
                                             '$tgl_input_mysql',
-                                            1,
+                                            '$kategori_tc',
                                             0,
                                             0,
-                                            0,
-                                            '',
-                                            1
+                                            '$jml_peserta',
+                                            '$tempat_kegiatan',
+                                            '$status_tc'
                                         )")
                                         or die('Ada kesalahan pada query insert realisasi: ' . mysqli_error($mysqli));
 

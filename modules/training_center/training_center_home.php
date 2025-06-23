@@ -13,49 +13,44 @@ else {
 		
 		// Query untuk mengambil semua data dari tbl_rk_training_center (tanpa join)
 		$main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_kategori, c.nama_status
-                                        FROM tbl_rk_training_center as a
-                                        INNER JOIN tbl_kategori_tc as b ON a.kategori_tc=b.id_kategori
-                                        INNER JOIN tbl_status as c ON a.status_tc=c.id_status
-                                        ORDER BY tgl_surat ASC")
-                                        or die('Error pada query data RK training_center: '. mysqli_error($mysqli));
-		
-		// Data untuk charts dan summary
-		$yearly_data = [];
-        $monthly_data = [];
-        $program_data = [];
-        $keterangan_data = [];
-        $kategori_data = [];
-        $total_target_calc = 0;
-        $total_realisasi_calc = 0;
-        $total_kontrak_calc = 0;
-        $total_ongoing_calc = 0;
-        $total_doc_calc = 0;
-        $table_data = [];
-        $Realisasi_data = [];
-        $target_data = [];
-        $kontrak_data = [];
-        $ongoing_data = [];
+                                    FROM tbl_rk_training_center as a
+                                    INNER JOIN tbl_kategori as b ON a.kategori_tc=b.id_kategori
+                                    INNER JOIN tbl_status as c ON a.status_tc=c.id_status
+                                    ORDER BY tgl_surat ASC")
+                                    or die('Error pada query data RK training_center: '. mysqli_error($mysqli));
 
-        // Array untuk menyimpan data bulanan dengan perhitungan akumulatif
-        $monthly_accumulative = [];
+// Data untuk charts dan summary
+$yearly_data = [];
+$monthly_data = [];
+$program_data = [];
+$keterangan_data = [];
+$kategori_data = [];
+$total_target_calc = 0;
+$total_realisasi_calc = 0;
+$total_kontrak_calc = 0;
+$total_ongoing_calc = 0;
+$total_doc_calc = 0;
+$table_data = [];
+$Realisasi_data = [];
+$target_data = [];
+$kontrak_data = [];
+$ongoing_data = [];
+$monthly_accumulative = [];
 
-        // Reset pointer query
-        mysqli_data_seek($main_query, 0);
+// Ambil total target tahunan terlebih dahulu
+$yearly_target = 0;
+while ($data = mysqli_fetch_assoc($main_query)) {
+    $yearly_target += $data['target_nominal'];
+}
 
-        // Ambil total target tahunan terlebih dahulu
-        $yearly_target = 0;
-        while ($data = mysqli_fetch_assoc($main_query)) {
-            $yearly_target += $data['target_nominal'];
-        }
+// Hitung target bulanan (total target tahunan dibagi 12)
+$monthly_target = $yearly_target / 12;
 
-        // Hitung target bulanan (total target tahunan dibagi 12)
-        $monthly_target = $yearly_target / 12;
+// Reset pointer query
+mysqli_data_seek($main_query, 0);
 
-        // Reset pointer query lagi
-        mysqli_data_seek($main_query, 0);
-
-        // Buat array untuk menyimpan data per bulan
-        $months_data = [];
+// Buat array untuk menyimpan data per bulan
+$months_data = [];
         while ($data = mysqli_fetch_assoc($main_query)) {
             $tahun = date('Y', strtotime($data['tgl_surat']));
             $bulan = date('Y-m', strtotime($data['tgl_surat']));
@@ -83,7 +78,7 @@ else {
             $months_data[$bulan]['kontrak'] += $data['kontrak_nominal'];
             $months_data[$bulan]['ongoing'] += $data['ongoing_nominal'];
             
-            // Data untuk chart lainnya (program, yearly, dll) - tetap sama seperti sebelumnya
+            // Data untuk chart lainnya (program, yearly, dll)
             if (!isset($yearly_data[$tahun])) {
                 $yearly_data[$tahun] = ['target' => 0, 'realisasi' => 0];
             }
@@ -103,34 +98,8 @@ else {
                 $keterangan_data[$data['keterangan_program']]['realisasi'] += $data['realisasi_nominal'];
             }
             
-            // Simpan semua data, bukan hanya yang memiliki realisasi
-            $table_data[] = $data;
-            
-            // Pisahkan data berdasarkan kondisi REALISASI
-            if ($data['realisasi_nominal'] > 0) {
-                $Realisasi_data[] = $data;
-            }
-            
-            // Untuk target_data
-            if ($data['target_nominal'] > 0) {
-                $target_data[] = $data;
-            }
-
-            // Untuk kontrak data
-            if ($data['kontrak_nominal'] > 0) {
-                $kontrak_data[] = $data;
-            }
-
-            // Untuk ongoing data
-            if ($data['ongoing_nominal'] > 0) {
-                $ongoing_data[] = $data;
-            }
-        }
-        // Proses data untuk menghitung jumlah per kategori
-        while ($data = mysqli_fetch_assoc($main_query)) {
+            // Data untuk kategori chart berdasarkan realisasi
             $kategori_nama = $data['nama_kategori'];
-            
-            // Hitung jumlah data per kategori
             if (!isset($kategori_data[$kategori_nama])) {
                 $kategori_data[$kategori_nama] = [
                     'count' => 0,
@@ -138,11 +107,30 @@ else {
                     'target' => 0
                 ];
             }
-            
             $kategori_data[$kategori_nama]['count']++;
             $kategori_data[$kategori_nama]['realisasi'] += $data['realisasi_nominal'];
             $kategori_data[$kategori_nama]['target'] += $data['target_nominal'];
+            
+            // Simpan semua data
+            $table_data[] = $data;
+            
+            // Pisahkan data berdasarkan kondisi
+            if ($data['realisasi_nominal'] > 0) {
+                $Realisasi_data[] = $data;
+            }
+            if ($data['target_nominal'] > 0) {
+                $target_data[] = $data;
+            }
+            if ($data['kontrak_nominal'] > 0) {
+                $kontrak_data[] = $data;
+            }
+            if ($data['ongoing_nominal'] > 0) {
+                $ongoing_data[] = $data;
+            }
         }
+
+        // Reset pointer query untuk penggunaan selanjutnya
+        mysqli_data_seek($main_query, 0);
 
         // Reset pointer query lagi untuk penggunaan selanjutnya
         mysqli_data_seek($main_query, 0);
@@ -373,7 +361,7 @@ else {
                 </div>
             </div>
             
-            <!-- Bar Chart - Realisasi per Keterangan Program -->
+            <!-- Pie Chart - Kategori Program -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
@@ -481,7 +469,7 @@ else {
                                                                                 required>
                                                                             <option value="">-- Pilih Kategori --</option>
                                                                             <?php
-                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori_tc ORDER BY nama_kategori ASC");
+                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori ORDER BY nama_kategori ASC");
                                                                             while ($kategori = mysqli_fetch_array($kategori_query)) {
                                                                                 $selected = ($kategori['id_kategori'] == $data['kategori_tc']) ? 'selected' : '';
                                                                                 echo "<option value='".$kategori['id_kategori']."' ".$selected.">".$kategori['nama_kategori']."</option>";
@@ -631,7 +619,7 @@ else {
                                                     <div class="modal-body text-left">Anda yakin ingin menghapus data RK training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                        <a href="modules/training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -754,7 +742,7 @@ else {
                                                                                 required>
                                                                             <option value="">-- Pilih Kategori --</option>
                                                                             <?php
-                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori_tc ORDER BY nama_kategori ASC");
+                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori ORDER BY nama_kategori ASC");
                                                                             while ($kategori = mysqli_fetch_array($kategori_query)) {
                                                                                 $selected = ($kategori['id_kategori'] == $data['kategori_tc']) ? 'selected' : '';
                                                                                 echo "<option value='".$kategori['id_kategori']."' ".$selected.">".$kategori['nama_kategori']."</option>";
@@ -923,7 +911,7 @@ else {
                                                     <div class="modal-body text-left">Anda yakin ingin menghapus data Kontrak training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                        <a href="modules/training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1048,7 +1036,7 @@ else {
                                                                                 required>
                                                                             <option value="">-- Pilih Kategori --</option>
                                                                             <?php
-                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori_tc ORDER BY nama_kategori ASC");
+                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_kategori ORDER BY nama_kategori ASC");
                                                                             while ($kategori = mysqli_fetch_array($kategori_query)) {
                                                                                 $selected = ($kategori['id_kategori'] == $data['kategori_tc']) ? 'selected' : '';
                                                                                 echo "<option value='".$kategori['id_kategori']."' ".$selected.">".$kategori['nama_kategori']."</option>";
@@ -1242,7 +1230,7 @@ else {
                                                     <div class="modal-body text-left">Anda yakin ingin menghapus data OnGoing training_center <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                        <a href="modules/training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1467,7 +1455,7 @@ else {
                                                     <div class="modal-body text-left">Anda yakin ingin menghapus data Rencana Training Center<strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/rk_training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                        <a href="modules/training_center/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1886,7 +1874,7 @@ else {
                             label: function(context) {
                                 const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
                                 const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                                return context.label + ': ' + context.parsed + ' item (' + percentage + '%)';
+                                return context.label + ': ' + context.parsed + ' kegiatan (' + percentage + '%)';
                             }
                         }
                     }

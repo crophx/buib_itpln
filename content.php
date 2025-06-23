@@ -84,7 +84,7 @@ else {
 		// panggil file tampil home lemtera
 		include "modules/lemtera/lemtera_home.php";
 	}
-	// jika module yang dipilih "form entri lemtera"
+	// jika module yang dipilih "form entri realisasi lemtera"
 	elseif ($_GET['module'] == 'form_entri_realisasi_lemtera') {
 		// panggil file tampil entri data buib
 		include "modules/lemtera/form_entri_realisasi.php";
@@ -93,6 +93,16 @@ else {
 	elseif ($_GET['module'] == 'form_entri_rk_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data lemtera
 		include "modules/lemtera/form_entri_rk.php";
+	}
+	// jika module yang dipilih "form entri kontrak lemtera"
+	elseif ($_GET['module'] == 'form_entri_terkontrak_lemtera') {
+		// panggil file tampil entri data buib
+		include "modules/lemtera/form_entri_terkontrak.php";
+	}
+	// jika module yang dipilih "form entri rk lemtera"
+	elseif ($_GET['module'] == 'form_entri_ongoing_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil entri data lemtera
+		include "modules/lemtera/form_entri_ongoing.php";
 	}
 	// -- MODULE Training Center -- //
 	elseif ($_GET['module'] == 'training_center' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'TrainingCenter'])) {

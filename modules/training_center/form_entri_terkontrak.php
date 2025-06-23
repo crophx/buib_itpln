@@ -58,8 +58,8 @@ else { ?>
                                 <select name="kategori_tc" class="form-control select2-single" autocomplete="off" required>
                                     <option selected disabled value="">-- Pilih Kategori --</option>
                                     <?php
-                                    // Query untuk mengambil data kategori dari tbl_kategori_tc
-                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_kategori FROM tbl_kategori_tc ORDER BY nama_kategori ASC") 
+                                    // Query untuk mengambil data kategori dari tbl_kategori
+                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_kategori FROM tbl_kategori ORDER BY nama_kategori ASC") 
                                                     or die('Error pada query kategori: '. mysqli_error($mysqli));
                                     
                                     while ($data_kategori = mysqli_fetch_assoc($query_kategori)) {

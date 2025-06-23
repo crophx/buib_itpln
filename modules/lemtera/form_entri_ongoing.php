@@ -16,7 +16,7 @@ else { ?>
                 <ul class="breadcrumbs">
                     <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
-                    <li class="nav-item"><a href="?module=training_center">Data Ongoing</a></li>
+                    <li class="nav-item"><a href="?module=lemtera">Data Ongoing</a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
                     <li class="nav-item"><a>Entri</a></li>
                 </ul>
@@ -34,14 +34,14 @@ else { ?>
                     </div>
                     <!-- button kembali -->
                     <div class="button-container">
-                        <a href="?module=training_center" class="btn btn-secondary btn-round">
+                        <a href="?module=lemtera" class="btn btn-secondary btn-round">
                             <span class="btn-label"><i class="fa fa-arrow-left mr-2"></i></span> Kembali
                         </a>
                     </div>
                 </div>
             </div>
             <!--Form Entri Data-->
-            <form action="modules/training_center/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form action="modules/lemtera/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-6">
@@ -54,20 +54,20 @@ else { ?>
 
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label>Kategori Training Center <span class="text-danger">*</span></label>
-                                <select name="kategori_tc" class="form-control select2-single" autocomplete="off" required>
+                                <label>Entity Lemtera<span class="text-danger">*</span></label>
+                                <select name="entity_lemtera" class="form-control select2-single" autocomplete="off" required>
                                     <option selected disabled value="">-- Pilih Kategori --</option>
                                     <?php
                                     // Query untuk mengambil data kategori dari tbl_kategori
-                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_kategori FROM tbl_kategori ORDER BY nama_kategori ASC") 
+                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_entity_lemtera FROM tbl_kategori ORDER BY nama_entity_lemtera ASC") 
                                                     or die('Error pada query kategori: '. mysqli_error($mysqli));
                                     
                                     while ($data_kategori = mysqli_fetch_assoc($query_kategori)) {
-                                        echo "<option value='".$data_kategori['id_kategori']."'>".$data_kategori['nama_kategori']."</option>";
+                                        echo "<option value='".$data_kategori['id_kategori']."'>".$data_kategori['nama_entity_lemtera']."</option>";
                                     }
                                     ?>
                                 </select>
-                                <div class="invalid-feedback">Kategori training center tidak boleh kosong.</div>
+                                <div class="invalid-feedback">Kategori Lemtera tidak boleh kosong.</div>
                             </div>
                         </div>
                     </div>
@@ -101,7 +101,7 @@ else { ?>
                         <div class="col-lg-4">
                             <div class="form-group">
                                 <label>Status <span class="text-danger">*</span></label>
-                                <select name="status_tc" class="form-control select2-single" autocomplete="off" required>
+                                <select name="status_lemtera" class="form-control select2-single" autocomplete="off" required>
                                     <option selected disabled value="">-- Pilih Status --</option>
                                     <?php
                                     // Query untuk mengambil data status dari tbl_status
@@ -123,12 +123,12 @@ else { ?>
                             <div class="form-group">
                                 <label>Keterangan Program</label>
                                 <textarea name="keterangan_program" class="form-control" rows="4" placeholder="Masukkan keterangan program (opsional)"></textarea>
-                                <small class="form-text text-muted">Keterangan tambahan mengenai program training center yang sedang berjalan</small>
+                                <small class="form-text text-muted">Keterangan tambahan mengenai program Lemtera yang sedang berjalan</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Info Box untuk menampilkan informasi ongoing -->
+                    <!-- Info Box untuk menampilkan informasi preview ongoing -->
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="alert alert-warning" id="ongoing-info" style="display: none;">
@@ -155,7 +155,7 @@ else { ?>
                     <!-- button reset form -->
                     <input type="reset" value="Reset" class="btn btn-warning btn-round pl-4 pr-4 mr-2">
                     <!-- button kembali ke halaman tampil data -->
-                    <a href="?module=training_center" class="btn btn-default btn-round pl-4 pr-4">Batal</a>
+                    <a href="?module=lemtera" class="btn btn-default btn-round pl-4 pr-4">Batal</a>
                 </div>
             </form>
         </div>
