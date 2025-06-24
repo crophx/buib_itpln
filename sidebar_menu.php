@@ -19,7 +19,7 @@ else {
 					<p>Beranda</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu beranda tidak aktif
 		else { ?>
@@ -29,7 +29,7 @@ else {
 					<p>Beranda</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu arsip dokumen (tampil data / tampil detail / form entri / form ubah) dipilih, menu arsip dokumen aktif
@@ -47,7 +47,7 @@ else {
 					<p>Arsip Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu arsip dokumen tidak aktif
 		else { ?>
@@ -64,7 +64,7 @@ else {
 					<p>Arsip Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu jenis dokumen (tampil data / form entri / form ubah) dipilih, menu jenis dokumen aktif
@@ -75,7 +75,7 @@ else {
 					<p>Jenis Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu jenis dokumen tidak aktif
 		else { ?>
@@ -85,9 +85,9 @@ else {
 					<p>Jenis Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
-		
+
 		// jika menu pengajuan surat dipilih, menu profil instansi aktif
 		if ($_GET['module'] == 'pengajuan_surat') { ?>
 			<li class="nav-section">
@@ -115,7 +115,7 @@ else {
 					<p>Riwayat Pengajuan</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu profil instansi tidak aktif
 		else { ?>
@@ -144,7 +144,7 @@ else {
 					<p>Riwayat Pengajuan</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu profil instansi (tampil data / form ubah) dipilih, menu profil instansi aktif
@@ -162,7 +162,7 @@ else {
 					<p>Profil Instansi</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu profil instansi tidak aktif
 		else { ?>
@@ -179,7 +179,7 @@ else {
 					<p>Profil Instansi</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu pengguna aplikasi (tampil data / form entri / form ubah) dipilih, menu pengguna aplikasi aktif
@@ -190,7 +190,7 @@ else {
 					<p>Pengguna Aplikasi</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu pengguna aplikasi tidak aktif
 		else { ?>
@@ -200,7 +200,7 @@ else {
 					<p>Pengguna Aplikasi</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu tentang aplikasi dipilih, menu tentang aplikasi aktif
@@ -218,7 +218,7 @@ else {
 					<p>Tentang Aplikasi</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu tentang aplikasi tidak aktif
 		else { ?>
@@ -235,11 +235,11 @@ else {
 					<p>Tentang Aplikasi</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 	}
-	// jika hak akses = BUIB, tampilkan menu
-	elseif (in_array($_SESSION['hak_akses'], haystack: ['BKI', 'BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA'])) {
+	// jika hak akses = BKS, TraiingCenter, PusatBisnis, Lemtera, tampilkan menu
+	elseif (in_array($_SESSION['hak_akses'], haystack: ['BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
@@ -249,7 +249,7 @@ else {
 					<p>Beranda</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu beranda tidak aktif
 		else { ?>
@@ -259,7 +259,7 @@ else {
 					<p>Beranda</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu arsip dokumen (tampil data / tampil detail / form entri / form ubah) dipilih, menu arsip dokumen aktif
@@ -277,7 +277,7 @@ else {
 					<p>Arsip Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu arsip dokumen tidak aktif
 		else { ?>
@@ -294,7 +294,7 @@ else {
 					<p>Arsip Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu jenis dokumen (tampil data / form entri / form ubah) dipilih, menu jenis dokumen aktif
@@ -305,7 +305,7 @@ else {
 					<p>Jenis Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu jenis dokumen tidak aktif
 		else { ?>
@@ -315,7 +315,7 @@ else {
 					<p>Jenis Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu pengajuan surat dipilih, menu profil instansi aktif
@@ -333,7 +333,7 @@ else {
 					<p>Pengajuan Surat</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu profil instansi tidak aktif
 		else { ?>
@@ -350,7 +350,143 @@ else {
 					<p>Pengajuan Surat</p>
 				</a>
 			</li>
-		<?php
+			<?php
+		}
+	}
+	// jika hak akses = BKS, TraiingCenter, PusatBisnis, Lemtera, tampilkan menu
+	elseif (in_array($_SESSION['hak_akses'], ['BKI'])) {
+		// pengecekan menu aktif
+		// jika menu beranda dipilih, menu beranda aktif
+		if ($_GET['module'] == 'beranda') { ?>
+			<li class="nav-item active">
+				<a href="?module=beranda">
+					<i class="fas fa-home"></i>
+					<p>Beranda</p>
+				</a>
+			</li>
+			<?php
+		}
+		// jika tidak dipilih, menu beranda tidak aktif
+		else { ?>
+			<li class="nav-item">
+				<a href="?module=beranda">
+					<i class="fas fa-home"></i>
+					<p>Beranda</p>
+				</a>
+			</li>
+			<?php
+		}
+
+		// jika menu Data dokumen BKI (tampil data / tampil detail / form entri / form ubah) dipilih, menu arsip dokumen aktif
+		if ($_GET['module'] == 'bki' || $_GET['module'] == 'tampil_detail_arsip' || $_GET['module'] == 'form_entri_arsip' || $_GET['module'] == 'form_ubah_arsip') { ?>
+			<li class="nav-section">
+				<span class="sidebar-mini-icon">
+					<i class="fa fa-ellipsis-h"></i>
+				</span>
+				<h4 class="text-section">Dokumen BKI</h4>
+			</li>
+
+			<li class="nav-item active">
+				<a href="?module=bki">
+					<i class="fas fa-folder-open"></i>
+					<p>Data Dokumen</p>
+				</a>
+			</li>
+			<?php
+		}
+		// jika tidak dipilih, menu arsip dokumen tidak aktif
+		else { ?>
+			<li class="nav-section">
+				<span class="sidebar-mini-icon">
+					<i class="fa fa-ellipsis-h"></i>
+				</span>
+				<h4 class="text-section">Dokumen BKI</h4>
+			</li>
+
+			<li class="nav-item">
+				<a href="?module=bki">
+					<i class="fas fa-folder-open"></i>
+					<p>Data Dokumen</p>
+				</a>
+			</li>
+			<?php
+		}
+
+		// jika menu jenis dokumen (tampil data / form entri / form ubah) dipilih, menu jenis dokumen aktif
+		if ($_GET['module'] == 'jenis_dokumen_bki' || $_GET['module'] == 'form_entri_jenis' || $_GET['module'] == 'form_ubah_jenis') { ?>
+			<li class="nav-item active">
+				<a href="?module=jenis_dokumen_bki">
+					<i class="fas fa-clone"></i>
+					<p>Jenis Dokumen</p>
+				</a>
+			</li>
+			<?php
+		}
+		// jika tidak dipilih, menu jenis dokumen tidak aktif
+		else { ?>
+			<li class="nav-item">
+				<a href="?module=jenis_dokumen_bki">
+					<i class="fas fa-clone"></i>
+					<p>Jenis Dokumen</p>
+				</a>
+			</li>
+			<?php
+		}
+
+		// jika menu mitra_bki dipilih, menu beranda aktif
+		if ($_GET['module'] == 'mitra_bki') { ?>
+			<li class="nav-item active">
+				<a href="?module=mitra_bki">
+					<i class="fas fa-home"></i>
+					<p>Mitra Internasional</p>
+				</a>
+			</li>
+			<?php
+		}
+		// jika tidak dipilih, menu mitra_bki tidak aktif
+		else { ?>
+			<li class="nav-item">
+				<a href="?module=mitra_bki">
+					<i class="fas fa-clone"></i>
+					<p>Mitra Internasional</p>
+				</a>
+			</li>
+			<?php
+		}
+
+		// jika menu pengajuan surat dipilih, menu profil instansi aktif
+		if ($_GET['module'] == 'pengajuan_surat') { ?>
+			<li class="nav-section">
+				<span class="sidebar-mini-icon">
+					<i class="fa fa-ellipsis-h"></i>
+				</span>
+				<h4 class="text-section">Surat</h4>
+			</li>
+
+			<li class="nav-item active">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-window-restore"></i>
+					<p>Pengajuan Surat</p>
+				</a>
+			</li>
+			<?php
+		}
+		// jika tidak dipilih, menu profil instansi tidak aktif
+		else { ?>
+			<li class="nav-section">
+				<span class="sidebar-mini-icon">
+					<i class="fa fa-ellipsis-h"></i>
+				</span>
+				<h4 class="text-section">Surat</h4>
+			</li>
+
+			<li class="nav-item">
+				<a href="?module=pengajuan_surat">
+					<i class="fas fa-window-restore"></i>
+					<p>Pengajuan Surat</p>
+				</a>
+			</li>
+			<?php
 		}
 	}
 	// jika hak akses = user, tampilkan menu
@@ -364,7 +500,7 @@ else {
 					<p>Beranda</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu beranda tidak aktif
 		else { ?>
@@ -374,7 +510,7 @@ else {
 					<p>Beranda</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 		// jika menu arsip dokumen (tampil data / tampil detail) dipilih, menu arsip dokumen aktif
@@ -392,7 +528,7 @@ else {
 					<p>Arsip Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 		// jika tidak dipilih, menu arsip dokumen tidak aktif
 		else { ?>
@@ -409,7 +545,7 @@ else {
 					<p>Arsip Dokumen</p>
 				</a>
 			</li>
-		<?php
+			<?php
 		}
 
 	}
