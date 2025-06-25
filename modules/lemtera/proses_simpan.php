@@ -193,7 +193,7 @@ else {
         $tgl_input_mysql = convertDateFormat($tgl_surat);
 
         // Validasi input wajib
-        if (empty($nama_program) || empty($ongoing_nominal) || 
+        if (empty($nama_program) || empty($entity_lemtera) || empty($ongoing_nominal) || 
             empty($tgl_input_mysql) || empty($status_lemtera) || empty($keterangan_program)) {
             header('location: ../../main.php?module=lemtera&pesan=7');
             exit();
@@ -263,30 +263,28 @@ else {
         
         // Ambil data dari form rencana kegiatan
         $nama_program    = mysqli_real_escape_string($mysqli, $_POST['nama_program']);
-        $kegiatan       = mysqli_real_escape_string($mysqli, $_POST['kegiatan']);
+        $entity_lemtera       = mysqli_real_escape_string($mysqli, $_POST['entity_lemtera']);
         $target_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['target_nominal'])));
-        $bulan          = mysqli_real_escape_string($mysqli, $_POST['bulan']);
-        $tahun          = mysqli_real_escape_string($mysqli, $_POST['tahun']);
-        $tgl_input      = mysqli_real_escape_string($mysqli, $_POST['tgl_input']);
+        $tgl_surat      = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
+        $status_lemtera      = mysqli_real_escape_string($mysqli, $_POST['status_lemtera']);
+        $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
-        $tgl_input_mysql = convertDateFormat($tgl_input);
+        $tgl_input_mysql = convertDateFormat($tgl_surat);
 
         // Validasi input wajib
-        if (empty($nama_program) || empty($kegiatan) || empty($target_nominal) || 
-            empty($bulan) || empty($tahun) || empty($tgl_input)) {
+        if (empty($nama_program) || empty($entity_lemtera) || empty($target_nominal) || 
+            empty($tgl_input_mysql) || empty($status_lemtera) || empty($keterangan_program)) {
             header('location: ../../main.php?module=lemtera&pesan=7');
             exit();
         }
 
-        // Validasi bahwa target nominal adalah angka
+        // Validasi bahwa target ongoing adalah angka
         if (!is_numeric($target_nominal) || $target_nominal <= 0) {
             header('location: ../../main.php?module=lemtera&pesan=8');
             exit();
         }
 
-        // Buat keterangan program
-        $keterangan_program = $kegiatan;
 
         // Cek apakah data sudah ada
         $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_lemtera 
@@ -299,7 +297,7 @@ else {
             exit();
         }
 
-        // Insert data rencana kegiatan
+        // Insert data simpan onoging
         $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_lemtera (
                                             nama_program,
                                             keterangan_program, 
@@ -315,22 +313,23 @@ else {
                                         ) VALUES (
                                             '$nama_program',
                                             '$keterangan_program', 
+                                            '$target_nominal', 
                                             0, 
-                                            '$realisasi_nominal', 
                                             '$tgl_input_mysql',
-                                            1,
+                                            '$entity_lemtera',
                                             0,
                                             0,
                                             0,
                                             '',
-                                            1
+                                            '$status_lemtera'
                                         )")
-                                        or die('Ada kesalahan pada query insert realisasi: ' . mysqli_error($mysqli));
+                                        or die('Ada kesalahan pada query insert rencana: ' . mysqli_error($mysqli));
 
+        // Jika insert berhasil, arahkan ke halaman utama dengan pesan sukses
         if ($insert) {
             header('location: ../../main.php?module=lemtera&pesan=1');
         } else {
-            header('location: ../../main.php?module=lemtera&pesan=3');
+            header('location: ../../main.php?module=lemtera&pesan=2');
         }
     }
     

@@ -58,12 +58,12 @@ else { ?>
                                 <select name="entity_lemtera" class="form-control select2-single" autocomplete="off" required>
                                     <option selected disabled value="">-- Pilih Kategori --</option>
                                     <?php
-                                    // Query untuk mengambil data kategori dari tbl_kategori
-                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_entity_lemtera FROM tbl_kategori ORDER BY nama_entity_lemtera ASC") 
+                                    // Query untuk mengambil data kategori dari tbl_entity_lemtera
+                                    $query_kategori = mysqli_query($mysqli, "SELECT id_entity, nama_entity_lemtera FROM tbl_entity_lemtera ORDER BY nama_entity_lemtera ASC") 
                                                     or die('Error pada query kategori: '. mysqli_error($mysqli));
                                     
                                     while ($data_kategori = mysqli_fetch_assoc($query_kategori)) {
-                                        echo "<option value='".$data_kategori['id_kategori']."'>".$data_kategori['nama_entity_lemtera']."</option>";
+                                        echo "<option value='".$data_kategori['id_entity']."'>".$data_kategori['nama_entity_lemtera']."</option>";
                                     }
                                     ?>
                                 </select>

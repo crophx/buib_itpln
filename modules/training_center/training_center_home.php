@@ -171,7 +171,7 @@ $months_data = [];
 							<li class="separator"><i class="flaticon-right-arrow"></i></li>
 							<li class="nav-item"><a href="?module=beranda">Beranda</a></li>
 							<li class="separator"><i class="flaticon-right-arrow"></i></li>
-							<li class="nav-item"><a>Data RK training_center</a></li>
+							<li class="nav-item"><a>Data Training Center</a></li>
 						</ul>
 					</div>
 				</div>
@@ -221,9 +221,9 @@ $months_data = [];
                                 </select>
                             </div>
                             <div class="col-md-3 text-right">
-                                <button class="btn btn-primary" onclick="refreshData()">
-                                    <i class="fas fa-sync-alt mr-2"></i>Refresh Data
-                                </button>
+                                <a href="?module=kategori_peserta" class="btn btn-primary">
+                                    <span class="btn-label"></span>Kategori Peserta
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -366,7 +366,7 @@ $months_data = [];
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="fas fa-chart-bar mr-2"></i>Realisasi per Keterangan Program
+                            <i class="fas fa-chart-bar mr-2"></i>Realisasi per Kategori Peserta
                         </div>
                     </div>
                     <div class="card-body">
@@ -378,7 +378,7 @@ $months_data = [];
 
         <!-- Tables Section Data Realisasi --->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="card-title">
                     <i class="fas fa-table mr-2"></i>Detail Data Realisasi
                 </div>
@@ -647,7 +647,7 @@ $months_data = [];
 
         <!-- Tables Section Data TERKONTRAK --->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="card-title">
                     <i class="fas fa-table mr-2"></i>Detail Data Terkontrak
                 </div>
@@ -941,7 +941,7 @@ $months_data = [];
         <!-- Tables Section Data OnGoing --->
         
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="card-title">
                     <i class="fas fa-table mr-2"></i>Detail Data On-Going
                 </div>
@@ -1259,7 +1259,7 @@ $months_data = [];
         
         <!-- Tables Section RENCANA KEGIATAN --->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="card-title">
                     <i class="fas fa-table mr-2"></i>Rencana Kegiatan 2025
                 </div>
@@ -1674,16 +1674,21 @@ $months_data = [];
 
         const totalTarget = <?php echo $total_target_calc; ?>;
         const totalRealisasi = <?php echo $total_realisasi_calc; ?>;
-        const sisaTarget = totalTarget - totalRealisasi;
+        const totalKontrak = <?php echo $total_kontrak_calc; ?>;
+        const totalOngoing = <?php echo $total_ongoing_calc; ?>;
+
+        // Hitung sisa target setelah mempertimbangkan realisasi, kontrak, dan ongoing
+        const totalProgress = totalRealisasi + totalKontrak + totalOngoing;
+        const sisaTarget = totalTarget - totalProgress > 0 ? totalTarget - totalProgress : 0;
 
         doughnutChart = new Chart(doughnutCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Tercapai', 'Belum Tercapai'],
+                labels: ['Realisasi', 'Kontrak', 'Ongoing', 'Sisa Target'],
                 datasets: [{
-                    data: [totalRealisasi, sisaTarget > 0 ? sisaTarget : 0],
-                    backgroundColor: ['#4BC0C0', '#FFE0E0'],
-                    borderColor: ['#36A2EB', '#FF6384'],
+                    data: [totalRealisasi, totalKontrak, totalOngoing, sisaTarget],
+                    backgroundColor: ['#4BC0C0', '#36A2EB', '#FFCE56', '#FFE0E0'],
+                    borderColor: ['#36A2EB', '#FF6384', '#FF9F40', '#FF6384'],
                     borderWidth: 2
                 }]
             },
@@ -1693,7 +1698,7 @@ $months_data = [];
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Progress Target vs Realisasi'
+                        text: 'Progress Target vs Realisasi, Kontrak, dan Ongoing'
                     },
                     legend: {
                         position: 'bottom'
@@ -1701,8 +1706,10 @@ $months_data = [];
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const percentage = totalTarget > 0 ? ((context.parsed / totalTarget) * 100).toFixed(1) : 0;
-                                return context.label + ': Rp ' + context.parsed.toLocaleString('id-ID') + ' (' + percentage + '%)';
+                                const total = totalTarget;
+                                const value = context.parsed;
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return context.label + ': Rp ' + value.toLocaleString('id-ID') + ' (' + percentage + '%)';
                             }
                         }
                     }
@@ -1912,12 +1919,6 @@ $months_data = [];
     function updateCharts() {
         console.log('Updating all charts...');
         initializeCharts();
-    }
-
-    // Function untuk refresh data
-    function refreshData() {
-        console.log('Refreshing page...');
-        location.reload();
     }
 
     // Initialize semua saat DOM ready
