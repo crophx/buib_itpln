@@ -30,16 +30,19 @@ else {
 					</div>
 					<div class="ml-md-auto py-2 py-md-0">
 						<!-- button tambahkan jenis -->
-						<a href="#" class="btn btn-success btn-round" data-toggle="modal" data-target="#modalTambah" data-tooltip="tooltip" data-placement="top" title="Tambah">
+						<a href="#" class="btn btn-success btn-round" data-toggle="modal" data-target="#modalTambah"
+							data-tooltip="tooltip" data-placement="top" title="Tambah">
 							<i class="fa fa-plus mr-2 text-regular"> Tambahkan Data Baru</i>
 						</a>
 						<!-- modal tambahkan jenis -->
-						<div class="modal fade" id="modalTambah" tabindex="-1" role="dialog" aria-labelledby="modalEditLabel" aria-hidden="true">
+						<div class="modal fade" id="modalTambah" tabindex="-1" role="dialog" aria-labelledby="modalEditLabel"
+							aria-hidden="true">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<form action="modules/bki/jenis_dokumen_bki/proses_simpan.php" method="post">
 										<div class="modal-header">
-											<h5 class="modal-title" id="modalUbahLabel"><i class="fas fa-pencil-alt mr-2"></i> Tambahkan Jenis Dokumen</h5>
+											<h5 class="modal-title" id="modalUbahLabel"><i class="fas fa-pencil-alt mr-2"></i>
+												Tambahkan Jenis Dokumen</h5>
 										</div>
 										<div class="modal-body">
 											<input type="hidden" name="id" value="">
@@ -61,8 +64,10 @@ else {
 										</div>
 										<!-- Button Footer -->
 										<div class="modal-footer">
-											<button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-											<input type="submit" name="simpan" value="Simpan Perubahan" class="btn btn-success btn-round">
+											<button type="button" class="btn btn-default btn-round"
+												data-dismiss="modal">Batal</button>
+											<input type="submit" name="simpan" value="Simpan Perubahan"
+												class="btn btn-success btn-round">
 										</div>
 									</form>
 								</div>
@@ -98,9 +103,9 @@ else {
 								$no = 1;
 								// sql statement untuk menampilkan data dari tabel "tbl_jenis_dokumen_bki"
 								$query = mysqli_query($mysqli, "SELECT * FROM tbl_jenis_dokumen_bki;")
-								or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+									or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
 								// ambil data hasil query
-								while ($data = mysqli_fetch_assoc($query)) { 
+								while ($data = mysqli_fetch_assoc($query)) {
 									?>
 									<!-- tampilkan data -->
 									<tr>
@@ -111,42 +116,54 @@ else {
 										<td width="80" class="text-center">
 											<div>
 												<!-- Button Ubah -->
-												<a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1" data-toggle="modal" data-target="#modalUbah<?php echo $data['id']; ?>" data-tooltip="tooltip" data-placement="top" title="Ubah">
+												<a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1"
+													data-toggle="modal" data-target="#modalUbah<?php echo $data['id']; ?>"
+													data-tooltip="tooltip" data-placement="top" title="Ubah">
 													<i class="fas fa-pencil-alt fa-sm"></i>
 												</a>
 												<!-- modalUbah -->
-												<div class="modal fade" id="modalUbah<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUbahLabel" aria-hidden="true">
+												<div class="modal fade" id="modalUbah<?php echo $data['id']; ?>" tabindex="-1"
+													role="dialog" aria-labelledby="modalUbahLabel" aria-hidden="true">
 													<div class="modal-dialog" role="document">
 														<div class="modal-content">
-															<form action="modules/bki/jenis_dokumen_bki/proses_ubah.php" method="post">
+															<form action="modules/bki/jenis_dokumen_bki/proses_ubah.php"
+																method="post">
 																<div class="modal-header">
-																	<h5 class="modal-title" id="modalUbahLabel"><i class="fas fa-pencil-alt mr-2"></i> Ubah Jenis Dokumen</h5>
+																	<h5 class="modal-title" id="modalUbahLabel"><i
+																			class="fas fa-pencil-alt mr-2"></i> Ubah Jenis Dokumen
+																	</h5>
 																</div>
 																<div class="modal-body">
-																	<input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+																	<input type="hidden" name="id"
+																		value="<?php echo $data['id']; ?>">
 																	<!-- Form Jenis/Nama Dokumen -->
 																	<div class="form-group">
 																		<label>Jenis Dokumen</label>
-																		<input type="text" name="nama_dokumen" class="form-control" value="<?php echo htmlspecialchars($data['nama_dokumen']); ?>">
+																		<input type="text" name="nama_dokumen" class="form-control"
+																			value="<?php echo htmlspecialchars($data['nama_dokumen']); ?>">
 																	</div>
-																	
+
 																	<!-- bagian Ubah Kode Singkat -->
 																	<div class="form-group">
 																		<label>Kode Singkat</label>
-																		<input type="text" name="kode_singkat" class="form-control" value="<?php echo htmlspecialchars($data['kode_singkat']); ?>">
+																		<input type="text" name="kode_singkat" class="form-control"
+																			value="<?php echo htmlspecialchars($data['kode_singkat']); ?>">
 																	</div>
 
 																	<!-- bagian Ubah Kode Singkat -->
 																	<div class="form-group">
 																		<label>Keterangan</label>
-																		<input type="text" name="keterangan" class="form-control" value="<?php echo htmlspecialchars($data['keterangan']); ?>">
+																		<input type="text" name="keterangan" class="form-control"
+																			value="<?php echo htmlspecialchars($data['keterangan']); ?>">
 																	</div>
 																</div>
 																<!-- Button Footer -->
 																<div class="modal-footer">
-																	<button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-																	
-																	<input type="submit" name="simpan" value="Simpan Perubahan" class="btn btn-success btn-round">
+																	<button type="button" class="btn btn-default btn-round"
+																		data-dismiss="modal">Batal</button>
+
+																	<input type="submit" name="simpan" value="Simpan Perubahan"
+																		class="btn btn-success btn-round">
 																</div>
 															</form>
 														</div>
@@ -164,7 +181,7 @@ else {
 		</div>
 
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				// dapatkan parameter URL
 				let queryString = window.location.search;
 				let urlParams = new URLSearchParams(queryString);
@@ -225,7 +242,7 @@ else {
 				}
 			});
 		</script>
-	<?php
+		<?php
 	}
 	// jika hak akses = Pengguna, tampilkan konten
 	elseif ($_SESSION['hak_akses'] == 'Pengguna') { ?>
@@ -274,7 +291,7 @@ else {
 								$query = mysqli_query($mysqli, "SELECT a.id_arsip, a.jenis_dokumen, a.bulan_tahun, a.tahun_anggaran, a.dipa, b.nama_jenis 
 																FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
 																ORDER BY a.id_arsip DESC")
-																or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+									or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
 								// ambil data hasil query
 								while ($data = mysqli_fetch_assoc($query)) { ?>
 									<!-- tampilkan data -->
@@ -285,7 +302,9 @@ else {
 										<td width="80" class="text-center"><?php echo $data['tahun_anggaran']; ?></td>
 										<td width="80" class="text-center"><?php echo $data['dipa']; ?></td>
 										<td width="80" class="text-center">
-											<a href="?module=tampil_detail_arsip&id=<?php echo $data['id_arsip']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
+											<a href="?module=tampil_detail_arsip&id=<?php echo $data['id_arsip']; ?>"
+												class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip"
+												data-placement="top" title="Tampilkan Dokumen">
 												<i class="far fa-file-alt"></i>
 											</a>
 										</td>
@@ -297,7 +316,7 @@ else {
 				</div>
 			</div>
 		</div>
-<?php
+		<?php
 	}
 }
 ?>
