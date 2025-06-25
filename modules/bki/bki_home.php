@@ -406,14 +406,15 @@ LEFT JOIN tbl_mitra_bki AS m ON b.mitra_id = m.id")
 					<div class="card-title">Program Realisasi BKI</div>
 
 					<div>
+						<!-- Button tambah mitra -->
 						<a href="?module=mitra_bki" class="btn btn-warning btn-round">
 							<span class="btn-label"><i class="fas fa-users mr-2"></i></span> Mitra
 						</a>
-
+						<!-- Button tambah jenis dokumen -->
 						<a href="?module=jenis_dokumen_bki" class="btn btn-primary btn-round ml-2">
 							<span class="btn-label"><i class="fas fa-sitemap mr-2"></i></span> Jenis Dokumen
 						</a>
-
+						<!-- Button tambah dokumen -->
 						<a href="?module=form_entri_dokumen_bki" class="btn btn-success btn-round ml-2">
 							<span class="btn-label"><i class="fas fa-edit mr-2"></i></span> Entri Dokumen
 						</a>
