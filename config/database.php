@@ -1,8 +1,8 @@
 <?php
 // deklarasi parameter koneksi database
-$host     = "localhost:8889";                        // server database, default “localhost” atau “127.0.0.1”
+$host = "localhost";                        // server database, default “localhost” atau “127.0.0.1”
 $username = "root";                             // username database, default “root”
-$password = "root";                                 // password database, default kosong
+$password = "";                                 // password database, default kosong
 $database = "db_arsip_sipadu";                  // memilih database yang akan digunakan
 
 // buat koneksi database

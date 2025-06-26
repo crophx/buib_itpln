@@ -102,13 +102,13 @@ else {
 
 		// Query untuk statistik umum
 		$query_stats = mysqli_query($mysqli, "SELECT 
-    COUNT(DISTINCT m.negara) as total_negara,
-    COUNT(DISTINCT m.id) as total_mitra,
-    COUNT(b.id) as total_dokumen,
-    SUM(CASE WHEN b.link_dokumen_MoU IS NOT NULL AND b.link_dokumen_MoU != '' THEN 1 ELSE 0 END) as total_mou,
-    SUM(CASE WHEN b.link_dokumen_PKS IS NOT NULL AND b.link_dokumen_PKS != '' THEN 1 ELSE 0 END) as total_pks
-FROM tbl_bki AS b
-LEFT JOIN tbl_mitra_bki AS m ON b.mitra_id = m.id")
+			COUNT(DISTINCT m.negara) as total_negara,
+			COUNT(DISTINCT m.id) as total_mitra,
+			COUNT(b.id) as total_dokumen,
+			SUM(CASE WHEN b.link_dokumen_MoU IS NOT NULL AND b.link_dokumen_MoU != '' THEN 1 ELSE 0 END) as total_mou,
+			SUM(CASE WHEN b.link_dokumen_PKS IS NOT NULL AND b.link_dokumen_PKS != '' THEN 1 ELSE 0 END) as total_pks
+		FROM tbl_bki AS b
+		LEFT JOIN tbl_mitra_bki AS m ON b.mitra_id = m.id")
 			or die('Ada kesalahan pada query statistik: ' . mysqli_error($mysqli));
 
 		$stats = mysqli_fetch_assoc($query_stats);
@@ -464,7 +464,7 @@ LEFT JOIN tbl_mitra_bki AS m ON b.mitra_id = m.id")
                                                                 LEFT JOIN 
                                                                     tbl_mitra_bki AS m ON b.mitra_id = m.id
                                                                 LEFT JOIN 
-                                                                    tbl_jenis_dokumen_bki AS jd ON b.jenis_dokumen_id = jd.id
+                                                                    tbl_jenis_dokumen_bkI AS jd ON b.jenis_dokumen_id = jd.id
                                                                 LEFT JOIN 
                                                                     tbl_pic_bagian AS pb ON b.pic_bagian_id = pb.id
                                                                 ORDER BY 
