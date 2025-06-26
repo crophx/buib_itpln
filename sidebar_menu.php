@@ -239,7 +239,7 @@ else {
 		}
 	}
 	// jika hak akses = BKS, TraiingCenter, PusatBisnis, Lemtera, tampilkan menu
-	elseif (in_array($_SESSION['hak_akses'], haystack: ['BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA'])) {
+	elseif (in_array($_SESSION['hak_akses'], ['BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>

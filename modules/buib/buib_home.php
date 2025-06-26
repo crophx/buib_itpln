@@ -240,12 +240,12 @@ $months_data = [];
                             <div class="col-icon">
                                 <div class="icon-big icon-success bubble-shadow-small">
                                     <i class="fas fa-bullseye"></i>
-                                </div> 
+                                </div>
                             </div>
                             <div class="col">
                                 <div class="numbers">
                                     <p class="card-category mb-1">Total Target</p>
-                                    <h4 class="card-title mb-0">Rp <?php echo number_format($total_target_calc, 0, ',', '.'); ?></h4>
+                                    <h4 class="card-title mb-0" id="totalTarget">Rp <?php echo number_format($total_target_calc, 0, ',', '.'); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -265,7 +265,7 @@ $months_data = [];
                             <div class="col">
                                 <div class="numbers">
                                     <p class="card-category text-muted mb-1">Total Realisasi</p>
-                                    <h4 class="card-title mb-0">Rp <?php echo number_format($total_realisasi_calc, 0, ',', '.'); ?></h4>
+                                    <h4 class="card-title mb-0" id="totalRealisasi">Rp <?php echo number_format($total_realisasi_calc, 0, ',', '.'); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -285,7 +285,7 @@ $months_data = [];
                             <div class="col">
                                 <div class="numbers">
                                     <p class="card-category text-muted mb-1">Persentase Capaian</p>
-                                    <h4 class="card-title mb-0"><?php echo $persentase_total; ?>%</h4>
+                                    <h4 class="card-title mb-0" id="persentaseCapaian"><?php echo $persentase_total; ?>%</h4>
                                 </div>
                             </div>
                         </div>
@@ -305,7 +305,7 @@ $months_data = [];
                             <div class="col">
                                 <div class="numbers">
                                     <p class="card-category text-muted mb-1">Total Dokumen RK</p>
-                                    <h4 class="card-title mb-0"><?php echo number_format($total_doc_calc, 0, ',', '.'); ?></h4>
+                                    <h4 class="card-title mb-0" id="totalDokumen"><?php echo number_format($total_doc_calc, 0, ',', '.'); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -678,9 +678,6 @@ $months_data = [];
                             <?php
                             $no1 = 1;
                             foreach ($kontrak_data as $data) {
-                                $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-                                $status = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
-                                $status_class = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
                                 
                                 ?>
                                 <tr>
@@ -697,225 +694,12 @@ $months_data = [];
                                         <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-toggle="modal" data-target="#modalUbahKontrak<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
-                                        <!-- Modal Edit Kontrak -->
-                                        <div class="modal fade" id="modalUbahKontrak<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUbahKontrakLabel<?php echo $data['id']; ?>" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <!-- Modal Header -->
-                                                    <div class="modal-header btn-success text-white">
-                                                        <h5 class="modal-title font-weight-bold" id="modalUbahKontrakLabel<?php echo $data['id']; ?>">
-                                                            <i class="fas fa-edit mr-2"></i>Edit Data Kontrak
-                                                        </h5>
-                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-
-                                                    <form action="modules/buib/proses_ubah.php" method="POST" id="formUbahKontrak<?php echo $data['id']; ?>">
-                                                        <div class="modal-body">
-                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
-                                                            
-                                                            <!-- Row 1: Program & Kategori -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <input type="text" autocomplete="off"
-                                                                            class="form-control" 
-                                                                            id="nama_program<?php echo $data['id']; ?>" 
-                                                                            name="nama_program" 
-                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
-                                                                            placeholder="Masukkan nama program"
-                                                                            required>                       
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="deputy_buib<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-tags mr-1 text-success"></i>Deputy <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <select class="form-control" 
-                                                                                id="deputy_buib<?php echo $data['id']; ?>" 
-                                                                                name="deputy_buib" 
-                                                                                required>
-                                                                            <option value="">-- Pilih Kategori --</option>
-                                                                            <?php
-                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_deputy_buib ORDER BY nama_deputy ASC");
-                                                                            while ($kategori = mysqli_fetch_array($kategori_query)) {
-                                                                                $selected = ($kategori['id_deputy'] == $data['deputy_buib']) ? 'selected' : '';
-                                                                                echo "<option value='".$kategori['id_deputy']."' ".$selected.">".$kategori['nama_deputy']."</option>";
-                                                                            }
-                                                                            ?>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Row 2: Nominal Kontrak & Tanggal -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="kontrak_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <div class="input-group">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
-                                                                            </div>
-                                                                            <input type="text" autocomplete="off"
-                                                                                class="form-control currency" 
-                                                                                id="kontrak_nominal<?php echo $data['id']; ?>" 
-                                                                                name="kontrak_nominal" 
-                                                                                value="<?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?>" 
-                                                                                placeholder="0"
-                                                                                required>
-                                                                        </div>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <input type="date" 
-                                                                            class="form-control" 
-                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
-                                                                            name="tgl_surat" 
-                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
-                                                                            required>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Row 3: Status & Realisasi pada Edit Kontrak -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="status_buib<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <select class="form-control" 
-                                                                                id="status_buib<?php echo $data['id']; ?>" 
-                                                                                name="status_buib" 
-                                                                                required>
-                                                                            <option value="">-- Pilih Status --</option>
-                                                                            <?php
-                                                                            $status_query = mysqli_query($mysqli, "SELECT * FROM tbl_status ORDER BY nama_status ASC");
-                                                                            while ($status = mysqli_fetch_array($status_query)) {
-                                                                                $selected = ($status['id_status'] == $data['status_buib']) ? 'selected' : '';
-                                                                                echo "<option value='".$status['id_status']."' ".$selected.">".$status['nama_status']."</option>";
-                                                                            }
-                                                                            ?>
-                                                                        </select>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-check-circle mr-1"></i>Update jika sudah terealisasi
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="realisasi_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-bullseye mr-1 text-primary"></i>Realisasi Nominal
-                                                                        </label>
-                                                                        <div class="input-group">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text bg-primary text-white">Rp</span>
-                                                                            </div>
-                                                                            <input type="text" 
-                                                                                class="form-control currency" 
-                                                                                id="realisasi_nominal<?php echo $data['id']; ?>" 
-                                                                                name="realisasi_nominal" 
-                                                                                value="<?php echo isset($data['realisasi_nominal']) ? number_format($data['realisasi_nominal'], 0, ',', '.') : ''; ?>" 
-                                                                                placeholder="0">
-                                                                        </div>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-lightbulb mr-1"></i>Nominal yang sudah diterima
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Row 4: Keterangan Edit Kontrak-->
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
-                                                                        </label>
-                                                                        <textarea class="form-control" 
-                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
-                                                                                name="keterangan_program" 
-                                                                                rows="3" 
-                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Data Sebelumnya -->
-                                                            <div class="alert alert-light border mt-3">
-                                                                <h6 class="mb-2">
-                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
-                                                                </h6>
-                                                                <div class="row small">
-                                                                    <div class="col-md-4">
-                                                                        <strong>Program:</strong><br>
-                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
-                                                                        <strong>Kategori:</strong><br>
-                                                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_deputy']); ?></span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <strong>Status:</strong><br>
-                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span><br><br>
-                                                                        <strong>Nominal:</strong><br>
-                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?></span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <strong>Tanggal:</strong><br>
-                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
-                                                                        <strong>Periode:</strong><br>
-                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <!-- Modal Footer -->
-                                                        <div class="modal-footer bg-light">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                                <i class="fas fa-times mr-1"></i>Batal
-                                                            </button>
-                                                            <button type="submit" class="btn btn-success" name="ubahKontrak">
-                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         <!-- Modal Hapus Kontrak-->
                                         <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusKontrak<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
-                                        <!-- Modal Hapus Kontrak-->
-                                        <div class="modal fade" id="modalHapusKontrak<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data Kontrak buib</h5>
-                                                    </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data Kontrak buib <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/buib/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -971,10 +755,6 @@ $months_data = [];
                             <?php
                             $no1 = 1;
                             foreach ($ongoing_data as $data) {
-                                $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-                                $status = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
-                                $status_class = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
-                                
                                 ?>
                                 <tr>
                                     <td width="30" class="text-center"><?php echo $no1++; ?></td>
@@ -990,251 +770,12 @@ $months_data = [];
                                         <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahOngoing<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
-                                        <!-- Form Modal Edit Ongoing -->
-                                        <div class="modal fade" id="modalUbahOngoing<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalUbahOngoingLabel<?php echo $data['id']; ?>" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <!-- Modal Header -->
-                                                    <div class="modal-header btn-success text-white">
-                                                        <h5 class="modal-title font-weight-bold" id="modalUbahOngoingLabel<?php echo $data['id']; ?>">
-                                                            <i class="fas fa-edit mr-2"></i>Edit Data On-Going
-                                                        </h5>
-                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-
-                                                    <form action="modules/buib/proses_ubah.php" method="POST" id="formUbahOngoing<?php echo $data['id']; ?>">
-                                                        <div class="modal-body">
-                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
-                                                            
-                                                            <!-- Row 1: Edit Ongoing Program & Kategori -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <input type="text" autocomplete="off"
-                                                                            class="form-control" 
-                                                                            id="nama_program<?php echo $data['id']; ?>" 
-                                                                            name="nama_program" 
-                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
-                                                                            placeholder="Masukkan nama program"
-                                                                            required>                       
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Row 1: Edit Ongoing Kategori -->
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="deputy_buib<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-tags mr-1 text-success"></i>Deputy <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <select class="form-control" 
-                                                                                id="deputy_buib<?php echo $data['id']; ?>" 
-                                                                                name="deputy_buib" 
-                                                                                required>
-                                                                            <option value="">-- Pilih Kategori --</option>
-                                                                            <?php
-                                                                            $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_deputy_buib ORDER BY nama_deputy ASC");
-                                                                            while ($kategori = mysqli_fetch_array($kategori_query)) {
-                                                                                $selected = ($kategori['id_deputy'] == $data['deputy_buib']) ? 'selected' : '';
-                                                                                echo "<option value='".$kategori['id_deputy']."' ".$selected.">".$kategori['nama_deputy']."</option>";
-                                                                            }
-                                                                            ?>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Row 2: Nominal Ongoing & Tanggal -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="ongoing_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <div class="input-group">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
-                                                                            </div>
-                                                                            <input type="text" autocomplete="off"
-                                                                                class="form-control currency" 
-                                                                                id="ongoing_nominal<?php echo $data['id']; ?>" 
-                                                                                name="ongoing_nominal" 
-                                                                                value="<?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?>" 
-                                                                                placeholder="0"
-                                                                                required>
-                                                                        </div>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                                <!--Edit Ongoing Tanggal-->
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <input type="date" 
-                                                                            class="form-control" 
-                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
-                                                                            name="tgl_surat" 
-                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
-                                                                            required>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Row 3: Kontrak Pada Edit Ongoing-->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="kontrak_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-bullseye mr-1 text-primary"></i>Kontrak Nominal
-                                                                        </label>
-                                                                        <div class="input-group">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text bg-primary text-white">Rp</span>
-                                                                            </div>
-                                                                            <input type="text" autocomplete="off"
-                                                                                class="form-control currency" 
-                                                                                id="kontrak_nominal<?php echo $data['id']; ?>" 
-                                                                                name="kontrak_nominal" 
-                                                                                value="<?php echo isset($data['kontrak_nominal']) ? number_format($data['kontrak_nominal'], 0, ',', '.') : ''; ?>" 
-                                                                                placeholder="0">
-                                                                        </div>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-lightbulb mr-1"></i>Kontrak yang sudah disepakati
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Row 3: Realisasi Pada Edit Ongoing-->
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="realisasi_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-bullseye mr-1 text-primary"></i>Realisasi Nominal
-                                                                        </label>
-                                                                        <div class="input-group">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text bg-primary text-white">Rp</span>
-                                                                            </div>
-                                                                            <input type="text" autocomplete="off"
-                                                                                class="form-control currency" 
-                                                                                id="realisasi_nominal<?php echo $data['id']; ?>" 
-                                                                                name="realisasi_nominal" 
-                                                                                value="<?php echo isset($data['realisasi_nominal']) ? number_format($data['realisasi_nominal'], 0, ',', '.') : ''; ?>" 
-                                                                                placeholder="0">
-                                                                        </div>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-lightbulb mr-1"></i>Nominal yang sudah diterima
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <!-- Edit Status OnGoing -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="status_buib<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <select class="form-control" 
-                                                                                id="status_buib<?php echo $data['id']; ?>" 
-                                                                                name="status_buib" 
-                                                                                required>
-                                                                            <option value="">-- Pilih Status --</option>
-                                                                            <?php
-                                                                            $status_query = mysqli_query($mysqli, "SELECT * FROM tbl_status ORDER BY nama_status ASC");
-                                                                            while ($status = mysqli_fetch_array($status_query)) {
-                                                                                $selected = ($status['id_status'] == $data['status_buib']) ? 'selected' : '';
-                                                                                echo "<option value='".$status['id_status']."' ".$selected.">".$status['nama_status']."</option>";
-                                                                            }
-                                                                            ?>
-                                                                        </select>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-check-circle mr-1"></i>Update jika sudah terealisasi
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Row 4: Edit Keterangan  Ongoing -->
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
-                                                                        </label>
-                                                                        <textarea class="form-control" 
-                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
-                                                                                name="keterangan_program" 
-                                                                                rows="3" 
-                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Data Ongoing Sebelumnya -->
-                                                            <div class="alert alert-light border mt-3">
-                                                                <h6 class="mb-2">
-                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
-                                                                </h6>
-                                                                <div class="row small">
-                                                                    <div class="col-md-4">
-                                                                        <strong>Program:</strong><br>
-                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
-                                                                        <strong>Kategori:</strong><br>
-                                                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_deputy']); ?></span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <strong>Status:</strong><br>
-                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span><br><br>
-                                                                        <strong>Nominal:</strong><br>
-                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?></span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <strong>Tanggal:</strong><br>
-                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
-                                                                        <strong>Periode:</strong><br>
-                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <!-- Modal Footer button simpan -->
-                                                        <div class="modal-footer bg-light">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                                <i class="fas fa-times mr-1"></i>Batal
-                                                            </button>
-                                                            <button type="submit" class="btn btn-success" name="ubahOngoing">
-                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         <!-- Modal Hapus ONgoing -->
                                         <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusOngoing<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
-                                        <div class="modal fade" id="modalHapusOngoing<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data OnGoing buib</h5>
-                                                    </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data OnGoing buib <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/buib/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -1278,7 +819,7 @@ $months_data = [];
                             <tr>
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Nama Program</th>
-                                <th class="text-center">Deputy</th>
+                                <th class="text-center">Nama Deputy</th>
                                 <th class="text-center">Target</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Aksi</th>
@@ -1288,11 +829,6 @@ $months_data = [];
                             <?php
                             $no2 = 1;
                             foreach ($target_data as $data) {
-                                $sisa_target = $data['target_nominal'] - $data['realisasi_nominal'];
-                                $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-                                $status_persentase = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
-                                $status_persentase = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
-                                
                                 ?>
                                 <tr>
                                     <td width="30" class="text-center"><?php echo $no2++; ?></td>
@@ -1309,157 +845,12 @@ $months_data = [];
                                         <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahRencana<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
                                             <i class="fas fa-pencil-alt fa-sm"></i>
                                         </a>
-                                        <!-- Form Modal Edit Rencana -->
-                                        <div class="modal fade" id="modalUbahRencana<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalRencanaLabel<?php echo $data['id']; ?>" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <!-- Modal Header -->
-                                                    <div class="modal-header btn-success text-white">
-                                                        <h5 class="modal-title font-weight-bold" id="modalRencanaLabel<?php echo $data['id']; ?>">
-                                                            <i class="fas fa-edit mr-2"></i>Edit Data Rencana
-                                                        </h5>
-                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-
-                                                    <form action="modules/buib/proses_ubah.php" method="POST" id="formUbahRencana<?php echo $data['id']; ?>">
-                                                        <div class="modal-body">
-                                                            <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
-                                                            
-                                                            <!-- Edit Nama Program Rencana-->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="nama_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <input type="text" autocomplete="off"
-                                                                            class="form-control" 
-                                                                            id="nama_program<?php echo $data['id']; ?>" 
-                                                                            name="nama_program" 
-                                                                            value="<?php echo htmlspecialchars($data['nama_program']); ?>" 
-                                                                            placeholder="Masukkan nama program"
-                                                                            required>                       
-                                                                    </div>
-                                                                </div>
-                                                                <!-- Edit Nominal Rencana -->
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="target_nominal<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Rencana <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <div class="input-group">
-                                                                            <div class="input-group-prepend">
-                                                                                <span class="input-group-text bg-warning text-white">Rp</span>
-                                                                            </div>
-                                                                            <input type="text" autocomplete="off"
-                                                                                class="form-control currency" 
-                                                                                id="target_nominal<?php echo $data['id']; ?>" 
-                                                                                name="target_nominal" 
-                                                                                value="<?php echo number_format($data['target_nominal'], 0, ',', '.'); ?>" 
-                                                                                placeholder="0"
-                                                                                required>
-                                                                        </div>
-                                                                        <small class="form-text text-muted">
-                                                                            <i class="fas fa-info-circle mr-1"></i>Ubah nominal rencana
-                                                                        </small>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!--Edit Tanggal Rencana -->
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="tgl_surat<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
-                                                                        </label>
-                                                                        <input type="date" 
-                                                                            class="form-control" 
-                                                                            id="tgl_surat<?php echo $data['id']; ?>" 
-                                                                            name="tgl_surat" 
-                                                                            value="<?php echo date('Y-m-d', strtotime($data['tgl_surat'])); ?>" 
-                                                                            required>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Edit Keterangan Rencana -->
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-group">
-                                                                        <label for="keterangan_program<?php echo $data['id']; ?>" class="form-label font-weight-semibold">
-                                                                            <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
-                                                                        </label>
-                                                                        <textarea class="form-control" 
-                                                                                id="keterangan_program<?php echo $data['id']; ?>" 
-                                                                                name="keterangan_program" 
-                                                                                rows="3" 
-                                                                                placeholder="Masukkan keterangan tambahan (opsional)"><?php echo isset($data['keterangan_program']) ? htmlspecialchars($data['keterangan_program']) : ''; ?></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Data Sebelumnya -->
-                                                            <div class="alert alert-light border mt-3">
-                                                                <h6 class="mb-2">
-                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
-                                                                </h6>
-                                                                <div class="row small">
-                                                                    <div class="col-md-4">
-                                                                        <strong>Program:</strong><br>
-                                                                        <?php echo htmlspecialchars($data['nama_program']); ?><br><br>
-                                                                        <strong>Status:</strong><br>
-                                                                        <span class="badge badge-success"><?php echo htmlspecialchars($data['nama_status']); ?></span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        
-                                                                        <strong>Nominal:</strong><br>
-                                                                        <span class="text-warning font-weight-bold">Rp <?php echo number_format($data['target_nominal'], 0, ',', '.'); ?></span>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <strong>Tanggal:</strong><br>
-                                                                        <?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?><br><br>
-                                                                        <strong>Periode:</strong><br>
-                                                                        <span class="badge badge-info"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <!-- Modal Footer button simpan edit rencana-->
-                                                        <div class="modal-footer bg-light">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                                <i class="fas fa-times mr-1"></i>Batal
-                                                            </button>
-                                                            <button type="submit" class="btn btn-success" name="ubahRencana">
-                                                                <i class="fas fa-save mr-1"></i>Simpan Perubahan
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         <!-- Button hapus rencana -->
                                         <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusTarget<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
                                         </a>
-                                        <!-- Modal Hapus -->
-                                        <div class="modal fade" id="modalHapusTarget<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data Rencana buib</h5>
-                                                    </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data Rencana buib<strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/buib/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -1484,6 +875,12 @@ $months_data = [];
 
     <!-- Chart.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-maskmoney/3.0.2/jquery.maskMoney.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
     <script>
     // Data untuk charts dari PHP
@@ -1491,141 +888,175 @@ $months_data = [];
     const monthlyAccumulativeData = <?php echo json_encode($monthly_accumulative); ?>;
     const programData = <?php echo json_encode($program_data); ?>;
     const kategoriData = <?php echo json_encode($kategori_data); ?>; // Data kategori baru
+    const allTableData = <?php echo json_encode($table_data); ?>;
 
     // Variabel untuk menyimpan instance chart
     let lineChart, doughnutChart, barChart, kategoriChart;
 
-    // Function untuk inisialisasi semua chart
-    function initializeCharts() {
-        console.log('Initializing all charts...');
+    function filterData(tahun, program) {
+        console.log('Filtering data for Tahun:', tahun, 'Program:', program);
         
-        // Destroy existing charts jika ada
-        if (lineChart) {
-            lineChart.destroy();
-            lineChart = null;
-        }
-        if (doughnutChart) {
-            doughnutChart.destroy();
-            doughnutChart = null;
-        }
-        if (barChart) {
-            barChart.destroy();
-            barChart = null;
+        // Filter data berdasarkan tahun dan program
+        let filteredData = allTableData;
         
+        if (tahun !== 'all') {
+            filteredData = filteredData.filter(item => {
+                const itemYear = new Date(item.tgl_surat).getFullYear().toString();
+                return itemYear === tahun;
+            });
         }
-        if (kategoriChart) {
-            kategoriChart.destroy();
-            kategoriChart = null;
+        
+        if (program !== 'all') {
+            filteredData = filteredData.filter(item => item.nama_program === program);
         }
-
-        // Panggil semua fungsi inisialisasi chart
-        try {
-            initializeLineChart();
-            initializeDoughnutChart();
-            initializeBarChart();
-            initializeKategoriChart();
-            console.log('All charts initialized successfully');
-        } catch (error) {
-            console.error('Error initializing charts:', error);
-        }
+        
+        // Hitung ulang data untuk charts
+        const filteredYearlyData = {};
+        const filteredMonthlyData = {};
+        const filteredProgramData = {};
+        const filteredKategoriData = {};
+        let totalTarget = 0, totalRealisasi = 0, totalKontrak = 0, totalOngoing = 0;
+        
+        filteredData.forEach(item => {
+            const tahun = new Date(item.tgl_surat).getFullYear().toString();
+            const bulan = new Date(item.tgl_surat).toISOString().slice(0, 7);
+            const bulanNama = new Date(item.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' });
+            
+            // Yearly data
+            if (!filteredYearlyData[tahun]) {
+                filteredYearlyData[tahun] = { target: 0, realisasi: 0 };
+            }
+            filteredYearlyData[tahun].target += parseFloat(item.target_nominal || 0);
+            filteredYearlyData[tahun].realisasi += parseFloat(item.realisasi_nominal || 0);
+            
+            // Monthly data
+            if (!filteredMonthlyData[bulan]) {
+                filteredMonthlyData[bulan] = {
+                    label: bulanNama,
+                    target: 0,
+                    realisasi: 0,
+                    kontrak: 0,
+                    ongoing: 0
+                };
+            }
+            filteredMonthlyData[bulan].target += parseFloat(item.target_nominal || 0);
+            filteredMonthlyData[bulan].realisasi += parseFloat(item.realisasi_nominal || 0);
+            filteredMonthlyData[bulan].kontrak += parseFloat(item.kontrak_nominal || 0);
+            filteredMonthlyData[bulan].ongoing += parseFloat(item.ongoing_nominal || 0);
+            
+            // Program data
+            if (!filteredProgramData[item.nama_program]) {
+                filteredProgramData[item.nama_program] = { target: 0, realisasi: 0 };
+            }
+            filteredProgramData[item.nama_program].target += parseFloat(item.target_nominal || 0);
+            filteredProgramData[item.nama_program].realisasi += parseFloat(item.realisasi_nominal || 0);
+            
+            // Kategori data
+            if (!filteredKategoriData[item.nama_deputy]) {
+                filteredKategoriData[item.nama_deputy] = { count: 0, realisasi: 0, target: 0 };
+            }
+            filteredKategoriData[item.nama_deputy].count++;
+            filteredKategoriData[item.nama_deputy].realisasi += parseFloat(item.realisasi_nominal || 0);
+            filteredKategoriData[item.nama_deputy].target += parseFloat(item.target_nominal || 0);
+            
+            // Total calculations
+            totalTarget += parseFloat(item.target_nominal || 0);
+            totalRealisasi += parseFloat(item.realisasi_nominal || 0);
+            totalKontrak += parseFloat(item.kontrak_nominal || 0);
+            totalOngoing += parseFloat(item.ongoing_nominal || 0);
+        });
+        
+        // Hitung monthly accumulative
+        const monthlyAccumulative = {};
+        let cumulativeTarget = 0, cumulativeRealisasi = 0, cumulativeKontrak = 0, cumulativeOngoing = 0;
+        const monthlyTarget = totalTarget / 12;
+        
+        Object.keys(filteredMonthlyData).sort().forEach(bulan => {
+            cumulativeTarget += monthlyTarget;
+            cumulativeRealisasi += filteredMonthlyData[bulan].realisasi;
+            cumulativeKontrak += filteredMonthlyData[bulan].realisasi + filteredMonthlyData[bulan].kontrak;
+            cumulativeOngoing += filteredMonthlyData[bulan].realisasi + filteredMonthlyData[bulan].kontrak + filteredMonthlyData[bulan].ongoing;
+            
+            monthlyAccumulative[bulan] = {
+                label: filteredMonthlyData[bulan].label,
+                target: cumulativeTarget,
+                realisasi: cumulativeRealisasi,
+                terkontrak: cumulativeKontrak,
+                ongoing: cumulativeOngoing
+            };
+        });
+        
+        return {
+            yearlyData: filteredYearlyData,
+            monthlyAccumulative: monthlyAccumulative,
+            programData: filteredProgramData,
+            kategoriData: filteredKategoriData,
+            totals: { target: totalTarget, realisasi: totalRealisasi, kontrak: totalKontrak, ongoing: totalOngoing },
+            filteredTableData: filteredData
+        };
     }
 
-    // Function untuk inisialisasi line chart
-    function initializeLineChart() {
-        console.log('Initializing line chart...');
+    // Function untuk update semua chart dan tabel
+    function updateChartsAndTables() {
+        const tahun = $('#filterTahun').val();
+        const program = $('#filterProgram').val();
+        const periode = $('#filterPeriode').val();
         
-        // Validasi data
-        if (!monthlyAccumulativeData || Object.keys(monthlyAccumulativeData).length === 0) {
-            console.error('Data monthlyAccumulativeData kosong atau tidak tersedia');
-            return;
-        }
+        console.log('Updating charts, tables, and summary cards with filters:', { tahun, program, periode });
+        
+        const filteredData = filterData(tahun, program);
+        
+        // Update summary cards
+        const totalTarget = filteredData.totals.target;
+        const totalRealisasi = filteredData.totals.realisasi;
+        const persentaseCapaian = totalTarget > 0 ? ((totalRealisasi / totalTarget) * 100).toFixed(2) : 0;
+        const totalDokumen = filteredData.filteredTableData.length;
+        
+        $('#totalTarget').text('Rp ' + totalTarget.toLocaleString('id-ID'));
+        $('#totalRealisasi').text('Rp ' + totalRealisasi.toLocaleString('id-ID'));
+        $('#persentaseCapaian').text(persentaseCapaian + '%');
+        $('#totalDokumen').text(totalDokumen.toLocaleString('id-ID'));
+        
+        // Update charts
+        updateLineChart(filteredData.monthlyAccumulative);
+        updateDoughnutChart(filteredData.totals);
+        updateBarChart(filteredData.monthlyAccumulative);
+        updateKategoriChart(filteredData.kategoriData);
+        
+        // Update tables
+        updateTables(filteredData.filteredTableData);
+    }
 
-        // Siapkan data untuk line chart dengan 4 garis
-        const months = Object.keys(monthlyAccumulativeData).sort();
-        const lineChartLabels = months.map(month => monthlyAccumulativeData[month].label);
-        const targetData = months.map(month => monthlyAccumulativeData[month].target || 0);
-        const realisasiData = months.map(month => monthlyAccumulativeData[month].realisasi || 0);
-        const terkontrakData = months.map(month => monthlyAccumulativeData[month].terkontrak || 0);
-        const ongoingData = months.map(month => monthlyAccumulativeData[month].ongoing || 0);
+    
 
-        // Cek apakah canvas element ada
-        const lineCtx = document.getElementById('lineChart');
-        if (!lineCtx) {
-            console.error('Canvas element lineChart tidak ditemukan');
-            return;
-        }
-
-        // Line Chart - 4 Garis: Target, Realisasi, Terkontrak, Ongoing
-        lineChart = new Chart(lineCtx, {
+    // Function untuk update line chart
+    function updateLineChart(monthlyAccumulative) {
+        if (lineChart) lineChart.destroy();
+        
+        const months = Object.keys(monthlyAccumulative).sort();
+        const labels = months.map(month => monthlyAccumulative[month].label);
+        const targetData = months.map(month => monthlyAccumulative[month].target || 0);
+        const realisasiData = months.map(month => monthlyAccumulative[month].realisasi || 0);
+        const terkontrakData = months.map(month => monthlyAccumulative[month].terkontrak || 0);
+        const ongoingData = months.map(month => monthlyAccumulative[month].ongoing || 0);
+        
+        lineChart = new Chart(document.getElementById('lineChart'), {
             type: 'line',
             data: {
-                labels: lineChartLabels,
+                labels: labels,
                 datasets: [
-                    {
-                        label: 'Target',
-                        data: targetData,
-                        borderColor: '#FF6384',
-                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                        tension: 0.4,
-                        fill: false,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#FF6384',
-                        pointBorderColor: '#FF6384',
-                        pointRadius: 5
-                    },
-                    {
-                        label: 'Realisasi',
-                        data: realisasiData,
-                        borderColor: '#36A2EB',
-                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                        tension: 0.4,
-                        fill: false,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#36A2EB',
-                        pointBorderColor: '#36A2EB',
-                        pointRadius: 5
-                    },
-                    {
-                        label: 'Terkontrak',
-                        data: terkontrakData,
-                        borderColor: '#FFCE56',
-                        backgroundColor: 'rgba(255, 206, 86, 0.1)',
-                        tension: 0.4,
-                        fill: false,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#FFCE56',
-                        pointBorderColor: '#FFCE56',
-                        pointRadius: 5
-                    },
-                    {
-                        label: 'Ongoing',
-                        data: ongoingData,
-                        borderColor: '#4BC0C0',
-                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                        tension: 0.4,
-                        fill: false,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#4BC0C0',
-                        pointBorderColor: '#4BC0C0',
-                        pointRadius: 5
-                    }
+                    { label: 'Target', data: targetData, borderColor: '#FF6384', tension: 0.4, fill: false },
+                    { label: 'Realisasi', data: realisasiData, borderColor: '#36A2EB', tension: 0.4, fill: false },
+                    { label: 'Terkontrak', data: terkontrakData, borderColor: '#FFCE56', tension: 0.4, fill: false },
+                    { label: 'Ongoing', data: ongoingData, borderColor: '#4BC0C0', tension: 0.4, fill: false }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Progress Kumulatif Bulanan'
-                    },
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20
-                        }
-                    },
+                    title: { display: true, text: 'Progress Kumulatif Bulanan' },
+                    legend: { position: 'top' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -1641,54 +1072,27 @@ $months_data = [];
                             callback: function(value) {
                                 return 'Rp ' + value.toLocaleString('id-ID');
                             }
-                        },
-                        grid: {
-                            color: 'rgba(0,0,0,0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: 'rgba(0,0,0,0.1)'
                         }
                     }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
                 }
             }
         });
-        
-        console.log('Line chart initialized successfully');
     }
 
-    // Function untuk inisialisasi doughnut chart
-    function initializeDoughnutChart() {
-        console.log('Initializing doughnut chart...');
+    // Function untuk update doughnut chart
+    function updateDoughnutChart(totals) {
+        if (doughnutChart) doughnutChart.destroy();
         
-        const doughnutCtx = document.getElementById('doughnutChart');
-        if (!doughnutCtx) {
-            console.error('Canvas element doughnutChart tidak ditemukan');
-            return;
-        }
-
-        const totalTarget = <?php echo $total_target_calc; ?>;
-        const totalRealisasi = <?php echo $total_realisasi_calc; ?>;
-        const totalKontrak = <?php echo $total_kontrak_calc; ?>;
-        const totalOngoing = <?php echo $total_ongoing_calc; ?>;
-
-        // Hitung sisa target setelah mempertimbangkan realisasi, kontrak, dan ongoing
-        const totalProgress = totalRealisasi + totalKontrak + totalOngoing;
-        const sisaTarget = totalTarget - totalProgress > 0 ? totalTarget - totalProgress : 0;
-
-        doughnutChart = new Chart(doughnutCtx, {
+        const totalProgress = totals.realisasi + totals.kontrak + totals.ongoing;
+        const sisaTarget = totals.target - totalProgress > 0 ? totals.target - totalProgress : 0;
+        
+        doughnutChart = new Chart(document.getElementById('doughnutChart'), {
             type: 'doughnut',
             data: {
                 labels: ['Realisasi', 'Kontrak', 'Ongoing', 'Sisa Target'],
                 datasets: [{
-                    data: [totalRealisasi, totalKontrak, totalOngoing, sisaTarget],
+                    data: [totals.realisasi, totals.kontrak, totals.ongoing, sisaTarget],
                     backgroundColor: ['#4BC0C0', '#36A2EB', '#FFCE56', '#FFE0E0'],
-                    borderColor: ['#36A2EB', '#FF6384', '#FF9F40', '#FF6384'],
                     borderWidth: 2
                 }]
             },
@@ -1696,17 +1100,12 @@ $months_data = [];
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Progress Target vs Realisasi, Kontrak, dan Ongoing'
-                    },
-                    legend: {
-                        position: 'bottom'
-                    },
+                    title: { display: true, text: 'Progress Target vs Realisasi, Kontrak, dan Ongoing' },
+                    legend: { position: 'bottom' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const total = totalTarget;
+                                const total = totals.target;
                                 const value = context.parsed;
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                                 return context.label + ': Rp ' + value.toLocaleString('id-ID') + ' (' + percentage + '%)';
@@ -1716,146 +1115,62 @@ $months_data = [];
                 }
             }
         });
-        
-        console.log('Doughnut chart initialized successfully');
     }
 
-    // Function untuk inisialisasi bar chart
-    function initializeBarChart() {
-        console.log('Initializing bar chart...');
+    // Function untuk update bar chart
+    function updateBarChart(monthlyAccumulative) {
+        if (barChart) barChart.destroy();
         
-        // Validasi data
-        if (!monthlyAccumulativeData || Object.keys(monthlyAccumulativeData).length === 0) {
-            console.error('Data monthlyAccumulativeData kosong atau tidak tersedia');
-            return;
-        }
+        const months = Object.keys(monthlyAccumulative).sort();
+        const labels = months.map(month => monthlyAccumulative[month].label);
+        const targetData = months.map(month => monthlyAccumulative[month].target || 0);
+        const realisasiData = months.map(month => monthlyAccumulative[month].realisasi || 0);
         
-        const months = Object.keys(monthlyAccumulativeData).sort();
-        const monthlyLabels = months.map(month => monthlyAccumulativeData[month].label);
-        const monthlyTargetData = months.map(month => monthlyAccumulativeData[month].target || 0);
-        const monthlyRealisasiData = months.map(month => monthlyAccumulativeData[month].realisasi || 0);
-        
-        const barCtx = document.getElementById('barChart');
-        if (!barCtx) {
-            console.error('Canvas element barChart tidak ditemukan');
-            return;
-        }
-        
-        barChart = new Chart(barCtx, {
+        barChart = new Chart(document.getElementById('barChart'), {
             type: 'bar',
             data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: 'Target Kumulatif',
-                    data: monthlyTargetData,
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                    borderColor: '#FF6384',
-                    borderWidth: 1
-                }, {
-                    label: 'Realisasi Kumulatif',
-                    data: monthlyRealisasiData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    borderColor: '#36A2EB',
-                    borderWidth: 1
-                }]
+                labels: labels,
+                datasets: [
+                    { label: 'Target Kumulatif', data: targetData, backgroundColor: 'rgba(255, 99, 132, 0.7)' },
+                    { label: 'Realisasi Kumulatif', data: realisasiData, backgroundColor: 'rgba(54, 162, 235, 0.7)' }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Target vs Realisasi Kumulatif Bulanan'
-                    },
-                    legend: {  
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
-                            }
-                        }
-                    }
+                    title: { display: true, text: 'Target vs Realisasi Kumulatif Bulanan' },
+                    legend: { position: 'top' }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Nominal (Rupiah)'
-                        },
                         ticks: {
                             callback: function(value) {
                                 return 'Rp ' + value.toLocaleString('id-ID');
                             }
                         }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Bulan'
-                        },
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 0
-                        }
                     }
                 }
             }
         });
-        
-        console.log('Bar chart initialized successfully');
     }
 
-    
-
-    // Function untuk initialize pie chart kategori
-    function initializeKategoriChart() {
-        console.log('Initializing kategori chart...');
-        console.log('kategoriData:', kategoriData);
+    // Function untuk update kategori chart
+    function updateKategoriChart(kategoriData) {
+        if (kategoriChart) kategoriChart.destroy();
         
-        // Validasi data
-        if (!kategoriData || Object.keys(kategoriData).length === 0) {
-            console.error('Data kategoriData kosong atau tidak tersedia');
-            return;
-        }
+        const labels = Object.keys(kategoriData);
+        const countData = labels.map(kategori => kategoriData[kategori].count || 0);
+        const colors = generateColors(labels.length);
         
-        const kategoriCtx = document.getElementById('kategoriChart');
-        if (!kategoriCtx) {
-            console.error('Canvas element kategoriChart tidak ditemukan');
-            return;
-        }
-        
-        // Pastikan kita mendapatkan context 2D
-        const ctx = kategoriCtx.getContext('2d');
-        if (!ctx) {
-            console.error('Tidak dapat mendapatkan 2D context dari kategoriChart');
-            return;
-        }
-        
-        // Siapkan data untuk pie chart berdasarkan jumlah count
-        const kategoriLabels = Object.keys(kategoriData);
-        const kategoriCountData = kategoriLabels.map(kategori => {
-            const value = kategoriData[kategori].count || 0;
-            console.log(`Kategori: ${kategori}, Count: ${value}`);
-            return value;
-        });
-        
-        console.log('Kategori Labels:', kategoriLabels);
-        console.log('Kategori Count Data:', kategoriCountData);
-        
-        // Generate warna untuk setiap kategori
-        const colors = generateColors(kategoriLabels.length);
-        
-        // Buat chart dengan konfigurasi yang lebih sederhana
-        kategoriChart = new Chart(ctx, {
+        kategoriChart = new Chart(document.getElementById('kategoriChart'), {
             type: 'pie',
             data: {
-                labels: kategoriLabels,
+                labels: labels,
                 datasets: [{
                     label: 'Jumlah per Kategori',
-                    data: kategoriCountData,
+                    data: countData,
                     backgroundColor: colors.background,
                     borderColor: colors.border,
                     borderWidth: 2
@@ -1865,17 +1180,8 @@ $months_data = [];
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Distribusi Kategori buib'
-                    },
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 10
-                        }
-                    },
+                    title: { display: true, text: 'Distribusi Kategori BUIB' },
+                    legend: { position: 'bottom' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -1888,16 +1194,420 @@ $months_data = [];
                 }
             }
         });
+    }
+
+
+    //TAMPIL DATA TABEL REALISASI, TABEL KONTRAK, TABEL ONGOING, TABEL RENCANA
+    // Function untuk update semua tabel
+    function updateTables(filteredData) {
+        // Update Realisasi table
+        const realisasiTable = $('#RealisasiDataTable').DataTable();
+        realisasiTable.clear();
+        let totalRealisasi = 0;
+        filteredData.filter(d => d.realisasi_nominal > 0).forEach((data, index) => {
+            totalRealisasi += parseFloat(data.realisasi_nominal);
+            realisasiTable.row.add([
+                index + 1,
+                data.nama_program,
+                data.nama_deputy,
+                'Rp ' + parseFloat(data.realisasi_nominal).toLocaleString('id-ID'),
+                new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
+                getAksiButtons(data.id, 'realisasi')
+            ]);
+        });
+        realisasiTable.draw();
+        $('#RealisasiDataTable tfoot').html(`
+            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                <td class="text-center" colspan="3"><strong>TOTAL REALISASI</strong></td>
+                <td class="text-right" style="color: #28a745; font-size: 1.1em;">Rp ${totalRealisasi.toLocaleString('id-ID')}</td>
+                <td class="text-center">-</td>
+                <td class="text-center">-</td>
+            </tr>
+        `);
         
-        console.log('Kategori chart initialized successfully');
+        // Update Kontrak table
+        const kontrakTable = $('#kontrakDataTable').DataTable();
+        kontrakTable.clear();
+        let totalKontrak = 0;
+        filteredData.filter(d => d.kontrak_nominal > 0).forEach((data, index) => {
+            totalKontrak += parseFloat(data.kontrak_nominal);
+            kontrakTable.row.add([
+                index + 1,
+                data.nama_program,
+                data.nama_deputy,
+                new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
+                data.keterangan_program,
+                'Rp ' + parseFloat(data.kontrak_nominal).toLocaleString('id-ID'),
+                `<span class="badge badge-primary">${data.nama_status}</span>`,
+                getAksiButtons(data.id, 'kontrak')
+            ]);
+        });
+        kontrakTable.draw();
+        $('#kontrakDataTable tfoot').html(`
+            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                <td class="text-center" colspan="5"><strong>TOTAL KONTRAK</strong></td>
+                <td class="text-right" style="color: #28a745; font-size: 1.1em;">Rp ${totalKontrak.toLocaleString('id-ID')}</td>
+                <td class="text-center">-</td>
+                <td class="text-center">-</td>
+            </tr>
+        `);
+        
+        // Update Ongoing table
+        const ongoingTable = $('#OngoingDataTable').DataTable();
+        ongoingTable.clear();
+        let totalOngoing = 0;
+        filteredData.filter(d => d.ongoing_nominal > 0).forEach((data, index) => {
+            totalOngoing += parseFloat(data.ongoing_nominal);
+            ongoingTable.row.add([
+                index + 1,
+                data.nama_program,
+                data.keterangan_program,
+                new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
+                'Rp ' + parseFloat(data.ongoing_nominal).toLocaleString('id-ID'),
+                `<span class="badge badge-danger">${data.nama_status}</span>`,
+                getAksiButtons(data.id, 'ongoing')
+            ]);
+        });
+        ongoingTable.draw();
+        $('#OngoingDataTable tfoot').html(`
+            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                <td class="text-center" colspan="4"><strong>TOTAL ONGOING</strong></td>
+                <td class="text-right" style="color: #28a745; font-size: 1.1em;">Rp ${totalOngoing.toLocaleString('id-ID')}</td>
+                <td class="text-center">-</td>
+                <td class="text-center">-</td>
+            </tr>
+        `);
+        
+        // Update Target table
+        const targetTable = $('#targetDataTable').DataTable();
+        targetTable.clear();
+        let totalTarget = 0;
+        filteredData.filter(d => d.target_nominal > 0).forEach((data, index) => {
+            totalTarget += parseFloat(data.target_nominal);
+            targetTable.row.add([
+                index + 1,
+                data.nama_program,
+                data.nama_deputy,
+                'Rp ' + parseFloat(data.target_nominal).toLocaleString('id-ID'),
+                `<span class="badge badge-warning">${data.nama_status}</span>`,
+                getAksiButtons(data.id, 'target')
+            ]);
+        });
+        targetTable.draw();
+        $('#targetDataTable tfoot').html(`
+            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                <td class="text-center" colspan="3"><strong>TOTAL RENCANA</strong></td>
+                <td class="text-right" style="color: #28a745; font-size: 1.1em;">Rp ${totalTarget.toLocaleString('id-ID')}</td>
+                <td class="text-center">-</td>
+                <td class="text-center">-</td>
+            </tr>
+        `);
+    }
+
+    // Function untuk generate aksi buttons
+    function getAksiButtons(id, type) {
+        return `
+            <a href="#" class="btn btn-icon btn-round btn-success btn-sm edit-btn" data-id="${id}" data-type="${type}" title="Ubah">
+                <i class="fas fa-pencil-alt fa-sm"></i>
+            </a>
+            <a href="#" class="btn btn-icon btn-round btn-danger btn-sm delete-btn" data-id="${id}" data-type="${type}" title="Hapus">
+                <i class="fas fa-trash fa-sm"></i>
+            </a>
+        `;
+    }
+
+    // MODAL UBAH DAN MODAL HAPUS   
+    // Function untuk generate modal content dynamically TABEL REALISASI, TABEL TERKONTRAK, TABEL ONGOING, TABEL RENCANA
+    function generateModal(id, type, isDelete = false) {
+        const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+        const modalId = isDelete ? `modalHapus${capitalizedType}${id}` : `modal${capitalizedType}${id}`;
+        
+        // Find the data for this ID
+        const item = allTableData.find(d => d.id == id);
+        if (!item) {
+            console.error(`Data with ID ${id} not found in allTableData`);
+            return '';
+        }
+
+        if (isDelete) {
+            // Delete modal
+            return `
+                <div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="${modalId}Label" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data ${capitalizedType} BUIB</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-left">
+                                Anda yakin ingin menghapus data ${capitalizedType} BUIB <strong>${item.nama_program}</strong> Tanggal <strong>${new Date(item.tgl_surat).toLocaleDateString('id-ID')}</strong>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
+                                <a href="modules/buib/proses_hapus.php?id=${id}" class="btn btn-danger btn-round delete-confirm">Ya, Hapus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Edit modal UBAH
+        let nominalFields = '';
+        switch (type) {
+            //modal Ubah REALISASI
+            case 'realisasi':
+                nominalFields = `
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Realisasi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-warning text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="realisasi_nominal" value="${Number(item.realisasi_nominal || 0).toLocaleString('id-ID')}" required>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                break;
+            //modal ubah KONTRAK
+            case 'kontrak':
+                nominalFields = `
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-warning text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}" required>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-bullseye mr-1 text-primary"></i>Realisasi Nominal
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="realisasi_nominal" value="${Number(item.realisasi_nominal || 0).toLocaleString('id-ID')}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                break;
+            //Modal UBAH ONGOING
+            case 'ongoing':
+                nominalFields = `
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-warning text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}" required>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-bullseye mr-1 text-primary"></i>Kontrak Nominal
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-bullseye mr-1 text-primary"></i>Realisasi Nominal
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="realisasi_nominal" value="${Number(item.realisasi_nominal || 0).toLocaleString('id-ID')}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                break;
+            //Modal UBAH RENCANA
+            case 'target':
+                nominalFields = `
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label font-weight-semibold">
+                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Rencana <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-warning text-white">Rp</span>
+                                </div>
+                                <input type="text" class="form-control currency" name="target_nominal" value="${Number(item.target_nominal || 0).toLocaleString('id-ID')}" required>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle mr-1"></i>Ubah nominal rencana
+                            </small>
+                        </div>
+                    </div>
+                `;
+                break;
+            default:
+                console.error(`Invalid type: ${type}`);
+                return '';
+        }
+
+        return `
+            <div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="${modalId}Label" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header btn-success text-white">
+                            <h5 class="modal-title font-weight-bold" id="${modalId}Label">
+                                <i class="fas fa-edit mr-2"></i>Edit Data ${capitalizedType}
+                            </h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="modules/buib/proses_ubah.php" method="POST" id="form${capitalizedType}${id}">
+                            <div class="modal-body">
+                                <input type="hidden" name="id" value="${id}">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-graduation-cap mr-1 text-primary"></i>Nama Program <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" class="form-control" name="nama_program" value="${item.nama_program || ''}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-tags mr-1 text-success"></i>Kategori buib <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-control" name="deputy_buib" required>
+                                                <option value="">-- Pilih Kategori --</option>
+                                                <?php
+                                                $kategori_query = mysqli_query($mysqli, "SELECT * FROM tbl_deputy_buib ORDER BY nama_deputy ASC");
+                                                while ($kategori = mysqli_fetch_array($kategori_query)) {
+                                                    echo "<option value='{$kategori['id_deputy']}' " . ($kategori['id_deputy'] == '${item.deputy_buib}' ? 'selected' : '') . ">{$kategori['nama_deputy']}</option>";
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    ${nominalFields}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-calendar-alt mr-1 text-info"></i>Tanggal Surat <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="date" class="form-control" name="tgl_surat" value="${item.tgl_surat ? new Date(item.tgl_surat).toISOString().split('T')[0] : ''}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-control" name="status_buib" required>
+                                                <option value="">-- Pilih Status --</option>
+                                                <?php
+                                                $status_query = mysqli_query($mysqli, "SELECT * FROM tbl_status ORDER BY nama_status ASC");
+                                                while ($status = mysqli_fetch_array($status_query)) {
+                                                    echo "<option value='{$status['id_status']}' " . ($status['id_status'] == '${item.status_buib}' ? 'selected' : '') . ">{$status['nama_status']}</option>";
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-sticky-note mr-1 text-secondary"></i>Keterangan
+                                            </label>
+                                            <textarea class="form-control" name="keterangan_program" rows="3">${item.keterangan_program || ''}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-light border mt-3">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
+                                    </h6>
+                                    <div class="row small">
+                                        <div class="col-md-4">
+                                            <strong>Program:</strong><br>
+                                            ${item.nama_program}<br><br>
+                                            <strong>Kategori:</strong><br>
+                                            <span class="badge badge-primary">${item.nama_deputy || ''}</span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Status:</strong><br>
+                                            <span class="badge badge-success">${item.nama_status || ''}</span><br><br>
+                                            <strong>Nominal:</strong><br>
+                                            <span class="text-warning font-weight-bold">Rp ${Number(item[`${type}_nominal`] || 0).toLocaleString('id-ID')}</span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Tanggal:</strong><br>
+                                            ${new Date(item.tgl_surat).toLocaleDateString('id-ID')}<br><br>
+                                            <strong>Periode:</strong><br>
+                                            <span class="badge badge-info">${new Date(item.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' })}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                    <i class="fas fa-times mr-1"></i>Batal
+                                </button>
+                                <button type="submit" class="btn btn-success" name="ubah${capitalizedType}">
+                                    <i class="fas fa-save mr-1"></i>Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     // Utility function untuk generate warna
     function generateColors(count) {
         const baseColors = [
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-            '#FF9F40', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-            '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE'
+            '#FF9F40', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'
         ];
         
         const backgroundColors = [];
@@ -1905,7 +1615,7 @@ $months_data = [];
         
         for (let i = 0; i < count; i++) {
             const baseColor = baseColors[i % baseColors.length];
-            backgroundColors.push(baseColor + '80'); // Tambahkan transparansi
+            backgroundColors.push(baseColor + '80');
             borderColors.push(baseColor);
         }
         
@@ -1915,106 +1625,111 @@ $months_data = [];
         };
     }
 
-    // Function untuk update semua chart
-    // Function untuk update semua chart berdasarkan filter
-    function updateCharts() {
-        console.log('Updating all charts with filters...');
-        
-        // Get filter values
-        const tahun = $('#filterTahun').val();
-        const program = $('#filterProgram').val();
-        const periode = $('#filterPeriode').val();
-
-        // Make AJAX request to fetch filtered data
-        $.ajax({
-            url: 'fetch_filtered_data.php', // PHP script to handle data fetching
-            method: 'POST',
-            data: {
-                tahun: tahun,
-                program: program,
-                periode: periode
-            },
-            dataType: 'json',
-            beforeSend: function() {
-                // Show loading indicator
-                $('.card-body').prepend('<div class="text-center loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
-            },
-            success: function(response) {
-                console.log('Filtered data received:', response);
-                
-                // Update global data variables with filtered data
-                yearlyData = response.yearlyData || {};
-                monthlyAccumulativeData = response.monthlyAccumulativeData || {};
-                programData = response.programData || {};
-                kategoriData = response.kategoriData || {};
-
-                // Reinitialize all charts with new data
-                initializeCharts();
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching filtered data:', error);
-                $.notify({
-                    title: '<h5 class="text-danger font-weight-bold mb-1"><i class="fas fa-times-circle mr-2"></i>Gagal!</h5>',
-                    message: 'Gagal memuat data. Silakan coba lagi.'
-                }, {
-                    type: 'danger'
-                });
-            },
-            complete: function() {
-                // Remove loading indicator
-                $('.loading').remove();
-            }
-        });
+    // Function untuk toggle chart periode (yearly/monthly)
+    function toggleChartPeriode() {
+        updateChartsAndTables();
     }
 
-    // Function untuk refresh data
-    function refreshData() {
-        console.log('Refreshing page...');
-        location.reload();
-    }
-
-    // Initialize semua saat DOM ready
+    // Initialize saat DOM ready
     $(document).ready(function() {
-        if ($.fn.DataTable.isDataTable('#RealisasiDataTable')) {
-            $('#RealisasiDataTable').DataTable().destroy();
-        }
-        
-        $('#RealisasiDataTable').DataTable({
-            "pageLength": 15,
-            "ordering": false
+        // Initialize DataTables
+        ['RealisasiDataTable', 'kontrakDataTable', 'OngoingDataTable', 'targetDataTable'].forEach(tableId => {
+            if ($.fn.DataTable.isDataTable(`#${tableId}`)) {
+                $(`#${tableId}`).DataTable().destroy();
+            }
+            $(`#${tableId}`).DataTable({
+                pageLength: 25,
+                ordering: false
+            });
         });
-
-        if ($.fn.DataTable.isDataTable('#kontrakDataTable')) {
-            $('#kontrakDataTable').DataTable().destroy();
-        }
         
-        $('#kontrakDataTable').DataTable({
-            "pageLength": 15,
-            "ordering": false
-        });
-
-        if ($.fn.DataTable.isDataTable('#OngoingDataTable')) {
-            $('#OngoingDataTable').DataTable().destroy();
-        }
+        // Initialize charts and tables
+        updateChartsAndTables();
         
-        $('#OngoingDataTable').DataTable({
-            "pageLength": 15,
-            "ordering": false
-        });
-
-        if ($.fn.DataTable.isDataTable('#targetDataTable')) {
-            $('#targetDataTable').DataTable().destroy();
-        }
-        
-        $('#targetDataTable').DataTable({
-            "pageLength": 15,
-            "ordering": false
-        });
-
-        // Initialize charts
-        initializeCharts();
+        // Event listeners untuk filter
+        $('#filterTahun, #filterProgram, #filterPeriode').on('change', updateChartsAndTables);
     });
-    
+
+
+    // Event delegation untuk handle button clicks
+    // Event listener for edit buttons
+    $(document).on('click', '.edit-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const type = $(this).data('type');
+        
+        console.log(`Edit button clicked: ID=${id}, Type=${type}`); // Debugging
+        
+        // Remove existing modals to prevent duplicates
+        $(`#modal${type.charAt(0).toUpperCase() + type.slice(1)}${id}`).remove();
+        
+        // Generate and append new modal
+        const modalHtml = generateModal(id, type);
+        if (!modalHtml) {
+            console.error('Failed to generate edit modal');
+            return;
+        }
+        $('body').append(modalHtml);
+        
+        // Initialize currency plugin for nominal inputs
+        $('.currency').maskMoney({
+            prefix: '',
+            thousands: '.',
+            decimal: ',',
+            precision: 0
+        });
+        
+        // Show modal
+        $(`#modal${type.charAt(0).toUpperCase() + type.slice(1)}${id}`).modal('show');
+    });
+
+    // Event listener for delete buttons
+    $(document).on('click', '.delete-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const type = $(this).data('type');
+        
+        console.log(`Delete button clicked: ID=${id}, Type=${type}`); // Debugging
+        
+        // Remove existing modals to prevent duplicates
+        $(`#modalHapus${type.charAt(0).toUpperCase() + type.slice(1)}${id}`).remove();
+        
+        // Generate and append new modal
+        const modalHtml = generateModal(id, type, true);
+        if (!modalHtml) {
+            console.error('Failed to generate delete modal');
+            return;
+        }
+        $('body').append(modalHtml);
+        
+        // Show modal
+        const modalSelector = `#modalHapus${type.charAt(0).toUpperCase() + type.slice(1)}${id}`;
+        $(modalSelector).modal('show');
+    });
+
+    // Update the initialize function to include modal cleanup
+    $(document).ready(function() {
+        // Initialize DataTables
+        ['RealisasiDataTable', 'kontrakDataTable', 'OngoingDataTable', 'targetDataTable'].forEach(tableId => {
+            if ($.fn.DataTable.isDataTable(`#${tableId}`)) {
+                $(`#${tableId}`).DataTable().destroy();
+            }
+            $(`#${tableId}`).DataTable({
+                pageLength: 25,
+                ordering: false,
+                drawCallback: function() {
+                    // Reinitialize tooltips or other plugins if needed
+                    $('[data-tooltip="tooltip"]').tooltip();
+                }
+            });
+        });
+        
+        // Initialize charts and tables
+        updateChartsAndTables();
+        
+        // Event listeners untuk filter
+        $('#filterTahun, #filterProgram, #filterPeriode').on('change', updateChartsAndTables);
+    });
     </script>
 
     <script type="text/javascript">
@@ -2099,7 +1814,7 @@ $months_data = [];
         });
     </script>
 
-
+    
 <?php } 
 }
 ?>
