@@ -134,8 +134,7 @@ else {
 	elseif ($_GET['module'] == 'form_entri_ongoing_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data lemtera
 		include "modules/lemtera/form_entri_ongoing.php";
-	}
-	elseif ($_GET['module'] == 'kategori_entity') {
+	} elseif ($_GET['module'] == 'kategori_entity') {
 		// panggil file tampil data KATEGORI ENTITY LEMTERA
 		include "modules/lemtera/kategori_entity.php";
 	}
@@ -166,8 +165,7 @@ else {
 	elseif ($_GET['module'] == 'form_entri_rk_training_center' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data bki
 		include "modules/training_center/form_entri_rk.php";
-	}
-	elseif ($_GET['module'] == 'kategori_peserta') {
+	} elseif ($_GET['module'] == 'kategori_peserta') {
 		// panggil file tampil data KATEGORI PESERTA training center
 		include "modules/training_center/kategori_peserta.php";
 	}
