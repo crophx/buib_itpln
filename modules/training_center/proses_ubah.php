@@ -20,19 +20,19 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
-        $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
+        $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
-        $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
-        $update = mysqli_query($mysqli, "UPDATE tbl_rk_buib 
+        $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
                                           SET 
                                             nama_program        = '$nama_program',
-                                            deputy_buib         = '$deputy_buib',
+                                            kategori_tc         = '$kategori_tc',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
-                                            status_buib           = '$status_buib',
+                                            status_tc           = '$status_tc',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
@@ -41,11 +41,11 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Cek hasil eksekusi query dan berikan notifikasi
         if ($update) {
             // Jika berhasil, alihkan dengan pesan sukses
-            header('location: ../../main.php?module=buib&pesan=2');
+            header('location: ../../main.php?module=training_center&pesan=2');
             exit(); // Pastikan exit dipanggil setelah header
         } else {
             // Jika gagal, alihkan dengan pesan error
-            header('location: ../../main.php?module=buib&pesan=4');
+            header('location: ../../main.php?module=training_center&pesan=4');
             exit(); // Pastikan exit dipanggil setelah header
         } 
     
@@ -61,19 +61,19 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
-        $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
+        $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
-        $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
-        $update = mysqli_query($mysqli, "UPDATE tbl_rk_buib 
+        $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
                                           SET 
                                             nama_program        = '$nama_program',
-                                            deputy_buib      = '$deputy_buib',
+                                            kategori_tc         = '$kategori_tc',
                                             ongoing_nominal     = '$ongoing_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
-                                            status_buib      = '$status_buib',
+                                            status_tc           = '$status_tc',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
@@ -83,11 +83,11 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Cek hasil eksekusi query dan berikan notifikasi
         if ($update) {
             // Jika berhasil, alihkan dengan pesan sukses
-            header('location: ../../main.php?module=buib&pesan=2');
+            header('location: ../../main.php?module=training_center&pesan=2');
             exit(); // Pastikan exit dipanggil setelah header
         } else {
             // Jika gagal, alihkan dengan pesan error
-            header('location: ../../main.php?module=buib&pesan=4');
+            header('location: ../../main.php?module=training_center&pesan=4');
             exit(); // Pastikan exit dipanggil setelah header
         }
     
@@ -101,18 +101,18 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
-        $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
+        $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
-        $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
-        $update = mysqli_query($mysqli, "UPDATE tbl_rk_buib 
+        $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
                                           SET 
                                             nama_program        = '$nama_program',
-                                            deputy_buib      = '$deputy_buib',
+                                            kategori_tc         = '$kategori_tc',
                                             tgl_surat           = '$tgl_surat',
-                                            status_buib      = '$status_buib',
+                                            status_tc           = '$status_tc',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
@@ -121,11 +121,11 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Cek hasil eksekusi query dan berikan notifikasi
         if ($update) {
             // Jika berhasil, alihkan dengan pesan sukses
-            header('location: ../../main.php?module=buib&pesan=2');
+            header('location: ../../main.php?module=training_center&pesan=2');
             exit(); // Pastikan exit dipanggil setelah header
         } else {
             // Jika gagal, alihkan dengan pesan error
-            header('location: ../../main.php?module=buib&pesan=4');
+            header('location: ../../main.php?module=training_center&pesan=4');
             exit(); // Pastikan exit dipanggil setelah header
         }
     
@@ -139,13 +139,13 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
-        //$deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
+        //$kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
-        //$status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        //$status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
-        $update = mysqli_query($mysqli, "UPDATE tbl_rk_buib 
+        $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
                                           SET 
                                             nama_program        = '$nama_program',
                                             tgl_surat           = '$tgl_surat',
@@ -157,11 +157,11 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Cek hasil eksekusi query dan berikan notifikasi
         if ($update) {
             // Jika berhasil, alihkan dengan pesan sukses
-            header('location: ../../main.php?module=buib&pesan=2');
+            header('location: ../../main.php?module=training_center&pesan=2');
             exit(); // Pastikan exit dipanggil setelah header
         } else {
             // Jika gagal, alihkan dengan pesan error
-            header('location: ../../main.php?module=buib&pesan=4');
+            header('location: ../../main.php?module=training_center&pesan=4');
             exit(); // Pastikan exit dipanggil setelah header
         }
     }

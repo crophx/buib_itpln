@@ -11,12 +11,12 @@ else { ?>
         <div class="page-inner py-4">
             <div class="page-header">
                 <!-- judul halaman -->
-                <h4 class="page-title"><i class="fas fa-plus-circle mr-2"></i>Input Data Rencana</h4>
+                <h4 class="page-title"><i class="fas fa-plus-circle mr-2"></i>Input Data Terkontrak</h4>
                 <!-- breadcrumbs -->
                 <ul class="breadcrumbs">
                     <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
-                    <li class="nav-item"><a href="?module=lemtera">Data Rencana</a></li>
+                    <li class="nav-item"><a href="?module=lemtera">Data Terkontrak</a></li>
                     <li class="separator"><i class="flaticon-right-arrow"></i></li>
                     <li class="nav-item"><a>Entri</a></li>
                 </ul>
@@ -30,7 +30,7 @@ else { ?>
                 <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <!--Judul Form-->
                     <div class="card-title" style="margin: 0;">
-                        <i class="fas fa-edit mr-2"></i>Entri Data Rencana
+                        <i class="fas fa-edit mr-2"></i>Entri Data Terkontrak
                     </div>
                     <!-- button kembali -->
                     <div class="button-container">
@@ -54,7 +54,7 @@ else { ?>
 
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <<label>Kategori Peserta lemtera <span class="text-danger">*</span></label>
+                                <label>Entity lemtera <span class="text-danger">*</span></label>
                                 <select name="entity_lemtera" class="form-control select2-single" autocomplete="off" required>
                                     <option selected disabled value="">-- Pilih Kategori --</option>
                                     <?php
@@ -67,7 +67,7 @@ else { ?>
                                     }
                                     ?>
                                 </select>
-                                <div class="invalid-feedback">Kategori lemtera tidak boleh kosong.</div>
+                                <div class="invalid-feedback">Entity lemtera tidak boleh kosong.</div>
                             </div>
                         </div>
                     </div>
@@ -75,9 +75,9 @@ else { ?>
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <label>Rencana Nominal <span class="text-danger">*</span></label>
-                                <input type="text" name="target_nominal" class="form-control" autocomplete="off" onKeyPress="return goodchars(event,'0123456789',this)" required>
-                                <div class="invalid-feedback">Rencana nominal tidak boleh kosong.</div>
+                                <label>Kontrak Nominal <span class="text-danger">*</span></label>
+                                <input type="text" name="kontrak_nominal" class="form-control" autocomplete="off" onKeyPress="return goodchars(event,'0123456789',this)" required>
+                                <div class="invalid-feedback">Kontrak nominal tidak boleh kosong.</div>
                                 <small class="form-text text-muted">Masukkan angka tanpa titik atau koma</small>
                             </div>
                         </div>
@@ -128,12 +128,12 @@ else { ?>
                         </div>
                     </div>
 
-                    <!-- Info Box untuk menampilkan informasi target -->
+                    <!-- Info Box untuk menampilkan informasi kontrak -->
                     <div class="row">
                         <div class="col-lg-12">
-                            <div class="alert alert-info" id="target-info" style="display: none;">
+                            <div class="alert alert-info" id="kontrak-info" style="display: none;">
                                 <i class="fas fa-info-circle mr-2"></i>
-                                <span id="target-text"></span>
+                                <span id="kontrak-text"></span>
                             </div>
                         </div>
                     </div>
@@ -141,7 +141,7 @@ else { ?>
                 
                 <div class="card-action">
                     <!-- button simpan data -->
-                    <input type="submit" name="simpan_rencana" value="Simpan" class="btn btn-success btn-round pl-4 pr-4 mr-2">
+                    <input type="submit" name="simpan_terkontrak" value="Simpan" class="btn btn-success btn-round pl-4 pr-4 mr-2">
                     <!-- button reset form -->
                     <input type="reset" value="Reset" class="btn btn-warning btn-round pl-4 pr-4 mr-2">
                     <!-- button kembali ke halaman tampil data -->
@@ -170,41 +170,41 @@ else { ?>
                 allowClear: true
             });
 
-            // Format angka dengan pemisah ribuan saat input target nominal
-            $('input[name="target_nominal"]').on('blur', function() {
+            // Format angka dengan pemisah ribuan saat input kontrak nominal
+            $('input[name="kontrak_nominal"]').on('blur', function() {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 if (value) {
                     var formatted = parseInt(value).toLocaleString('id-ID');
                     $(this).val(formatted);
-                    tampilkanInfotarget(value);
+                    tampilkanInfoKontrak(value);
                 }
             });
 
             // Hapus format saat focus untuk memudahkan edit
-            $('input[name="target_nominal"]').on('focus', function() {
+            $('input[name="kontrak_nominal"]').on('focus', function() {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 $(this).val(value);
-                $('#target-info').hide();
+                $('#kontrak-info').hide();
             });
 
-            // Event listener untuk menampilkan info target
-            $('input[name="target_nominal"]').on('keyup', function() {
+            // Event listener untuk menampilkan info kontrak
+            $('input[name="kontrak_nominal"]').on('keyup', function() {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 if (value && value.length > 3) {
-                    tampilkanInfotarget(value);
+                    tampilkanInfoKontrak(value);
                 } else {
-                    $('#target-info').hide();
+                    $('#kontrak-info').hide();
                 }
             });
         });
 
-        // Fungsi untuk menampilkan informasi target
-        function tampilkanInfotarget(value) {
+        // Fungsi untuk menampilkan informasi kontrak
+        function tampilkanInfoKontrak(value) {
             if (value) {
                 var formatted = parseInt(value).toLocaleString('id-ID');
-                var targetText = 'Nilai target: Rp ' + formatted;
-                $('#target-text').text(targetText);
-                $('#target-info').show();
+                var kontrakText = 'Nilai kontrak: Rp ' + formatted;
+                $('#kontrak-text').text(kontrakText);
+                $('#kontrak-info').show();
             }
         }
 

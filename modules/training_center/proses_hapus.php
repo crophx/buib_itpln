@@ -11,12 +11,12 @@ else{
     if(isset($_GET['id'])) {
         $id = mysqli_real_escape_string($mysqli, $_GET['id']);
 
-        $delete = mysqli_query($mysqli, "DELETE FROM tbl_rk_buib
+        $delete = mysqli_query($mysqli, "DELETE FROM tbl_rk_training_center
                                         WHERE id='$id'")
                                         or die('Ada kesalahan pada query delete : ' . mysqli_error($mysqli));
 
         if ($delete) {
-            header('location: ../../main.php?module=buib&pesan=3');
+            header('location: ../../main.php?module=training_center&pesan=3');
         }
     }
 }
