@@ -107,6 +107,16 @@ else {
 		// panggil file tampil entri data bks
 		include "modules/bks/form_entri_rk.php";
 	}
+	// jika module yang dipilih "form entri MoU"
+	elseif ($_GET['module'] == 'form_entri_MoU_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil entri data bks
+		include "modules/bki/mou/form_entri_MoU.php";
+	}
+	// jika module yang dipilih "form entri pks"
+	elseif ($_GET['module'] == 'form_entri_PKS_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil entri data bks
+		include "modules/bki/pks/form_entri_PKS.php";
+	}
 
 
 
