@@ -24,7 +24,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
                 <div class="card-header">
                     <div class="card-title">Formulir Entri Perjanjian Kerja Sama (PKS)</div>
                 </div>
-                <form action="modules/bki/proses_simpan_pks.php" method="post" class="needs-validation" novalidate>
+                <form action="modules/bki/pks/proses_simpan_pks.php" method="post" class="needs-validation" novalidate>
                     <div class="card-body">
                         <div class="form-group">
                             <label>Terhubung ke MoU Induk (Opsional)</label>

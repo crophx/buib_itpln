@@ -26,7 +26,7 @@ if (isset($_POST['simpan'])) {
 
     if ($query) {
         // Alihkan ke halaman utama BKI dengan pesan sukses
-        header('location: ../../main.php?module=bki&pesan=1');
+        header('location: /main.php?module=bki&pesan=1');
         exit();
     }
 }
