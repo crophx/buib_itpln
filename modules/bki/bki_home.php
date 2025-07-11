@@ -11,6 +11,7 @@ else {
 	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
 	// jika hak akses = SuperAdmin atau hak akses = Pimpinan, atau hak akses = SekretarisPimpinan, tampilkan konten
 	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKI'])) { ?>
+
 		<div class="panel-header">
 			<div class="page-inner py-45">
 				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
@@ -461,7 +462,7 @@ else {
 									<th class="text-center">No.</th>
 									<th>No. Dokumen PKS</th>
 									<th>Mitra</th>
-									<th>Tentang</th>
+									<th>Tentang</th>00
 									<th class="text-center">Tgl. TTD</th>
 									<th class="text-center">PIC</th>
 									<th class="text-center">MoU Induk</th>
