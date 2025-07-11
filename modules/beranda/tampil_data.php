@@ -135,8 +135,8 @@ else {
                 render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
                 render_menu_card('Bagian Kerja Sama (BKS)', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses'], 'https://dasker.itpln.ac.id/');
                 render_menu_card('Bagian Kerja Internasional (BKI)', 'bki', 'fas fa-camera', 'violet', $_SESSION['hak_akses']);
-                render_menu_card('BUIB', 'buib', 'fas fa-university', 'antiquewhite', $_SESSION['hak_akses']);
-                render_menu_card('LEMTERA', 'lemtera', 'fas fa-leaf', 'green', $_SESSION['hak_akses']);
+                render_menu_card('Bagian Usaha dan Inkubasi Bisnis', 'buib', 'fas fa-university', 'antiquewhite', $_SESSION['hak_akses']);
+                render_menu_card('Lembara Terapan', 'lemtera', 'fas fa-leaf', 'green', $_SESSION['hak_akses']);
                 render_menu_card('Training Center (TC)', 'training_center', 'fas fa-chalkboard-teacher', 'tomato', $_SESSION['hak_akses']);
                 ?>
             </div>
