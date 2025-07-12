@@ -119,25 +119,6 @@ else {
                 <div class="content-box">
                     <h1>COMING SOON</h1>
                     <p>Halaman Pusat Bisnis sedang dalam tahapan pengembangan.<br></p>
-
-                    <div id="countdown">
-                        <div class="time-box time-success">
-                            <span id="days">00</span>
-                            <span class="label">Hari</span>
-                        </div>
-                        <div class="time-box">
-                            <span id="hours">00</span>
-                            <span class="label">Jam</span>
-                        </div>
-                        <div class="time-box">
-                            <span id="minutes">00</span>
-                            <span class="label">Menit</span>
-                        </div>
-                        <div class="time-box">
-                            <span id="seconds">00</span>
-                            <span class="label">Detik</span>
-                        </div>
-                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <h4 class="page-title mt-4 mb-2">Fitur Mendatang</h4>
