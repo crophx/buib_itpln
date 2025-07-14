@@ -23,6 +23,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
         $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_buib']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -32,7 +33,8 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             deputy_buib         = '$deputy_buib',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
-                                            status_buib           = '$status_buib',
+                                            status_buib         = '$status_buib',
+                                            dokumen_rk_buib     = '$dokumen_rk_buib',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
@@ -64,6 +66,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
         $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_buib']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -74,6 +77,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal     = '$ongoing_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
                                             status_buib      = '$status_buib',
+                                            dokumen_rk_buib = '$dokumen_rk_buib',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
@@ -104,6 +108,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
         $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_buib']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -113,6 +118,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             deputy_buib      = '$deputy_buib',
                                             tgl_surat           = '$tgl_surat',
                                             status_buib      = '$status_buib',
+                                            dokumen_rk_buib = '$dokumen_rk_buib',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
@@ -130,7 +136,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         }
     
     //ubah Rencana
-    } else if (isset($_POST['ubahRencana'])) {
+    } else if (isset($_POST['ubahTarget'])) {
         $id = (int)$_POST['id'];
 
         // Membersihkan data nominal sebelum disimpan
@@ -139,9 +145,10 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
-        //$deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
+        $deputy_buib = mysqli_real_escape_string($mysqli, trim($_POST['deputy_buib']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
-        //$status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $status_buib = mysqli_real_escape_string($mysqli, trim($_POST['status_buib']));
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_buib']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -149,7 +156,10 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                           SET 
                                             nama_program        = '$nama_program',
                                             tgl_surat           = '$tgl_surat',
-                                            target_nominal     = '$target_nominal_clean',
+                                            deputy_buib         = '$deputy_buib',
+                                            target_nominal      = '$target_nominal_clean',
+                                            status_buib         = '$status_buib',
+                                            dokumen_rk_buib     = '$dokumen_rk_buib',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
                                           or die('Ada kesalahan pada query update : ' . mysqli_error($mysqli));
