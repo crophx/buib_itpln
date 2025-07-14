@@ -49,6 +49,24 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             exit();
         }
 
+        // Validasi bahwa target ongoing adalah angka
+        if (!is_numeric($realisasi_nominal) || $realisasi_nominal <= 0) {
+            header('location: ../../main.php?module=training_center&pesan=8');
+            exit();
+        }
+
+
+        // Cek apakah data sudah ada
+        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_training_center 
+                                          WHERE nama_program = '$nama_program' 
+                                          AND keterangan_program = '$keterangan_program'")
+            or die('Error pada query cek data: ' . mysqli_error($mysqli));
+
+        if (mysqli_num_rows($cek_data) > 0) {
+            header('location: ../../main.php?module=rencana&pesan=9');
+            exit();
+        }
+
         // Insert data realisasi
         $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_training_center (
                                             nama_program,
@@ -106,6 +124,24 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             empty($tgl_input_mysql) || empty($status_tc) || empty($keterangan_program)
         ) {
             header('location: ../../main.php?module=training_center&pesan=7');
+            exit();
+        }
+
+        // Validasi bahwa target terkontrak adalah angka
+        if (!is_numeric($kontrak_nominal) || $kontrak_nominal <= 0) {
+            header('location: ../../main.php?module=training_center&pesan=8');
+            exit();
+        }
+
+
+        // Cek apakah data sudah ada
+        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_training_center 
+                                          WHERE nama_program = '$nama_program' 
+                                          AND keterangan_program = '$keterangan_program'")
+            or die('Error pada query cek data: ' . mysqli_error($mysqli));
+
+        if (mysqli_num_rows($cek_data) > 0) {
+            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -171,6 +207,23 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             exit();
         }
 
+        // Validasi bahwa target ongoing adalah angka
+        if (!is_numeric($ongoing_nominal) || $ongoing_nominal <= 0) {
+            header('location: ../../main.php?module=training_center&pesan=8');
+            exit();
+        }
+
+
+        // Cek apakah data sudah ada
+        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_training_center 
+                                          WHERE nama_program = '$nama_program' 
+                                          AND keterangan_program = '$keterangan_program'")
+            or die('Error pada query cek data: ' . mysqli_error($mysqli));
+
+        if (mysqli_num_rows($cek_data) > 0) {
+            header('location: ../../main.php?module=rencana&pesan=9');
+            exit();
+        }
 
         // Insert data simpan onoging
         $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_training_center (
@@ -235,6 +288,23 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             exit();
         }
 
+        // Validasi bahwa target ongoing adalah angka
+        if (!is_numeric($target_nominal) || $target_nominal <= 0) {
+            header('location: ../../main.php?module=tc&pesan=8');
+            exit();
+        }
+
+
+        // Cek apakah data sudah ada
+        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_training_center 
+                                          WHERE nama_program = '$nama_program' 
+                                          AND keterangan_program = '$keterangan_program'")
+            or die('Error pada query cek data: ' . mysqli_error($mysqli));
+
+        if (mysqli_num_rows($cek_data) > 0) {
+            header('location: ../../main.php?module=rencana&pesan=9');
+            exit();
+        }
 
         // Insert data simpan onoging
         $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_training_center (
