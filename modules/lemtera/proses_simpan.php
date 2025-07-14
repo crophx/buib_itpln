@@ -32,6 +32,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $realisasi_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['realisasi_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_lemtera = mysqli_real_escape_string($mysqli, $_POST['status_lemtera']);
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_lemtera']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -40,27 +41,9 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($entity_lemtera) || empty($realisasi_nominal) ||
-            empty($tgl_input_mysql) || empty($status_lemtera) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_lemtera)
         ) {
             header('location: ../../main.php?module=lemtera&pesan=7');
-            exit();
-        }
-
-        // Validasi bahwa target terkontrak adalah angka
-        if (!is_numeric($realisasi_nominal) || $realisasi_nominal <= 0) {
-            header('location: ../../main.php?module=lemtera&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_lemtera 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-            or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -76,6 +59,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_lemtera,
                                             status_lemtera
                                         ) VALUES (
                                             '$nama_program',
@@ -88,6 +72,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             0,
                                             0,
                                             '',
+                                            '$dokumen_rk_lemtera',
                                             '$status_lemtera'
                                         )")
             or die('Ada kesalahan pada query insert realisasi: ' . mysqli_error($mysqli));
@@ -111,6 +96,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $kontrak_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['kontrak_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_lemtera = mysqli_real_escape_string($mysqli, $_POST['status_lemtera']);
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_lemtera']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -119,27 +105,9 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($entity_lemtera) || empty($kontrak_nominal) ||
-            empty($tgl_input_mysql) || empty($status_lemtera) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_lemtera)
         ) {
             header('location: ../../main.php?module=lemtera&pesan=7');
-            exit();
-        }
-
-        // Validasi bahwa target terkontrak adalah angka
-        if (!is_numeric($kontrak_nominal) || $kontrak_nominal <= 0) {
-            header('location: ../../main.php?module=lemtera&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_lemtera 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-            or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -155,6 +123,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_lemtera,
                                             status_lemtera
                                         ) VALUES (
                                             '$nama_program',
@@ -167,6 +136,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             0,
                                             0,
                                             '',
+                                            '$dokumen_rk_lemtera',
                                             '$status_lemtera'
                                         )")
             or die('Ada kesalahan pada query insert terkontrak: ' . mysqli_error($mysqli));
@@ -191,6 +161,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $ongoing_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['ongoing_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_lemtera = mysqli_real_escape_string($mysqli, $_POST['status_lemtera']);
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_lemtera']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -199,27 +170,9 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($entity_lemtera) || empty($ongoing_nominal) ||
-            empty($tgl_input_mysql) || empty($status_lemtera) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_lemtera) 
         ) {
             header('location: ../../main.php?module=lemtera&pesan=7');
-            exit();
-        }
-
-        // Validasi bahwa target ongoing adalah angka
-        if (!is_numeric($ongoing_nominal) || $ongoing_nominal <= 0) {
-            header('location: ../../main.php?module=lemtera&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_lemtera 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-            or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -235,6 +188,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_lemtera,
                                             status_lemtera
                                         ) VALUES (
                                             '$nama_program',
@@ -247,6 +201,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             '$ongoing_nominal',
                                             0,
                                             '',
+                                            '$dokumen_rk_lemtera',
                                             '$status_lemtera'
                                         )")
             or die('Ada kesalahan pada query insert terkontrak: ' . mysqli_error($mysqli));
@@ -273,6 +228,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $target_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['target_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_lemtera = mysqli_real_escape_string($mysqli, $_POST['status_lemtera']);
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_lemtera']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -281,27 +237,9 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($entity_lemtera) || empty($target_nominal) ||
-            empty($tgl_input_mysql) || empty($status_lemtera) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_lemtera) 
         ) {
             header('location: ../../main.php?module=lemtera&pesan=7');
-            exit();
-        }
-
-        // Validasi bahwa target ongoing adalah angka
-        if (!is_numeric($target_nominal) || $target_nominal <= 0) {
-            header('location: ../../main.php?module=lemtera&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_lemtera 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-            or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -317,6 +255,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_lemtera,
                                             status_lemtera
                                         ) VALUES (
                                             '$nama_program',
@@ -329,6 +268,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             0,
                                             0,
                                             '',
+                                            '$dokumen_rk_lemtera',
                                             '$status_lemtera'
                                         )")
             or die('Ada kesalahan pada query insert rencana: ' . mysqli_error($mysqli));
