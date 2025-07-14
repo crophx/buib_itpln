@@ -32,6 +32,7 @@ else {
         $realisasi_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['realisasi_nominal'])));
         $tgl_surat      = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_buib      = mysqli_real_escape_string($mysqli, $_POST['status_buib']);
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_buib']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -41,24 +42,6 @@ else {
         if (empty($nama_program) || empty($deputy_buib) || empty($realisasi_nominal) || 
             empty($tgl_input_mysql) || empty($status_buib) || empty($keterangan_program)) {
             header('location: ../../main.php?module=buib&pesan=7');
-            exit();
-        }
-
-        // Validasi bahwa target terkontrak adalah angka
-        if (!is_numeric($realisasi_nominal) || $realisasi_nominal <= 0) {
-            header('location: ../../main.php?module=buib&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_buib 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-                                          or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -72,9 +55,8 @@ else {
                                             deputy_buib,
                                             kontrak_nominal,
                                             ongoing_nominal,
-                                            jml_peserta,
-                                            tempat_kegiatan,
-                                            status_buib
+                                            status_buib,
+                                            dokumen_rk_buib
                                         ) VALUES (
                                             '$nama_program',
                                             '$keterangan_program', 
@@ -84,9 +66,8 @@ else {
                                             '$deputy_buib',
                                             0,
                                             0,
-                                            0,
-                                            '',
-                                            '$status_buib'
+                                            '$status_buib',
+                                            '$dokumen_rk_buib'
                                         )")
                                         or die('Ada kesalahan pada query insert realisasi: ' . mysqli_error($mysqli));
 
@@ -109,6 +90,7 @@ else {
         $kontrak_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['kontrak_nominal'])));
         $tgl_surat      = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_buib      = mysqli_real_escape_string($mysqli, $_POST['status_buib']);
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_buib']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -121,23 +103,6 @@ else {
             exit();
         }
 
-        // Validasi bahwa target terkontrak adalah angka
-        if (!is_numeric($kontrak_nominal) || $kontrak_nominal <= 0) {
-            header('location: ../../main.php?module=buib&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_buib 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-                                          or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
-            exit();
-        }
 
         // Insert data simpan terkontrak
         $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_buib (
@@ -149,9 +114,8 @@ else {
                                             deputy_buib,
                                             kontrak_nominal,
                                             ongoing_nominal,
-                                            jml_peserta,
-                                            tempat_kegiatan,
-                                            status_buib
+                                            status_buib,
+                                            dokumen_rk_buib
                                         ) VALUES (
                                             '$nama_program',
                                             '$keterangan_program', 
@@ -161,9 +125,8 @@ else {
                                             '$deputy_buib',
                                             '$kontrak_nominal',
                                             0,
-                                            0,
-                                            '',
-                                            '$status_buib'
+                                            '$status_buib',
+                                            '$dokumen_rk_buib'
                                         )")
                                         or die('Ada kesalahan pada query insert terkontrak: ' . mysqli_error($mysqli));
 
@@ -187,6 +150,7 @@ else {
         $ongoing_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['ongoing_nominal'])));
         $tgl_surat      = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_buib      = mysqli_real_escape_string($mysqli, $_POST['status_buib']);
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_buib']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -199,23 +163,6 @@ else {
             exit();
         }
 
-        // Validasi bahwa target ongoing adalah angka
-        if (!is_numeric($ongoing_nominal) || $ongoing_nominal <= 0) {
-            header('location: ../../main.php?module=buib&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_buib 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-                                          or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
-            exit();
-        }
 
         // Insert data simpan onoging
         $insert = mysqli_query($mysqli, "INSERT INTO tbl_rk_buib (
@@ -227,9 +174,8 @@ else {
                                             deputy_buib,
                                             kontrak_nominal,
                                             ongoing_nominal,
-                                            jml_peserta,
-                                            tempat_kegiatan,
-                                            status_buib
+                                            status_buib,
+                                            dokumen_rk_buib
                                         ) VALUES (
                                             '$nama_program',
                                             '$keterangan_program', 
@@ -239,9 +185,8 @@ else {
                                             '$deputy_buib',
                                             0,
                                             '$ongoing_nominal',
-                                            0,
-                                            '',
-                                            '$status_buib'
+                                            '$status_buib',
+                                            '$dokumen_rk_buib'
                                         )")
                                         or die('Ada kesalahan pada query insert ongoing: ' . mysqli_error($mysqli));
 
@@ -267,6 +212,7 @@ else {
         $target_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['target_nominal'])));
         $tgl_surat      = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_buib      = mysqli_real_escape_string($mysqli, $_POST['status_buib']);
+        $dokumen_rk_buib = mysqli_real_escape_string($mysqli, $_POST['dokumen_rk_buib']);
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -276,24 +222,6 @@ else {
         if (empty($nama_program) || empty($deputy_buib) || empty($target_nominal) || 
             empty($tgl_input_mysql) || empty($status_buib) || empty($keterangan_program)) {
             header('location: ../../main.php?module=buib&pesan=7');
-            exit();
-        }
-
-        // Validasi bahwa target ongoing adalah angka
-        if (!is_numeric($target_nominal) || $target_nominal <= 0) {
-            header('location: ../../main.php?module=buib&pesan=8');
-            exit();
-        }
-
-
-        // Cek apakah data sudah ada
-        $cek_data = mysqli_query($mysqli, "SELECT id FROM tbl_rk_buib 
-                                          WHERE nama_program = '$nama_program' 
-                                          AND keterangan_program = '$keterangan_program'")
-                                          or die('Error pada query cek data: ' . mysqli_error($mysqli));
-
-        if (mysqli_num_rows($cek_data) > 0) {
-            header('location: ../../main.php?module=rencana&pesan=9');
             exit();
         }
 
@@ -307,9 +235,8 @@ else {
                                             deputy_buib,
                                             kontrak_nominal,
                                             ongoing_nominal,
-                                            jml_peserta,
-                                            tempat_kegiatan,
-                                            status_buib
+                                            status_buib,
+                                            dokumen_rk_buib
                                         ) VALUES (
                                             '$nama_program',
                                             '$keterangan_program', 
@@ -319,9 +246,8 @@ else {
                                             '$deputy_buib',
                                             0,
                                             0,
-                                            0,
-                                            '',
-                                            '$status_buib'
+                                            '$status_buib',
+                                            '$dokumen_rk_buib'
                                         )")
                                         or die('Ada kesalahan pada query insert rencana: ' . mysqli_error($mysqli));
 

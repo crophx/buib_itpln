@@ -23,16 +23,18 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $entity_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['entity_lemtera']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
         $status_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['status_lemtera']));
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_lemtera']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
         $update = mysqli_query($mysqli, "UPDATE tbl_rk_lemtera 
                                           SET 
                                             nama_program        = '$nama_program',
-                                            entity_lemtera         = '$entity_lemtera',
+                                            entity_lemtera      = '$entity_lemtera',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
-                                            status_lemtera           = '$status_lemtera',
+                                            status_lemtera      = '$status_lemtera',
+                                            dokumen_rk_lemtera  = '$dokumen_rk_lemtera',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
@@ -64,6 +66,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $entity_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['entity_lemtera']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
         $status_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['status_lemtera']));
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_lemtera']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -76,6 +79,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             status_lemtera      = '$status_lemtera',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
+                                            dokumen_rk_lemtera  = '$dokumen_rk_lemtera',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
                                           or die('Ada kesalahan pada query update : ' . mysqli_error($mysqli));
@@ -104,6 +108,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $entity_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['entity_lemtera']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
         $status_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['status_lemtera']));
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_lemtera']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -114,6 +119,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             tgl_surat           = '$tgl_surat',
                                             status_lemtera      = '$status_lemtera',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
+                                            dokumen_rk_lemtera  = '$dokumen_rk_lemtera',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
                                           or die('Ada kesalahan pada query update : ' . mysqli_error($mysqli));
@@ -130,7 +136,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         }
     
     //ubah Rencana
-    } else if (isset($_POST['ubahRencana'])) {
+    } else if (isset($_POST['ubahTarget'])) {
         $id = (int)$_POST['id'];
 
         // Membersihkan data nominal sebelum disimpan
@@ -139,9 +145,10 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
-        //$entity_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['entity_lemtera']));
+        $entity_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['entity_lemtera']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
-        //$status_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['status_lemtera']));
+        $status_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['status_lemtera']));
+        $dokumen_rk_lemtera = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_lemtera']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
 
         // Query update dengan data yang sudah dibersihkan
@@ -149,7 +156,10 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                           SET 
                                             nama_program        = '$nama_program',
                                             tgl_surat           = '$tgl_surat',
-                                            target_nominal     = '$target_nominal_clean',
+                                            entity_lemtera      = '$entity_lemtera',
+                                            target_nominal      = '$target_nominal_clean',
+                                            status_lemtera      = '$status_lemtera',
+                                            dokumen_rk_lemtera  = '$dokumen_rk_lemtera',
                                             keterangan_program  = '$keterangan_program'
                                           WHERE id = '$id'")
                                           or die('Ada kesalahan pada query update : ' . mysqli_error($mysqli));
