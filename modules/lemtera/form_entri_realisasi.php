@@ -125,14 +125,6 @@ else { ?>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label class="text-primary">Link Dokumen</label>
-                                <input name="dokumen_rk_lemtera" class="form-control" placeholder="Masukkan link dokumen on-going (opsional)" autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
 
 
                     <div class="row">
@@ -140,7 +132,7 @@ else { ?>
                             <div class="form-group">
                                 <label>Keterangan Program</label>
                                 <textarea name="keterangan_program" class="form-control" rows="4"
-                                    placeholder="Masukkan keterangan program"></textarea>
+                                    placeholder="Masukkan keterangan program" required></textarea>
                                 <small class="form-text text-muted">Keterangan tambahan mengenai program Lemtera yang sedang
                                     berjalan</small>
                             </div>
