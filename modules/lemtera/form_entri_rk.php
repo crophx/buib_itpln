@@ -117,6 +117,14 @@ else { ?>
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label class="text-primary">Link Dokumen</label>
+                                <input name="dokumen_rk_lemtera" class="form-control" placeholder="Masukkan link dokumen on-going (opsional)" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-lg-12">

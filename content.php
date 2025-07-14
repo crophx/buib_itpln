@@ -121,30 +121,30 @@ else {
 
 
 	// -- MODULE LEMTERA -- //
-	elseif ($_GET['module'] == 'lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
+	elseif ($_GET['module'] == 'lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin','Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
 		// panggil file tampil home lemtera
 		include "modules/lemtera/lemtera_home.php";
 	}
 	// jika module yang dipilih "form entri realisasi lemtera"
-	elseif ($_GET['module'] == 'form_entri_realisasi_lemtera') {
+	elseif ($_GET['module'] == 'form_entri_realisasi_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin','Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
 		// panggil file tampil entri data buib
 		include "modules/lemtera/form_entri_realisasi.php";
 	}
 	// jika module yang dipilih "form entri rk lemtera"
-	elseif ($_GET['module'] == 'form_entri_rk_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan'])) {
+	elseif ($_GET['module'] == 'form_entri_rk_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data lemtera
 		include "modules/lemtera/form_entri_rk.php";
 	}
 	// jika module yang dipilih "form entri kontrak lemtera"
-	elseif ($_GET['module'] == 'form_entri_terkontrak_lemtera') {
+	elseif ($_GET['module'] == 'form_entri_terkontrak_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data buib
 		include "modules/lemtera/form_entri_terkontrak.php";
 	}
 	// jika module yang dipilih "form entri rk lemtera"
-	elseif ($_GET['module'] == 'form_entri_ongoing_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'lemtera', 'Pimpinan', 'SekretarisPimpinan'])) {
+	elseif ($_GET['module'] == 'form_entri_ongoing_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data lemtera
 		include "modules/lemtera/form_entri_ongoing.php";
-	} elseif ($_GET['module'] == 'kategori_entity') {
+	} elseif ($_GET['module'] == 'kategori_entity' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil data KATEGORI ENTITY LEMTERA
 		include "modules/lemtera/kategori_entity.php";
 	}
