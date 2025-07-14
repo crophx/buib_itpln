@@ -61,15 +61,11 @@ else { ?>
                                     <option selected disabled value="">-- Pilih Kategori --</option>
                                     <?php
                                     // Query untuk mengambil data kategori dari tbl_kategori
-                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_kategori FROM tbl_kategori ORDER BY nama_kategori ASC")
-                                        or die('Error pada query kategori: ' . mysqli_error($mysqli));
-
+                                    $query_kategori = mysqli_query($mysqli, "SELECT id_kategori, nama_kategori FROM tbl_kategori ORDER BY nama_kategori ASC") 
+                                                    or die('Error pada query kategori: '. mysqli_error($mysqli));
+                                    
                                     while ($data_kategori = mysqli_fetch_assoc($query_kategori)) {
-                                        // Menambahkan htmlspecialchars() pada teks yang ditampilkan
-                                        $id = $data_kategori['id_entity'];
-                                        $nama = htmlspecialchars($data_kategori['nama_entity_lemtera']);
-
-                                        echo "<option value='{$id}'>{$nama}</option>";
+                                        echo "<option value='".$data_kategori['id_kategori']."'>".$data_kategori['nama_kategori']."</option>";
                                     }
                                     ?>
                                 </select>
@@ -131,18 +127,21 @@ else { ?>
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <label>Jumlah Peserta <span class="text-danger">*</span></label>
-                                <input type="text" name="jml_peserta" class="form-control" autocomplete="off"
-                                    onKeyPress="return goodchars(event,'0123456789',this)" required>
-                                <div class="invalid-feedback">Jumlah peserta tidak boleh kosong.</div>
+                                <label>Jumlah Peserta (opsional)</label>
+                                <input type="text" name="jml_peserta" class="form-control" autocomplete="off" onKeyPress="return goodchars(event,'0123456789',this)">
                             </div>
                         </div>
 
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <label>Tempat Kegiatan<span class="text-danger">*</span></label>
-                                <input name="tempat_kegiatan" class="form-control" autocomplete="off" required>
-                                <div class="invalid-feedback">Tempat Kegiatan tidak boleh kosong.</div>
+                                <label>Tempat Kegiatan (opsional)</label>
+                                <input name="tempat_kegiatan" class="form-control" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label class="text-primary">Link Dokumen (opsional)</label>
+                                <input name="dokumen_rk_training_center" class="form-control" placeholder="Masukkan link dokumen realisasi" autocomplete="off">
                             </div>
                         </div>
                     </div>

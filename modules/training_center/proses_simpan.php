@@ -35,6 +35,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $tempat_kegiatan = mysqli_real_escape_string($mysqli, $_POST['tempat_kegiatan']);
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_tc = mysqli_real_escape_string($mysqli, $_POST['status_tc']);
+        $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -42,11 +43,19 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
         // Validasi input wajib
         if (
-            empty($nama_program) || empty($kategori_tc) || empty($realisasi_nominal) || empty($jml_peserta) ||
-            empty($tempat_kegiatan) || empty($tgl_input_mysql) || empty($status_tc) || empty($keterangan_program)
+            empty($nama_program) || empty($kategori_tc) || empty($realisasi_nominal) || 
+            empty($tgl_input_mysql) || empty($status_tc) 
         ) {
             header('location: ../../main.php?module=training_center&pesan=7');
             exit();
+        }
+
+        if (!empty($_POST['jml_peserta'])) {
+            // Jika ada isinya, ubah ke integer
+            $jml_peserta_sql = (int)$_POST['jml_peserta'];
+        } else {
+            // Jika kosong, gunakan kata kunci SQL NULL
+            $jml_peserta_sql = "NULL";
         }
 
         // Insert data realisasi
@@ -61,6 +70,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_training_center,
                                             status_tc
                                         ) VALUES (
                                             '$nama_program',
@@ -71,8 +81,9 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             '$kategori_tc',
                                             0,
                                             0,
-                                            '$jml_peserta',
+                                            $jml_peserta_sql,
                                             '$tempat_kegiatan',
+                                            '$dokumen_rk_training_center',
                                             '$status_tc'
                                         )")
             or die('Ada kesalahan pada query insert realisasi: ' . mysqli_error($mysqli));
@@ -95,6 +106,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $kontrak_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['kontrak_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_tc = mysqli_real_escape_string($mysqli, $_POST['status_tc']);
+        $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -103,7 +115,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($kategori_tc) || empty($kontrak_nominal) ||
-            empty($tgl_input_mysql) || empty($status_tc) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_tc)
         ) {
             header('location: ../../main.php?module=training_center&pesan=7');
             exit();
@@ -121,6 +133,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_training_center,
                                             status_tc
                                         ) VALUES (
                                             '$nama_program',
@@ -133,6 +146,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             0,
                                             0,
                                             '',
+                                            '$dokumen_rk_training_center',
                                             '$status_tc'
                                         )")
             or die('Ada kesalahan pada query insert terkontrak: ' . mysqli_error($mysqli));
@@ -157,6 +171,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $ongoing_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['ongoing_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_tc = mysqli_real_escape_string($mysqli, $_POST['status_tc']);
+        $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -165,7 +180,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($kategori_tc) || empty($ongoing_nominal) ||
-            empty($tgl_input_mysql) || empty($status_tc) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_tc) 
         ) {
             header('location: ../../main.php?module=training_center&pesan=7');
             exit();
@@ -184,6 +199,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_training_center,
                                             status_tc
                                         ) VALUES (
                                             '$nama_program',
@@ -196,6 +212,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             '$ongoing_nominal',
                                             0,
                                             '',
+                                            '$dokumen_rk_training_center',
                                             '$status_tc'
                                         )")
             or die('Ada kesalahan pada query insert terkontrak: ' . mysqli_error($mysqli));
@@ -221,6 +238,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $target_nominal = mysqli_real_escape_string($mysqli, str_replace(['.', ','], '', trim($_POST['target_nominal'])));
         $tgl_surat = mysqli_real_escape_string($mysqli, $_POST['tgl_surat']);
         $status_tc = mysqli_real_escape_string($mysqli, $_POST['status_tc']);
+        $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, $_POST['keterangan_program']);
 
         // Konversi format tanggal
@@ -229,7 +247,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Validasi input wajib
         if (
             empty($nama_program) || empty($target_nominal) ||
-            empty($tgl_input_mysql) || empty($status_tc) || empty($keterangan_program)
+            empty($tgl_input_mysql) || empty($status_tc)
         ) {
             header('location: ../../main.php?module=tc&pesan=7');
             exit();
@@ -248,6 +266,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             ongoing_nominal,
                                             jml_peserta,
                                             tempat_kegiatan,
+                                            dokumen_rk_training_center,
                                             status_tc
                                         ) VALUES (
                                             '$nama_program',
@@ -260,6 +279,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             0,
                                             0,
                                             '',
+                                            '$dokumen_rk_training_center',
                                             '$status_tc'
                                         )")
             or die('Ada kesalahan pada query insert rencana: ' . mysqli_error($mysqli));
