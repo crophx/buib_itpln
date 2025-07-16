@@ -1,5 +1,8 @@
 <?php
 // Memulai session untuk menyimpan pesan notifikasi
+
+use Dom\Mysql;
+
 session_start();
 
 // Cek status login pengguna
@@ -22,9 +25,19 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
         $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
+        $jml_peserta = mysqli_real_escape_string($mysqli, trim($_POST['jml_peserta']));
+        $tempat_kegiatan = mysqli_real_escape_string($mysqli, trim($_POST['tempat_kegiatan']));
         $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
+
+        if (!empty($_POST['jml_peserta'])) {
+            // Jika ada isinya, ubah ke integer
+            $jml_peserta_sql = (int)$_POST['jml_peserta'];
+        } else {
+            // Jika kosong, gunakan kata kunci SQL NULL
+            $jml_peserta_sql = "NULL";
+        }
 
         // Query update dengan data yang sudah dibersihkan
         $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
@@ -34,6 +47,8 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             kontrak_nominal     = '$kontrak_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
                                             status_tc           = '$status_tc',
+                                            jml_peserta         = $jml_peserta_sql,
+                                            tempat_kegiatan     = '$tempat_kegiatan',
                                             dokumen_rk_training_center = '$dokumen_rk_training_center',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
                                             keterangan_program  = '$keterangan_program'
@@ -65,9 +80,19 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
         $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
+        $jml_peserta = mysqli_real_escape_string($mysqli, trim($_POST['jml_peserta']));
+        $tempat_kegiatan = mysqli_real_escape_string($mysqli, trim($_POST['tempat_kegiatan']));
         $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
+
+        if (!empty($_POST['jml_peserta'])) {
+            // Jika ada isinya, ubah ke integer
+            $jml_peserta_sql = (int)$_POST['jml_peserta'];
+        } else {
+            // Jika kosong, gunakan kata kunci SQL NULL
+            $jml_peserta_sql = "NULL";
+        }
 
         // Query update dengan data yang sudah dibersihkan
         $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
@@ -76,6 +101,8 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             kategori_tc         = '$kategori_tc',
                                             ongoing_nominal     = '$ongoing_nominal_clean',
                                             tgl_surat           = '$tgl_surat',
+                                            jml_peserta         = $jml_peserta_sql,
+                                            tempat_kegiatan     = '$tempat_kegiatan',
                                             status_tc           = '$status_tc',
                                             dokumen_rk_training_center = '$dokumen_rk_training_center',
                                             kontrak_nominal     = '$kontrak_nominal_clean',
@@ -102,14 +129,25 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         // Membersihkan data nominal sebelum disimpan
 
         $realisasi_nominal_clean = (int)preg_replace("/[^0-9]/", "", $_POST['realisasi_nominal']);
+        
 
         // Membersihkan data lainnya
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
         $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
+        $jml_peserta = mysqli_real_escape_string($mysqli, trim($_POST['jml_peserta']));
+        $tempat_kegiatan = mysqli_real_escape_string($mysqli, trim($_POST['tempat_kegiatan']));
         $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
+
+        if (!empty($_POST['jml_peserta'])) {
+            // Jika ada isinya, ubah ke integer
+            $jml_peserta_sql = (int)$_POST['jml_peserta'];
+        } else {
+            // Jika kosong, gunakan kata kunci SQL NULL
+            $jml_peserta_sql = "NULL";
+        }
 
         // Query update dengan data yang sudah dibersihkan
         $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
@@ -117,6 +155,8 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             nama_program        = '$nama_program',
                                             kategori_tc         = '$kategori_tc',
                                             tgl_surat           = '$tgl_surat',
+                                            jml_peserta         = $jml_peserta_sql,
+                                            tempat_kegiatan     = '$tempat_kegiatan',
                                             status_tc           = '$status_tc',
                                             dokumen_rk_training_center = '$dokumen_rk_training_center',
                                             realisasi_nominal   = '$realisasi_nominal_clean',
@@ -147,9 +187,19 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
         $nama_program = mysqli_real_escape_string($mysqli, trim($_POST['nama_program']));
         $kategori_tc = mysqli_real_escape_string($mysqli, trim($_POST['kategori_tc']));
         $tgl_surat = mysqli_real_escape_string($mysqli, trim($_POST['tgl_surat']));
+        $jml_peserta = mysqli_real_escape_string($mysqli, trim($_POST['jml_peserta']));
+        $tempat_kegiatan = mysqli_real_escape_string($mysqli, trim($_POST['tempat_kegiatan']));
         $status_tc = mysqli_real_escape_string($mysqli, trim($_POST['status_tc']));
         $dokumen_rk_training_center = mysqli_real_escape_string($mysqli, trim($_POST['dokumen_rk_training_center']));
         $keterangan_program = mysqli_real_escape_string($mysqli, trim($_POST['keterangan_program']));
+
+        if (!empty($_POST['jml_peserta'])) {
+            // Jika ada isinya, ubah ke integer
+            $jml_peserta_sql = (int)$_POST['jml_peserta'];
+        } else {
+            // Jika kosong, gunakan kata kunci SQL NULL
+            $jml_peserta_sql = "NULL";
+        }
 
         // Query update dengan data yang sudah dibersihkan
         $update = mysqli_query($mysqli, "UPDATE tbl_rk_training_center 
@@ -157,6 +207,8 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                             nama_program        = '$nama_program',
                                             tgl_surat           = '$tgl_surat',
                                             kategori_tc         = '$kategori_tc',
+                                            jml_peserta         = $jml_peserta_sql,
+                                            tempat_kegiatan     = '$tempat_kegiatan',
                                             target_nominal     = '$target_nominal_clean',
                                             status_tc           = '$status_tc',
                                             dokumen_rk_training_center = '$dokumen_rk_training_center',

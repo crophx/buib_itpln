@@ -40,7 +40,7 @@ else {
 
         // Validasi input wajib
         if (empty($nama_program) || empty($deputy_buib) || empty($realisasi_nominal) || 
-            empty($tgl_input_mysql) || empty($status_buib) || empty($keterangan_program)) {
+            empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
         }
@@ -98,7 +98,7 @@ else {
 
         // Validasi input wajib
         if (empty($nama_program) || empty($deputy_buib) || empty($kontrak_nominal) || 
-            empty($tgl_input_mysql) || empty($status_buib) || empty($keterangan_program)) {
+            empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
         }
@@ -158,7 +158,7 @@ else {
 
         // Validasi input wajib
         if (empty($nama_program) || empty($deputy_buib) || empty($ongoing_nominal) || 
-            empty($tgl_input_mysql) || empty($status_buib) || empty($keterangan_program)) {
+            empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
         }
@@ -220,7 +220,7 @@ else {
 
         // Validasi input wajib
         if (empty($nama_program) || empty($deputy_buib) || empty($target_nominal) || 
-            empty($tgl_input_mysql) || empty($status_buib) || empty($keterangan_program)) {
+            empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
         }

@@ -308,7 +308,7 @@ $months_data = [];
                             </div>
                             <div class="col">
                                 <div class="numbers">
-                                    <p class="card-category text-muted mb-1">Total Dokumen RK</p>
+                                    <p class="card-category text-muted mb-1">Total Program</p>
                                     <h4 class="card-title mb-0" id="totalDokumen"><?php echo number_format($total_doc_calc, 0, ',', '.'); ?></h4>
                                 </div>
                             </div>
@@ -402,46 +402,21 @@ $months_data = [];
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Nama Program</th>
                                 <th class="text-center">Peserta</th>
-                                <th class="text-center">Realisasi</th>
+                                <th class="text-center">Jumlah Peserta</th>
+                                <th class="text-center">Tempat Kegiatan</th>
                                 <th class="text-center">Bulan</th>
+                                <th class="text-center">Realisasi Nominal</th>
+                                <th class="text-center">Status</th>
                                 <th class="text-center">Dokumen</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            $no1 = 1;
-                            foreach ($Realisasi_data as $data) {
-                            ?>
-                                <tr>
-                                    <td width="30" class="text-center"><?php echo $no1++; ?></td>
-                                    <td><?php echo htmlspecialchars($data['nama_program']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['realisasi_nominal'], 0, ',', '.'); ?></td>
-                                    <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
-                                    <td class="text-center">
-                                        <?php if (!empty($data['dokumen_rk_training_center'])) : ?>
-                                            <a href="<?php echo htmlspecialchars($data['dokumen_rk_training_center']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen">
-                                                <i class="fas fa-link"></i>
-                                            </a>
-                                        <?php else : ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm edit-btn" data-id="<?php echo $data['id']; ?>" data-type="realisasi" data-tooltip="tooltip" title="Ubah">
-                                            <i class="fas fa-pencil-alt fa-sm"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm delete-btn" data-id="<?php echo $data['id']; ?>" data-type="realisasi" data-tooltip="tooltip" title="Hapus">
-                                            <i class="fas fa-trash fa-sm"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php } ?>
+                            
                         </tbody>
                         <tfoot>
                             <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                <td class="text-center" colspan="3">
+                                <td class="text-center" colspan="6">
                                     <strong>TOTAL REALISASI</strong>
                                 </td>
                                 <td class="text-right" style="color: #28a745; font-size: 1.1em;">
@@ -477,8 +452,8 @@ $months_data = [];
                                 <th class="text-center">No.</th>
                                 <th class="text-center">Nama Program</th>
                                 <th class="text-center">Peserta</th>
-                                <th class="text-center">Bulan</th>
                                 <th class="text-center">Keterangan</th>
+                                <th class="text-center">Bulan</th>
                                 <th class="text-center">Nominal Kontrak</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Dokumen</th>
@@ -486,41 +461,7 @@ $months_data = [];
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            $no1 = 1;
-                            foreach ($kontrak_data as $data) {
-                                ?>
-                                <tr>
-                                    <td width="30" class="text-center"><?php echo $no1++; ?></td>
-                                    <td><?php echo htmlspecialchars($data['nama_program']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['nama_kategori']); ?></td>
-                                    <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
-                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['kontrak_nominal'], 0, ',', '.'); ?></td>
-                                    <td width="80" class="text-center">
-                                        <span class="badge badge-primary"><?php echo htmlspecialchars($data['nama_status']); ?></span><br>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if (!empty($data['dokumen_rk_training_center'])) : ?>
-                                            <a href="<?php echo htmlspecialchars($data['dokumen_rk_training_center']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen">
-                                                <i class="fas fa-link"></i>
-                                            </a>
-                                        <?php else : ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td width="80" class="text-center">
-                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-toggle="modal" data-target="#modalUbahKontrak<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
-                                            <i class="fas fa-pencil-alt fa-sm"></i>
-                                        </a>
-                                        
-                                        <!-- Modal Hapus Kontrak-->
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusKontrak<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
-                                            <i class="fas fa-trash fa-sm"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php } ?>
+                            
                         </tbody>
                         <!-- FOOTER TOTAL TERKONTRAK -->
                         <tfoot>
@@ -569,42 +510,7 @@ $months_data = [];
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            $no1 = 1;
-                            foreach ($ongoing_data as $data) {
-                                ?>
-                                <tr>
-                                    <td width="30" class="text-center"><?php echo $no1++; ?></td>
-                                    <td><?php echo htmlspecialchars($data['nama_program']); ?></td>
-                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
-                                    <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['ongoing_nominal'], 0, ',', '.'); ?></td>
-                                    <td width="80" class="text-center">
-                                        <span class="badge badge-danger"><?php echo htmlspecialchars($data['nama_status']); ?></span><br>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if (!empty($data['dokumen_rk_training_center'])) : ?>
-                                            <a href="<?php echo htmlspecialchars($data['dokumen_rk_training_center']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen">
-                                                <i class="fas fa-link"></i>
-                                            </a>
-                                        <?php else : ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td width="100" class="text-center">
-                                        <!-- Button Edit Ongoing -->
-                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahOngoing<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
-                                            <i class="fas fa-pencil-alt fa-sm"></i>
-                                        </a>
-                                        
-                                        <!-- Modal Hapus ONgoing -->
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusOngoing<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
-                                            <i class="fas fa-trash fa-sm"></i>
-                                        </a>
-                                        
-                                    </td>
-                                </tr>
-                            <?php } ?>
+                            
                         </tbody>
                         <!-- FOOTER TOTAL ONGOING-->
                         <tfoot>
@@ -652,42 +558,7 @@ $months_data = [];
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            $no2 = 1;
-                            foreach ($target_data as $data) {
-                                ?>
-                                <tr>
-                                    <td width="30" class="text-center"><?php echo $no2++; ?></td>
-                                    <td>
-                                        <?php echo htmlspecialchars($data['nama_program']); ?>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['target_nominal'], 0, ',', '.'); ?></td>
-                                    <td width="120" class="text-center">
-                                        <span class="badge badge-warning"><?php echo htmlspecialchars($data['nama_status']); ?></span><br>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if (!empty($data['dokumen_rk_training_center'])) : ?>
-                                            <a href="<?php echo htmlspecialchars($data['dokumen_rk_training_center']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen"><br>
-                                                <i class="fas fa-link"></i>
-                                            </a>
-                                        <?php else : ?>
-                                            -
-                                        <?php endif; ?>
-                                    </td>
-                                    <td width="80" class="text-center">
-                                        <!-- Button Edit Rencana -->
-                                        <a href="#" class="btn btn-icon btn-round btn-success btn-sm" data-toggle="modal" data-target="#modalUbahRencana<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Ubah">
-                                            <i class="fas fa-pencil-alt fa-sm"></i>
-                                        </a>
-                                        <!-- Button hapus rencana -->
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusTarget<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
-                                            <i class="fas fa-trash fa-sm"></i>
-                                        </a>
-                                        
-                                    </td>
-                                </tr>
-                            <?php } ?>
+                           
                         </tbody>
                         <tfoot>
                             <tr style="background-color: #f8f9fa; font-weight: bold;">
@@ -831,7 +702,6 @@ $months_data = [];
         };
     }
 
-    // Function untuk update semua chart dan tabel
     // Function untuk update semua chart dan tabel
     function updateChartsAndTables() {
         const tahun = $('#filterTahun').val();
@@ -1033,12 +903,43 @@ $months_data = [];
     //TAMPIL DATA TABEL REALISASI, TABEL KONTRAK, TABEL ONGOING, TABEL RENCANA
     // Function untuk update semua tabel
     function updateTables(filteredData) {
+        function createStatusBadge(namaStatus) {
+        // Mapping antara status dengan class & icon
+            const statusMap = {
+                'realisasi': { class: 'badge-success', icon: 'fas fa-check-circle' },
+                'on-going':  { class: 'badge-warning', icon: 'fas fa-clock' },
+                'rencana':   { class: 'badge-info',    icon: 'fas fa-calendar-plus' },
+                'kontrak':   { class: 'badge-primary', icon: 'fas fa-file-contract' },
+                'batal':     { class: 'badge-danger',  icon: 'fas fa-ban'}
+            };
+
+            // Default value jika status tidak ditemukan
+            const defaultStatus = { class: 'badge-secondary', icon: 'fas fa-question-circle' };
+
+            // Cari status di dalam map (ubah ke huruf kecil), atau gunakan default
+            const statusInfo = statusMap[namaStatus.toLowerCase()] || defaultStatus;
+            
+            // Buat HTML untuk icon dan badge
+            const badgeIcon = `<i class="${statusInfo.icon} mr-1"></i>`;
+            
+            return `<span class="badge ${statusInfo.class}">${badgeIcon}${namaStatus}</span>`;
+        }
         // Function helper untuk membuat tombol link dokumen
         function getLinkButton(url) {
             if (url) {
-                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen"><i class="fas fa-link"></i></a>`;
+                return `
+                    <div class="d-flex justify-content-center">
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen">
+                            <i class="fas fa-link"></i>
+                        </a>
+                    </div>
+                `;
             }
-            return '-';
+            return `
+                <div class="d-flex justify-content-center">
+                    -
+                </div>
+            `;
         }
         // Update Realisasi table
         const realisasiTable = $('#RealisasiDataTable').DataTable();
@@ -1050,15 +951,20 @@ $months_data = [];
                 index + 1,
                 data.nama_program,
                 data.nama_kategori,
-                'Rp ' + parseFloat(data.realisasi_nominal).toLocaleString('id-ID'),
+                data.jml_peserta,
+                data.tempat_kegiatan,
                 new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
+                'Rp ' + parseFloat(data.realisasi_nominal).toLocaleString('id-ID'),
+                createStatusBadge(data.nama_status),
                 getLinkButton(data.dokumen_rk_training_center), // DITAMBAHKAN
                 getAksiButtons(data.id, 'realisasi')
             ]);
+        
         });
+        
         realisasiTable.draw();
         $('#RealisasiDataTable tfoot tr').html(`
-            <td class="text-center" colspan="3"><strong>TOTAL REALISASI</strong></td>
+            <td class="text-center" colspan="6"><strong>TOTAL REALISASI</strong></td>
             <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp ${totalRealisasi.toLocaleString('id-ID')}</strong></td>
             <td class="text-center" colspan="3"></td>
         `);
@@ -1073,10 +979,10 @@ $months_data = [];
                 index + 1,
                 data.nama_program,
                 data.nama_kategori,
-                new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                 data.keterangan_program,
+                new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                 'Rp ' + parseFloat(data.kontrak_nominal).toLocaleString('id-ID'),
-                `<span class="badge badge-primary">${data.nama_status}</span>`,
+                createStatusBadge(data.nama_status),
                 getLinkButton(data.dokumen_rk_training_center),
                 getAksiButtons(data.id, 'kontrak')
             ]);
@@ -1102,7 +1008,7 @@ $months_data = [];
                 data.keterangan_program,
                 new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                 'Rp ' + parseFloat(data.ongoing_nominal).toLocaleString('id-ID'),
-                `<span class="badge badge-danger">${data.nama_status}</span>`,
+                createStatusBadge(data.nama_status),
                 getLinkButton(data.dokumen_rk_training_center),
                 getAksiButtons(data.id, 'ongoing')
             ]);
@@ -1127,7 +1033,7 @@ $months_data = [];
                 data.nama_program,
                 data.keterangan_program,
                 'Rp ' + parseFloat(data.target_nominal).toLocaleString('id-ID'),
-                `<span class="badge badge-warning">${data.nama_status}</span>`,
+                createStatusBadge(data.nama_status),
                 getLinkButton(data.dokumen_rk_training_center),
                 getAksiButtons(data.id, 'target')
             ]);
@@ -1145,12 +1051,14 @@ $months_data = [];
     // Function untuk generate aksi buttons
     function getAksiButtons(id, type) {
         return `
-            <a href="#" class="btn btn-icon btn-round btn-success btn-sm edit-btn" data-id="${id}" data-type="${type}" title="Ubah">
-                <i class="fas fa-pencil-alt fa-sm"></i>
-            </a>
-            <a href="#" class="btn btn-icon btn-round btn-danger btn-sm delete-btn" data-id="${id}" data-type="${type}" title="Hapus">
-                <i class="fas fa-trash fa-sm"></i>
-            </a>
+            <div class="d-flex justify-content-center" style="gap: 5px;">
+                <a href="#" class="btn btn-icon btn-round btn-success btn-sm edit-btn" data-id="${id}" data-type="${type}" title="Ubah">
+                    <i class="fas fa-pencil-alt fa-sm"></i>
+                </a>
+                <a href="#" class="btn btn-icon btn-round btn-danger btn-sm delete-btn" data-id="${id}" data-type="${type}" title="Hapus">
+                    <i class="fas fa-trash fa-sm"></i>
+                </a>
+            </div>
         `;
     }
 
@@ -1376,6 +1284,22 @@ $months_data = [];
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-graduation-cap mr-1 text-primary"></i>Jumlah Peserta (opsional)</label>
+                                            <input type="text" class="form-control" name="jml_peserta"  onKeyPress="return goodchars(event,'0123456789',this)" value="${item.jml_peserta || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
+                                                <i class="fas fa-graduation-cap mr-1 text-primary"></i>Tempat Kegiatan (opsional)</label>
+                                            <input type="text" class="form-control" name="tempat_kegiatan" value="${item.tempat_kegiatan || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label font-weight-semibold">
                                                 <i class="fas fa-info-circle mr-1 text-success"></i>Status <span class="text-danger">*</span>
                                             </label>
                                             <select class="form-control" name="status_tc" required>
@@ -1394,7 +1318,7 @@ $months_data = [];
                                             <label class="form-label font-weight-semibold">
                                                 <i class="fas fa-graduation-cap mr-1 text-primary"></i>Link Dokumen
                                             </label>
-                                            <input type="text" class="form-control" name="dokumen_rk_training_center" value="${item.dokumen_rk_training_center|| ''}">
+                                            <input type="text" class="form-control" name="dokumen_rk_training_center" autocomplete="off" value="${item.dokumen_rk_training_center|| ''}">
                                         </div>
                                     </div>
                                 </div>

@@ -190,12 +190,12 @@ else { ?>
                                         </div>
 
                                         <!-- button hapus data -->
-                                        <!-- <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapus<?php echo $data['id_kategori']; ?>" data-tooltip="tooltip" data-placement="top" title="Hapus">
+                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapus<?php echo $data['id_kategori']; ?>" data-tooltip="tooltip" data-placement="top" title="Hapus">
                                             <i class="fas fa-trash fa-sm"></i>
-                                        </a> -->
+                                        </a>
 
                                         <!-- Modal Hapus -->
-                                        <!-- <div class="modal fade" id="modalHapus<?php echo $data['id_kategori']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalHapusLabel<?php echo $data['id_kategori']; ?>" aria-hidden="true">
+                                        <div class="modal fade" id="modalHapus<?php echo $data['id_kategori']; ?>" tabindex="-1" role="dialog" aria-labelledby="modalHapusLabel<?php echo $data['id_kategori']; ?>" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header bg-danger text-white">
@@ -232,7 +232,7 @@ else { ?>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div> -->
+                                        </div> 
                                     </td>
                                 </tr>
                             <?php } ?>

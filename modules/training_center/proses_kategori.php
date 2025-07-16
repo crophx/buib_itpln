@@ -72,27 +72,27 @@ else {
     // Cek jika request untuk 'hapus' dikirim
     // Catatan: Form hapus di file Anda mengirimkan request ke file view itu sendiri.
     // Kode di bawah ini akan bekerja jika Anda mengubah action form hapus ke file ini.
-    // elseif (isset($_POST['hapus'])) {
-    //     // Ambil data dari form
-    //     $id_kategori = (int)$_POST['id_kategori'];
+    elseif (isset($_POST['hapus'])) {
+        // Ambil data dari form
+        $id_kategori = (int)$_POST['id_kategori'];
 
-    //     // Buat query untuk menghapus data
-    //     $query_delete = mysqli_query($mysqli, "DELETE FROM tbl_kategori WHERE id_kategori = $id_kategori");
+        // Buat query untuk menghapus data
+        $query_delete = mysqli_query($mysqli, "DELETE FROM tbl_kategori WHERE id_kategori = $id_kategori");
 
-    //     // Cek jika proses delete berhasil
-    //     if ($query_delete) {
-    //         header('location: ../../main.php?module=training_center&pesan=3');
-    //         exit();
-    //     } 
-    //     // Jika gagal, kirim notifikasi error
-    //     else {
-    //         // Ini bisa terjadi jika ada foreign key constraint (misalnya, kategori masih digunakan di tabel lain)
-    //         $_SESSION['alert'] = [
-    //             'type'    => 'error',
-    //             'message' => 'Gagal menghapus data! Kategori mungkin masih digunakan oleh data lain.'
-    //         ];
-    //     }
-    // }
+        // Cek jika proses delete berhasil
+        if ($query_delete) {
+            header('location: ../../main.php?module=training_center&pesan=3');
+            exit();
+        } 
+        // Jika gagal, kirim notifikasi error
+        else {
+            // Ini bisa terjadi jika ada foreign key constraint (misalnya, kategori masih digunakan di tabel lain)
+            $_SESSION['alert'] = [
+                'type'    => 'error',
+                'message' => 'Gagal menghapus data! Kategori mungkin masih digunakan oleh data lain.'
+            ];
+        }
+    }
 
     // Setelah semua proses selesai, alihkan kembali ke halaman utama data kategori
     header('location: ../../main.php?module=kategori_peserta');

@@ -159,20 +159,7 @@ else { ?>
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Tampil Data Sebelumnya -->
-                                                            <div class="alert alert-light border mt-3">
-                                                                <h6 class="mb-2 font-weight-semibold">
-                                                                    <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
-                                                                </h6>
-                                                                <div class="row">
-                                                                    <div class="col-md-12">
-                                                                        <div class="d-flex align-items-center">
-                                                                            <strong class="mr-2">Kategori:</strong>
-                                                                            <span class="badge badge-info badge-lg"><?php echo htmlspecialchars($data['nama_kategori']); ?></span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                            
                                                         </div>
 
                                                         <!-- Modal Footer -->
@@ -243,7 +230,15 @@ else { ?>
         </div>
     </div>
 
-    
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi DataTables
+            $('#basic-datatables').DataTable({
+                "pageLength": 50, // Menetapkan jumlah entri default per halaman menjadi 25
+                "ordering": true
+                });
+        });
+    </script>
 
     
 <?php } ?>
