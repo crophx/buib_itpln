@@ -13,6 +13,10 @@ else {
 		// panggil file tampil data beranda
 		include "modules/beranda/tampil_data.php";
 	}
+	if ($_GET['module'] == 'dashboard') {
+		// panggil file tampil data beranda
+		include "modules/dashboard/dashboard.php";
+	}
 
 	// -- MODULE BUIB -- //
 	// jika module yang dipilih "buib"

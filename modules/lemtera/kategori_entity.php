@@ -234,9 +234,8 @@ else { ?>
         $(document).ready(function() {
             // Inisialisasi DataTables
             $('#basic-datatables').DataTable({
-                "pageLength": 50, // Menetapkan jumlah entri default per halaman menjadi 25
-                "ordering": true
-                });
+                "pageLength": 25
+            });
         });
     </script>
 

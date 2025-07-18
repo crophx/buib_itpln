@@ -159,7 +159,7 @@ else { ?>
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Tampil Data Sebelumnya -->
+                                                            <!-- Tampil Data Sebelumnya
                                                             <div class="alert alert-light border mt-3">
                                                                 <h6 class="mb-2 font-weight-semibold">
                                                                     <i class="fas fa-history mr-2 text-info"></i>Data Sebelumnya
@@ -172,7 +172,7 @@ else { ?>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                            </div> -->
                                                         </div>
 
                                                         <!-- Modal Footer -->
@@ -242,6 +242,15 @@ else { ?>
             </div>
         </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi DataTables
+            $('#basic-datatables').DataTable({
+                "pageLength": 25
+            });
+        });
+    </script>
 
     
 

@@ -360,7 +360,7 @@ else {
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">
-                                <i class="fas fa-chart-bar mr-2"></i>Realisasi per Keterangan Program
+                                <i class="fas fa-chart-bar mr-2"></i>Realisasi per Entity
                             </div>
                         </div>
                         <div class="card-body">

@@ -54,11 +54,11 @@ else { ?>
 
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label>Deputy buib<span class="text-danger">*</span></label>
+                                <label>deputy buib <span class="text-danger">*</span></label>
                                 <select name="deputy_buib" class="form-control select2-single" autocomplete="off" required>
                                     <option selected disabled value="">-- Pilih deputy --</option>
                                     <?php
-                                    // Query untuk mengambil data deputy dari tbl_deputy
+                                    // Query untuk mengambil data deputy dari tbl_deputy_buib
                                     $query_deputy = mysqli_query($mysqli, "SELECT id_deputy, nama_deputy FROM tbl_deputy_buib ORDER BY nama_deputy ASC") 
                                                     or die('Error pada query deputy: '. mysqli_error($mysqli));
                                     

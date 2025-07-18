@@ -31,6 +31,26 @@ else {
 			</li>
 			<?php
 		}
+		// jika menu dashboar dipilih, menu dashboard aktif
+		if ($_GET['module'] == 'dashboard') { ?>
+			<li class="nav-item active">
+				<a href="?module=dashboard">
+					<i class="fas fa-tachometer-alt"></i>
+					<p>Dashboard</p>
+				</a>
+			</li>
+			<?php
+		}
+		// jika tidak dipilih, menu dashboard tidak aktif
+		else { ?>
+			<li class="nav-item">
+				<a href="?module=dashboard">
+					<i class="fas fa-tachometer-alt"></i>
+					<p>Dashboard</p>
+				</a>
+			</li>
+			<?php
+		}
 
 		// jika menu arsip dokumen (tampil data / tampil detail / form entri / form ubah) dipilih, menu arsip dokumen aktif
 		if ($_GET['module'] == 'arsip' || $_GET['module'] == 'tampil_detail_arsip' || $_GET['module'] == 'form_entri_arsip' || $_GET['module'] == 'form_ubah_arsip') { ?>
