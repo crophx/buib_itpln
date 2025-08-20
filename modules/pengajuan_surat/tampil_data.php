@@ -64,7 +64,7 @@ else {
 								$query = mysqli_query($mysqli, "SELECT a.id_arsip, a.jenis_dokumen, a.bulan_tahun, a.tahun_anggaran, a.dipa, b.nama_jenis 
 																FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
 																ORDER BY a.id_arsip DESC")
-																or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+									or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
 								// ambil data hasil query
 								while ($data = mysqli_fetch_assoc($query)) { ?>
 									<!-- tampilkan data -->
@@ -75,31 +75,45 @@ else {
 										<td width="80" class="text-center"><?php echo $data['tahun_anggaran']; ?></td>
 										<td width="80" class="text-center"><?php echo $data['dipa']; ?></td>
 										<td width="80" class="text-center">
-											<a href="?module=tampil_detail_arsip&id=<?php echo $data['id_arsip']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
+											<a href="?module=tampil_detail_arsip&id=<?php echo $data['id_arsip']; ?>"
+												class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip"
+												data-placement="top" title="Tampilkan Dokumen">
 												<i class="far fa-file-alt"></i>
 											</a>
 										</td>
 										<td width="60" class="text-center">
 											<div>
 												<!-- button ubah data -->
-												<a href="?module=form_ubah_arsip&id=<?php echo $data['id_arsip']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Ubah">
+												<a href="?module=form_ubah_arsip&id=<?php echo $data['id_arsip']; ?>"
+													class="btn btn-icon btn-round btn-success btn-sm mr-md-1" data-tooltip="tooltip"
+													data-placement="top" title="Ubah">
 													<i class="fas fa-pencil-alt fa-sm"></i>
 												</a>
 												<!-- button hapus data -->
-												<a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapus<?php echo $data['id_arsip']; ?>" data-tooltip="tooltip" data-placement="top" title="Hapus">
+												<a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal"
+													data-target="#modalHapus<?php echo $data['id_arsip']; ?>" data-tooltip="tooltip"
+													data-placement="top" title="Hapus">
 													<i class="fas fa-trash fa-sm"></i>
 												</a>
 												<!-- Modal Hapus -->
-												<div class="modal fade" id="modalHapus<?php echo $data['id_arsip']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+												<div class="modal fade" id="modalHapus<?php echo $data['id_arsip']; ?>"
+													tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+													aria-hidden="true">
 													<div class="modal-dialog" role="document">
 														<div class="modal-content">
 															<div class="modal-header">
-																<h5 class="modal-title" id="exampleModalLabel"><i class="fas fa-trash mr-2"></i>Hapus Data Arsip Dokumen</h5>
+																<h5 class="modal-title" id="exampleModalLabel"><i
+																		class="fas fa-trash mr-2"></i>Hapus Data Arsip Dokumen</h5>
 															</div>
-															<div class="modal-body text-left">Anda yakin ingin menghapus data arsip dokumen <strong><?php echo $data['nama_jenis']; ?></strong> bulan <strong><?php echo $data['bulan_tahun']; ?></strong>?</div>
+															<div class="modal-body text-left">Anda yakin ingin menghapus data arsip
+																dokumen <strong><?php echo $data['nama_jenis']; ?></strong> bulan
+																<strong><?php echo $data['bulan_tahun']; ?></strong>?
+															</div>
 															<div class="modal-footer">
-																<button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-																<a href="modules/arsip/proses_hapus.php?id=<?php echo $data['id_arsip']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+																<button type="button" class="btn btn-default btn-round"
+																	data-dismiss="modal">Batal</button>
+																<a href="modules/arsip/proses_hapus.php?id=<?php echo $data['id_arsip']; ?>"
+																	class="btn btn-danger btn-round">Ya, Hapus</a>
 															</div>
 														</div>
 													</div>
@@ -116,7 +130,7 @@ else {
 		</div>
 
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				// dapatkan parameter URL
 				let queryString = window.location.search;
 				let urlParams = new URLSearchParams(queryString);
@@ -177,7 +191,7 @@ else {
 				}
 			});
 		</script>
-	<?php
+		<?php
 	}
 	// jika hak akses = Pengguna, tampilkan konten
 	elseif ($_SESSION['hak_akses'] == 'Pengguna') { ?>
@@ -226,7 +240,7 @@ else {
 								$query = mysqli_query($mysqli, "SELECT a.id_arsip, a.jenis_dokumen, a.bulan_tahun, a.tahun_anggaran, a.dipa, b.nama_jenis 
 																FROM tbl_arsip as a INNER JOIN tbl_jenis as b ON a.jenis_dokumen=b.id_jenis 
 																ORDER BY a.id_arsip DESC")
-																or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+									or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
 								// ambil data hasil query
 								while ($data = mysqli_fetch_assoc($query)) { ?>
 									<!-- tampilkan data -->
@@ -237,7 +251,9 @@ else {
 										<td width="80" class="text-center"><?php echo $data['tahun_anggaran']; ?></td>
 										<td width="80" class="text-center"><?php echo $data['dipa']; ?></td>
 										<td width="80" class="text-center">
-											<a href="?module=tampil_detail_arsip&id=<?php echo $data['id_arsip']; ?>" class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip" data-placement="top" title="Tampilkan Dokumen">
+											<a href="?module=tampil_detail_arsip&id=<?php echo $data['id_arsip']; ?>"
+												class="btn btn-icon btn-round btn-warning btn-sm mr-md-1" data-tooltip="tooltip"
+												data-placement="top" title="Tampilkan Dokumen">
 												<i class="far fa-file-alt"></i>
 											</a>
 										</td>
@@ -249,7 +265,7 @@ else {
 				</div>
 			</div>
 		</div>
-<?php
+		<?php
 	}
 }
 ?>

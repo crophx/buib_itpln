@@ -133,7 +133,7 @@ else {
             <div class="row mt-5">
                 <?php
                 render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
-                render_menu_card('Bagian Kerja Sama', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses'], 'https://dasker.itpln.ac.id/');
+                render_menu_card('Bagian Kerja Sama', 'bks', 'fas fa-clone', null, $_SESSION['hak_akses']);
                 render_menu_card('Bagian Kerja Internasional', 'bki', 'fas fa-camera', 'violet', $_SESSION['hak_akses']);
                 render_menu_card('Bagian Usaha dan Inkubasi Bisnis', 'buib', 'fas fa-university', 'antiquewhite', $_SESSION['hak_akses']);
                 render_menu_card('Lembaga Terapan', 'lemtera', 'fas fa-leaf', 'green', $_SESSION['hak_akses']);

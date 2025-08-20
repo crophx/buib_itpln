@@ -27,7 +27,8 @@ else { ?>
     <div class="page-inner mt--5">
         <div class="card">
             <div class="card-header">
-                <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div class="header-content"
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <!--Judul Form-->
                     <div class="card-title" style="margin: 0;">
                         <i class="fas fa-edit mr-2"></i>Entri Data Rencana Kegiatan
@@ -41,23 +42,45 @@ else { ?>
                 </div>
             </div>
             <!--Form Entri Data-->
-            <form action="modules/bks/proses_simpan.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form action="modules/bks/proses_simpan.php" method="post" enctype="multipart/form-data"
+                class="needs-validation" novalidate>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label>Deputy bks <span class="text-danger">*</span></label>
-                                <input name="nama_program" class="form-control" autocomplete="off" required>
-                                <div class="invalid-feedback">Deputy bks tidak boleh kosong.</div>
+                                <label>Nama Mitra<span class="text-danger">*</span></label>
+
+                                <select name="mitra_id" class="form-control select2-single" required>
+                                    <option value="" disabled selected>-- Pilih Mitra --</option>
+                                    <?php
+                                    // Query untuk mengambil semua data dari tabel master mitra
+                                    $query_mitra = mysqli_query($mysqli, "SELECT id, nama_mitra FROM tbl_mitra_bki ORDER BY nama_mitra ASC");
+
+                                    // Looping untuk membuat setiap opsi dropdown
+                                    while ($data_mitra = mysqli_fetch_assoc($query_mitra)) {
+                                        // Atribut 'value' diisi dengan ID, teks yang tampil diisi dengan NAMA
+                                        echo "<option value='{$data_mitra['id']}'>{$data_mitra['nama_mitra']}</option>";
+                                    }
+                                    ?>
+                                </select>
+                                <div class="invalid-feedback">Mitra tidak boleh kosong.</div>
+                                <small class="form-text text-primary pt-1">
+                                    Jika pilihan mitra tidak ada, silakan <a href="?module=mitra_bki"><i>[klik
+                                            disini]</i></a>
+                                    untuk menambahkan.
+                                </small>
                             </div>
                         </div>
 
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label>Kegiatan <span class="text-danger">*</span></label>
-                                <!-- PERBAIKAN: Ubah name dari "text" menjadi "kegiatan" -->
-                                <input name="kegiatan" class="form-control" autocomplete="off" required>
-                                <div class="invalid-feedback">Kegiatan tidak boleh kosong.</div>
+                                <label>Bentuk Kerjasama</label> <span class="text-danger">*</span></label>
+                                <select name="bentuk_kerjasama" class="form-control select2-single" required>
+                                    <option value="" disabled selected>-- Pilih Bentuk Kerjasama --</option>
+                                    <option value="Akademik">Akademik</option>
+                                    <option value="Non-Akademik">Non Akademik</option>
+                                </select>
+                                <div class="invalid-feedback">Klasifikasi Mitra tidak boleh kosong.</div>
                             </div>
                         </div>
                     </div>
@@ -65,17 +88,11 @@ else { ?>
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <label>Rencana Nominal <span class="text-danger">*</span></label>
-                                <input type="text" name="target_nominal" class="form-control" autocomplete="off" onKeyPress="return goodchars(event,'0123456789',this)" required>
-                                <div class="invalid-feedback">Rencana nominal tidak boleh kosong.</div>
-                                <small class="form-text text-muted">Masukkan angka tanpa titik atau koma</small>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                <label>Tanggal Input <span class="text-danger">*</span></label>
+                                <label>Tanggal Input Rencana<span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="text" name="tgl_input" class="form-control datepicker" placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>" required>
+                                    <input type="text" name="tgl_input" class="form-control datepicker"
+                                        placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>"
+                                        required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">
                                             <i class="fa fa-calendar-alt"></i>
@@ -83,7 +100,8 @@ else { ?>
                                     </div>
                                 </div>
                                 <div class="invalid-feedback">Tanggal input tidak boleh kosong.</div>
-                                <small class="form-text text-muted">Pilih tanggal input dengan mengklik pada kalender</small>
+                                <small class="form-text text-muted">Pilih tanggal input dengan mengklik pada
+                                    kalender</small>
                             </div>
                         </div>
 
@@ -127,23 +145,60 @@ else { ?>
                     </div>
 
                     <div class="row">
-                        
-                    </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Status Kerjasama <span class="text-danger">*</span></label>
+                                <select name="status_kerjasama_id" class="form-control select2-single" required>
+                                    <option value="" disabled selected>-- Pilih Status --</option>
+                                    <?php
+                                    // Query untuk mengambil semua data dari tabel master status
+                                    $query_status = mysqli_query($mysqli, "SELECT id, status_kerjasama FROM tbl_status_kerjasama ORDER BY id ASC");
 
-                    <!-- Info Box untuk menampilkan persentase otomatis -->
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="alert alert-info" id="persentase-info" style="display: none;">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                <span id="persentase-text"></span>
+                                    while ($data_status = mysqli_fetch_assoc($query_status)) {
+                                        echo "<option value='{$data_status['id']}'>{$data_status['status_kerjasama']}</option>";
+                                    }
+                                    ?>
+                                </select>
+                                <div class="invalid-feedback">Status Kerjasama tidak boleh kosong.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Klasifikasi Mitra<span class="text-danger">*</span></label>
+                                <select name="klasifikasi_mitra" class="form-control select2-single" required>
+                                    <option value="" disabled selected>-- Pilih Klasifikasi --</option>
+                                    <option value="Industri">Industri</option>
+                                    <option value="PLN Group">PLN Group</option>
+                                    <option value="Pemerintahan">Pemerintahan</option>
+                                    <option value="Start-Up">Start-Up</option>
+                                    <option value="Perusahaan Multinasional">Perusahaan Multinasional</option>
+                                    <option value="Perguruan Tinggi">Perguruan Tinggi</option>
+                                    <option value="Institusi/Organisasi Multilateral">Institusi/Organisasi Multilateral
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">Klasifikasi Mitra tidak boleh kosong.</div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label>Perihal <span class="text-danger">*</span></label>
+                        <textarea name="perihal" class="form-control" rows="3" required></textarea>
+                        <div class="invalid-feedback">Perihal tidak boleh kosong.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Keterangan <span class="text-danger">*</span></label>
+                        <textarea name="keterangan" class="form-control" rows="3" required></textarea>
+                        <div class="invalid-feedback">Keterangan tidak boleh kosong.</div>
+                    </div>
                 </div>
-                
+
                 <div class="card-action">
                     <!-- button simpan data -->
-                    <input type="submit" name="simpan_rencana" value="Simpan" class="btn btn-success btn-round pl-4 pr-4 mr-2">
+                    <input type="submit" name="simpan_rencana" value="Simpan"
+                        class="btn btn-success btn-round pl-4 pr-4 mr-2">
                     <!-- button reset form -->
                     <input type="reset" value="Reset" class="btn btn-warning btn-round pl-4 pr-4 mr-2">
                     <!-- button kembali ke halaman tampil data -->
@@ -155,7 +210,7 @@ else { ?>
 
     <!-- Script untuk menginisialisasi datepicker dan kalkulasi persentase -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Inisialisasi datepicker
             $('.datepicker').datepicker({
                 format: 'dd/mm/yyyy',
@@ -173,12 +228,12 @@ else { ?>
             });
 
             // Event listener untuk input realisasi
-            $('input[name="target_nominal"]').on('keyup', function() {
+            $('input[name="target_nominal"]').on('keyup', function () {
                 hitungPersentase();
             });
 
             // Format angka dengan pemisah ribuan saat input
-            $('input[name="target_nominal"]').on('blur', function() {
+            $('input[name="target_nominal"]').on('blur', function () {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 if (value) {
                     var formatted = parseInt(value).toLocaleString('id-ID');
@@ -188,7 +243,7 @@ else { ?>
             });
 
             // Hapus format saat focus untuk memudahkan edit
-            $('input[name="target_nominal"]').on('focus', function() {
+            $('input[name="target_nominal"]').on('focus', function () {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 $(this).val(value);
             });
@@ -199,20 +254,20 @@ else { ?>
             var key, keychar;
             key = event.keyCode;
             if (key == null) return true;
-            
+
             // untuk backspace dan delete
             if (key == 0 || key == 8 || key == 9 || key == 13 || key == 27) return true;
-            
+
             keychar = String.fromCharCode(key);
             keychar = keychar.toLowerCase();
             goodchars = goodchars.toLowerCase();
-            
+
             // cek apakah karakter yang diinput termasuk dalam daftar yang diizinkan
             if (goodchars.indexOf(keychar) != -1)
                 return true;
             return false;
         }
     </script>
-    
+
 <?php }
 ?>
