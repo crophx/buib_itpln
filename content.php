@@ -59,20 +59,15 @@ else {
 		// panggil file tampil entri data buib
 		include "modules/buib/tampil_detail.php";
 	}
+
 	// -- MODULE Pusat Bisnis -- //
 	elseif ($_GET['module'] == 'pusat_bisnis' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'PusatBisnis'])) {
 		// panggil file tampil home pusat_bisnis
 		include "modules/pusat_bisnis/pusat_bisnis_home.php";
 	}
-	// -- MODULE BKS -- //
-	elseif ($_GET['module'] == 'bks' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
-		// panggil file tampil home bks
-		include "modules/bks/bks_home.php";
-	}
-
 
 	// -- MODULE BKI -- //
-	elseif ($_GET['module'] == 'bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKI'])) {
+	elseif ($_GET['module'] == 'bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'BKI'])) {
 		// panggil file tampil home bki
 		include "modules/bki/bki_home.php";
 	}
@@ -92,14 +87,45 @@ else {
 		include "modules/bki/form_entri_rk.php";
 	}
 	// jika module yang dipilih "jenis dokumen bki"
-	elseif ($_GET['module'] == 'jenis_dokumen_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan'])) {
+	elseif ($_GET['module'] == 'jenis_dokumen_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil tampil data jenis dokumen bki
 		include "modules/bki/jenis_dokumen_bki/tampil_data.php";
 	}
 	// jika module yang dipilih "mitra bki"
-	elseif ($_GET['module'] == 'mitra_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan'])) {
+	elseif ($_GET['module'] == 'mitra_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
 		// panggil file tampil tampil data jenis dokumen bki
 		include "modules/bki/mitra_bki/tampil_data.php";
+	}
+	// jika module yang dipilih "form entri MoU"
+	elseif ($_GET['module'] == 'form_entri_MoU_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil entri data bks
+		include "modules/bki/mou/form_entri_MoU.php";
+	}
+	// jika module yang dipilih "form entri pks"
+	elseif ($_GET['module'] == 'form_entri_PKS_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKI', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil entri data bks
+		include "modules/bki/pks/form_entri_PKS.php";
+	}
+
+	// -- MODULE BKS -- //
+	elseif ($_GET['module'] == 'bks' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
+		// panggil file tampil home bks
+		include "modules/bks/bks_home.php";
+	}
+	// jika module yang dipilih "form entri input MoU di bks"
+	elseif ($_GET['module'] == 'form_entri_MoU_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/mou/form_entri_MoU_bks.php";
+	}
+	// jika module yang dipilih "form ubah bks"
+	elseif ($_GET['module'] == 'form_ubah_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/form_ubah.php";
+	}
+	// jika module yang dipilih "tampil bks"
+	elseif ($_GET['module'] == 'tampil_detail_bks') {
+		// panggil file tampil entri data bks
+		include "modules/bks/tampil_detail.php";
 	}
 	// jika module yang dipilih "form entri bks"
 	elseif ($_GET['module'] == 'form_entri_realisasi_bks') {
@@ -111,18 +137,16 @@ else {
 		// panggil file tampil entri data bks
 		include "modules/bks/form_entri_rk.php";
 	}
-	// jika module yang dipilih "form entri MoU"
-	elseif ($_GET['module'] == 'form_entri_MoU_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
+	// jika module yang dipilih "form entri pks bks"
+	elseif ($_GET['module'] == 'form_entri_pks_bks' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data bks
-		include "modules/bki/mou/form_entri_MoU.php";
+		include "modules/bks/pks/form_entri_PKS.php";
 	}
-	// jika module yang dipilih "form entri pks"
-	elseif ($_GET['module'] == 'form_entri_PKS_bki' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
+	// jika module yang dipilih "form entri ia bks"
+	elseif ($_GET['module'] == 'form_entri_ia_bks' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data bks
-		include "modules/bki/pks/form_entri_PKS.php";
+		include "modules/bks/implementation_arrangement/form_entri_i_a.php";
 	}
-
-
 
 	// -- MODULE LEMTERA -- //
 	elseif ($_GET['module'] == 'lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin','Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
@@ -153,10 +177,8 @@ else {
 		include "modules/lemtera/kategori_entity.php";
 	}
 
-
-
 	// -- MODULE Training Center -- //
-	elseif ($_GET['module'] == 'training_center' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'TrainingCenter'])) {
+	elseif ($_GET['module'] == 'training_center' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'TrainingCenter'])) {
 		// panggil file tampil home training_center
 		include "modules/training_center/training_center_home.php";
 	}
@@ -182,16 +204,6 @@ else {
 	} elseif ($_GET['module'] == 'kategori_peserta') {
 		// panggil file tampil data KATEGORI PESERTA training center
 		include "modules/training_center/kategori_peserta.php";
-	}
-	// jika module yang dipilih "form ubah bks"
-	elseif ($_GET['module'] == 'form_ubah_bks') {
-		// panggil file tampil entri data bks
-		include "modules/bks/form_ubah.php";
-	}
-	// jika module yang dipilih "tampil bks"
-	elseif ($_GET['module'] == 'tampil_detail_bks') {
-		// panggil file tampil entri data bks
-		include "modules/bks/tampil_detail.php";
 	}
 	// jika module yang dipilih "arsip"
 	elseif ($_GET['module'] == 'arsip') {
