@@ -5,6 +5,9 @@ require_once "../../config/database.php";
 // Pengecekan hak akses
 if (empty($_SESSION['hak_akses']) || !in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
     header('location: ../../../main.php?module=bks&pesan=6');
+// Pengecekan hak akses
+if (empty($_SESSION['hak_akses']) || !in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
+    header('location: ../../../main.php?module=bks&pesan=6');
     exit();
 }
 
@@ -34,6 +37,10 @@ if (isset($_POST['simpan_rencana'])) {
                                      VALUES('$mitra_id', '$bentuk_kerjasama', '$perihal','$keterangan', '$target_realisasi', '$status_kerjasama_id')")
         or die('Ada kesalahan pada query insert Rencana Kegiatan: ' . mysqli_error($mysqli));
 
+    // Cek jika query berhasil
+    if ($query) {
+        header('location: ../../../main.php?module=bks&pesan=1');
+        exit();
     // Cek jika query berhasil
     if ($query) {
         header('location: ../../../main.php?module=bks&pesan=1');

@@ -7,8 +7,8 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
     // Panggil file koneksi database
     require_once 'config/database.php';
 
-    // Ambil tahun yang dipilih dari filter, default 'all'
-    $selected_year = isset($_GET['tahun']) && is_numeric($_GET['tahun']) ? $_GET['tahun'] : 'all';
+    // Ambil tahun yang dipilih dari filter, default tahun sekarang
+    $selected_year = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
 
     // Fungsi untuk membuat klausa WHERE untuk filter tahun
     function getYearWhereClause($year, $date_column = 'tgl_surat')
@@ -163,6 +163,171 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
     $training_center_kategori = getRealisasiPerKategori($mysqli, 'tbl_rk_training_center', 'kategori_tc', 'tbl_kategori', 'id_kategori', 'nama_kategori', $selected_year);
     $buib_kategori = getRealisasiPerKategori($mysqli, 'tbl_rk_buib', 'deputy_buib', 'tbl_deputy_buib', 'id_deputy', 'nama_deputy', $selected_year);
 
+    // Data untuk BKI
+    $query_mou_negara = mysqli_query($mysqli, "SELECT b.negara, COUNT(a.id) as jumlah_mou FROM tbl_mou as a LEFT JOIN tbl_mitra_bki as b ON a.mitra_id=b.id GROUP BY b.negara ORDER BY jumlah_mou DESC");
+    $data_mou_negara = [];
+    while ($row = mysqli_fetch_assoc($query_mou_negara)) {
+        $data_mou_negara[] = $row;
+    }
+
+    $year_filter_bki = ($selected_year == 'all') ? "" : "WHERE YEAR(tanggal) = " . (int)$selected_year;
+    $query_dokumen_bulan = mysqli_query($mysqli, "
+        SELECT DATE_FORMAT(tanggal, '%Y-%m') as bulan,
+               SUM(CASE WHEN tipe = 'MoU' THEN 1 ELSE 0 END) as jumlah_mou,
+               SUM(CASE WHEN tipe = 'PKS' THEN 1 ELSE 0 END) as jumlah_pks
+        FROM (
+            SELECT tanggal_penandatanganan as tanggal, 'MoU' as tipe FROM tbl_mou
+            UNION ALL
+            SELECT tanggal_penandatanganan as tanggal, 'PKS' as tipe FROM tbl_pks
+        ) as combined
+        $year_filter_bki
+        GROUP BY bulan
+        ORDER BY bulan ASC
+    ");
+    $data_dokumen_bulan = [];
+    while($row = mysqli_fetch_assoc($query_dokumen_bulan)){
+        $data_dokumen_bulan[] = $row;
+    }
+
+    $query_mitra_bki = mysqli_query($mysqli, "
+        SELECT m.nama_mitra,
+               (COUNT(DISTINCT mou.id) + COUNT(DISTINCT pks.id)) as jumlah_dokumen
+        FROM tbl_mitra_bki m
+        LEFT JOIN tbl_mou mou ON m.id = mou.mitra_id
+        LEFT JOIN tbl_pks pks ON m.id = pks.mitra_id
+        GROUP BY m.nama_mitra
+        HAVING jumlah_dokumen > 0
+        ORDER BY jumlah_dokumen DESC
+    ");
+    $data_mitra_bki = [];
+    while($row = mysqli_fetch_assoc($query_mitra_bki)){
+        $data_mitra_bki[] = $row;
+    }
+    
+    // =================================================================
+    // REVISI: KODE UNTUK DATA BKS (BAGIAN KERJA SAMA)
+    // =================================================================
+    $year_filter_bks_main = ($selected_year == 'all') ? '' : 'WHERE YEAR(tanggal_awal) = ' . (int)$selected_year;
+
+    // 1. Chart Klasifikasi Mitra
+    $query_bks_klasifikasi = mysqli_query($mysqli, "
+        SELECT klasifikasi_mitra, COUNT(*) as jumlah FROM (
+            SELECT klasifikasi_mitra FROM tbl_mou_bks $year_filter_bks_main
+            UNION ALL
+            SELECT klasifikasi_mitra FROM tbl_pks_bks $year_filter_bks_main
+            UNION ALL
+            SELECT klasifikasi_mitra FROM tbl_i_a $year_filter_bks_main
+        ) as combined_docs GROUP BY klasifikasi_mitra
+    ");
+    $data_bks_klasifikasi = [];
+    while($row = mysqli_fetch_assoc($query_bks_klasifikasi)){ $data_bks_klasifikasi[] = $row; }
+
+    // 2. Chart Jumlah Dokumen (MoU, PKS, IA)
+    $query_bks_jml_dokumen = mysqli_query($mysqli, "
+        SELECT 'MoU' as tipe, COUNT(*) as jumlah FROM tbl_mou_bks $year_filter_bks_main
+        UNION ALL
+        SELECT 'PKS' as tipe, COUNT(*) as jumlah FROM tbl_pks_bks $year_filter_bks_main
+        UNION ALL
+        SELECT 'IA' as tipe, COUNT(*) as jumlah FROM tbl_i_a $year_filter_bks_main
+    ");
+    $data_bks_jml_dokumen = [];
+    while($row = mysqli_fetch_assoc($query_bks_jml_dokumen)){ $data_bks_jml_dokumen[] = $row; }
+
+    // 3. Chart Bentuk Kerjasama (Berdasarkan MoU, PKS, IA)
+    $query_bks_bentuk = mysqli_query($mysqli, "
+        SELECT bentuk_kerjasama_bks, COUNT(*) as jumlah FROM (
+            SELECT bentuk_kerjasama_bks FROM tbl_mou_bks $year_filter_bks_main
+            UNION ALL
+            SELECT bentuk_kerjasama_bks FROM tbl_pks_bks $year_filter_bks_main
+            UNION ALL
+            SELECT bentuk_kerjasama_bks FROM tbl_i_a $year_filter_bks_main
+        ) as combined_docs GROUP BY bentuk_kerjasama_bks
+    ");
+    $data_bks_bentuk = [];
+    while($row = mysqli_fetch_assoc($query_bks_bentuk)){ $data_bks_bentuk[] = $row; }
+
+    // 4. Chart Jumlah Dokumen (MoU, PKS, IA) per Bulan
+    $year_filter_bks_main = ($selected_year == 'all') ? '' : 'WHERE YEAR(tanggal_awal) = ' . (int)$selected_year;
+    
+    $query_bks_bulanan = mysqli_query($mysqli, "
+        SELECT 
+            DATE_FORMAT(tanggal_awal, '%Y-%m') as bulan,
+            SUM(CASE WHEN tipe = 'MoU' THEN 1 ELSE 0 END) as jumlah_mou,
+            SUM(CASE WHEN tipe = 'PKS' THEN 1 ELSE 0 END) as jumlah_pks,
+            SUM(CASE WHEN tipe = 'IA' THEN 1 ELSE 0 END) as jumlah_ia
+        FROM (
+            SELECT tanggal_awal, 'MoU' as tipe FROM tbl_mou_bks
+            UNION ALL
+            SELECT tanggal_awal, 'PKS' as tipe FROM tbl_pks_bks
+            UNION ALL
+            SELECT tanggal_awal, 'IA' as tipe FROM tbl_i_a
+        ) as combined_docs
+        $year_filter_bks_main
+        GROUP BY bulan
+        ORDER BY bulan ASC
+    ");
+    
+    $data_bks_bulanan = [];
+    while($row = mysqli_fetch_assoc($query_bks_bulanan)){
+        $data_bks_bulanan[] = $row;
+    }
+    
+    // 5. Chart Kategori Jangka Waktu
+    $query_bks_jangka_waktu = mysqli_query($mysqli, "
+        SELECT CASE 
+            WHEN DATEDIFF(tanggal_akhir, tanggal_awal) <= 365 THEN 'Jangka Pendek (≤1 tahun)'
+            WHEN DATEDIFF(tanggal_akhir, tanggal_awal) <= 1095 THEN 'Jangka Menengah (1-3 tahun)'
+            ELSE 'Jangka Panjang (>3 tahun)'
+        END as kategori_waktu, COUNT(*) as jumlah FROM (
+            SELECT tanggal_awal, tanggal_akhir FROM tbl_mou_bks $year_filter_bks_main
+            UNION ALL
+            SELECT tanggal_awal, tanggal_akhir FROM tbl_pks_bks $year_filter_bks_main
+            UNION ALL
+            SELECT tanggal_awal, tanggal_akhir FROM tbl_i_a $year_filter_bks_main
+        ) as combined_docs WHERE tanggal_awal IS NOT NULL AND tanggal_akhir IS NOT NULL
+        GROUP BY kategori_waktu
+    ");
+    $data_bks_jangka_waktu = [];
+    while($row = mysqli_fetch_assoc($query_bks_jangka_waktu)){ $data_bks_jangka_waktu[] = $row; }
+    
+    // 6. Query untuk menghitung total mitra unik BKS
+    // CATATAN: Query ini mengasumsikan nama kolom untuk mitra adalah 'nama_mitra'. Sesuaikan jika nama kolomnya berbeda.
+    $query_bks_total_mitra = mysqli_query($mysqli, "
+        SELECT COUNT(DISTINCT mitra_id) as total FROM (
+            SELECT mitra_id FROM tbl_mou_bks $year_filter_bks_main
+            UNION
+            SELECT mitra_id FROM tbl_pks_bks $year_filter_bks_main
+            UNION
+            SELECT mitra_id FROM tbl_i_a $year_filter_bks_main
+        ) as combined_mitra
+    ");
+    $data_bks_total_mitra = mysqli_fetch_assoc($query_bks_total_mitra);
+
+    // =================================================================
+    // AKHIR DARI KODE REVISI UNTUK BKS
+    // =================================================================
+
+    // Menyiapkan data untuk Summary Card BKS dan BKI
+    // Proses data BKS
+    $bks_summary = ['mou' => 0, 'pks' => 0, 'ia' => 0, 'mitra' => 0, 'total' => 0];
+    foreach ($data_bks_jml_dokumen as $doc) {
+        if ($doc['tipe'] == 'MoU') $bks_summary['mou'] = $doc['jumlah'];
+        if ($doc['tipe'] == 'PKS') $bks_summary['pks'] = $doc['jumlah'];
+        if ($doc['tipe'] == 'IA') $bks_summary['ia'] = $doc['jumlah'];
+    }
+    $bks_summary['mitra'] = $data_bks_total_mitra['total'] ?? 0;
+    $bks_summary['total'] = $bks_summary['mou'] + $bks_summary['pks'] + $bks_summary['ia'];
+
+    // Proses data BKI
+    $bki_summary = ['mou' => 0, 'pks' => 0, 'mitra' => 0, 'negara' => 0, 'total' => 0];
+    foreach ($data_dokumen_bulan as $data) {
+        $bki_summary['mou'] += $data['jumlah_mou'];
+        $bki_summary['pks'] += $data['jumlah_pks'];
+    }
+    $bki_summary['mitra'] = count($data_mitra_bki);
+    $bki_summary['negara'] = count($data_mou_negara); // Menghitung jumlah negara
+    $bki_summary['total'] = $bki_summary['mou'] + $bki_summary['pks'];
+
     function formatNumber($number)
     {
         if ($number > 0) {
@@ -177,14 +342,12 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
 
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
-
 <body>
 
     <div class="panel-header">
@@ -213,7 +376,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                                 <div class="col-md-3">
                                     <label for="filterTahun">Filter Tahun:</label>
                                     <select name="tahun" id="filterTahun" class="form-control">
-                                        <option value="all">Semua Tahun</option>
+                                        <option value="all" <?php echo ($selected_year == 'all') ? 'selected' : ''; ?>>Semua Tahun</option>
                                         <?php
                                         // Query untuk mendapatkan semua tahun unik dari semua tabel
                                         $query_tahun = mysqli_query($mysqli, "(SELECT DISTINCT YEAR(tgl_surat) as tahun FROM tbl_rk_lemtera) UNION (SELECT DISTINCT YEAR(tgl_surat) as tahun FROM tbl_rk_training_center) UNION (SELECT DISTINCT YEAR(tgl_surat) as tahun FROM tbl_rk_buib) ORDER BY tahun DESC");
@@ -333,6 +496,70 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-stats card-round">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-icon">
+                                <div class="icon-big text-center icon-danger bubble-shadow-small"><i class="fas fa-handshake"></i></div>
+                            </div>
+                            <div class="col col-stats ml-3 ml-sm-0">
+                                <div class="numbers">
+                                    <p class="card-category">Bagian Kerja Sama (BKS)</p>
+                                    <h4 class="card-title"><?php echo $bks_summary['total']; ?> Dokumen</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-3 text-center border-right"><small class="text-muted">Jumlah MoU</small>
+                                <h6 class="font-weight-bold"><?php echo $bks_summary['mou']; ?></h6>
+                            </div>
+                            <div class="col-3 text-center border-right"><small class="text-muted">Jumlah PKS</small>
+                                <h6 class="font-weight-bold"><?php echo $bks_summary['pks']; ?></h6>
+                            </div>
+                            <div class="col-3 text-center border-right"><small class="text-muted">Jumlah IA</small>
+                                <h6 class="font-weight-bold"><?php echo $bks_summary['ia']; ?></h6>
+                            </div>
+                            <div class="col-3 text-center"><small class="text-muted">Total Mitra</small>
+                                <h6 class="font-weight-bold"><?php echo $bks_summary['mitra']; ?></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-stats card-round">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-icon">
+                                <div class="icon-big text-center icon-info bubble-shadow-small"><i class="fas fa-globe"></i></div>
+                            </div>
+                            <div class="col col-stats ml-3 ml-sm-0">
+                                <div class="numbers">
+                                    <p class="card-category">Bagian Kerja Sama Internasional (BKI)</p>
+                                    <h4 class="card-title"><?php echo $bki_summary['total']; ?> Dokumen</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-3 text-center border-right"><small class="text-muted">Jumlah MoU</small>
+                                <h6 class="font-weight-bold"><?php echo $bki_summary['mou']; ?></h6>
+                            </div>
+                            <div class="col-3 text-center border-right"><small class="text-muted">Jumlah PKS</small>
+                                <h6 class="font-weight-bold"><?php echo $bki_summary['pks']; ?></h6>
+                            </div>
+                            <div class="col-3 text-center border-right"><small class="text-muted">Total Mitra</small>
+                                <h6 class="font-weight-bold"><?php echo $bki_summary['mitra']; ?></h6>
+                            </div>
+                            <div class="col-3 text-center"><small class="text-muted">Total Negara</small>
+                                <h6 class="font-weight-bold"><?php echo $bki_summary['negara']; ?></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-12">
@@ -415,19 +642,54 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <div class="text-center"><h3 class="card-title text-danger"><i class="fas fa-handshake mr-2"></i>Bagian Kerja Sama</h3></div>
+                        <div class="text-center"><h3 class="card-title text-danger"><i class="fas fa-handshake mr-2"></i>Bagian Kerja Sama (BKS)</h3></div>
                     </div>
                     <div class="card-body">
+                         <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="chartBksKlasifikasi" height="200"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="chartBksJmlDokumen" height="200"></canvas>
+                            </div>
                         </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <canvas id="chartBksBentuk" height="200"></canvas>
+                            </div>
+                             <div class="col-md-6">
+                                <canvas id="chartBksJangkaWaktu" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                             <div class="col-md-12">
+                                <canvas id="chartBksBulanan" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
                         <div class="text-center"><h3 class="card-title text-info"><i class="fas fa-globe mr-2"></i>Bagian Kerja Sama Internasional</h3></div>
                     </div>
                     <div class="card-body">
-                         </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="chartMoUDistribusi" height="200"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="chartMoUvsPKS" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <canvas id="chartMitra" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -450,65 +712,30 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             const lemteraKategori = <?php echo json_encode($lemtera_kategori); ?>;
             const trainingCenterKategori = <?php echo json_encode($training_center_kategori); ?>;
             const buibKategori = <?php echo json_encode($buib_kategori); ?>;
+            
+            const dataMouNegara = <?php echo json_encode($data_mou_negara); ?>;
+            const dataDokumenBulan = <?php echo json_encode($data_dokumen_bulan); ?>;
+            const dataMitraBki = <?php echo json_encode($data_mitra_bki); ?>;
 
-            // Render Line Chart (bisa kumulatif atau aktual)
+            // Data BKS from PHP
+            const dataBksKlasifikasi = <?php echo json_encode($data_bks_klasifikasi); ?>;
+            const dataBksJmlDokumen = <?php echo json_encode($data_bks_jml_dokumen); ?>;
+            const dataBksBentuk = <?php echo json_encode($data_bks_bentuk); ?>;
+            const dataBksBulanan = <?php echo json_encode($data_bks_bulanan); ?>;
+            const dataBksJangkaWaktu = <?php echo json_encode($data_bks_jangka_waktu); ?>;
+            
+            // Render Line Chart
             function renderLineChart(canvasId, chartData, chartTitle, isCumulative = true) {
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 const labels = Object.values(chartData).map(item => item.label);
                 new Chart(ctx, {
                     type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'Target',
-                                data: Object.values(chartData).map(item => item.target || 0),
-                                borderColor: '#FF6384',
-                                tension: 0.3,
-                                fill: false
-                            },
-                            {
-                                label: 'Realisasi' + (isCumulative ? ' Kumulatif' : ''),
-                                data: Object.values(chartData).map(item => item.realisasi || 0),
-                                borderColor: '#36A2EB',
-                                tension: 0.3,
-                                fill: false
-                            },
-                            {
-                                label: 'Kontrak' + (isCumulative ? ' Kumulatif' : ''),
-                                data: isCumulative ? Object.values(chartData).map(item => item.terkontrak || 0) : Object.values(chartData).map(item => item.kontrak || 0),
-                                borderColor: '#FFCE56',
-                                tension: 0.3,
-                                fill: false
-                            },
-                            {
-                                label: 'Ongoing' + (isCumulative ? ' Kumulatif' : ''),
-                                data: isCumulative ? Object.values(chartData).map(item => item.ongoing || 0) : Object.values(chartData).map(item => item.ongoing || 0),
-                                borderColor: '#4BC0C0',
-                                tension: 0.3,
-                                fill: false
-                            }
-                        ]
-                    },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            title: {
-                                display: true,
-                                text: chartTitle,
-                                font: { size: 16 }
-                            },
-                            legend: { 
-                                display: true, 
-                                position: 'top' 
-                            } 
-                        } 
-                    }
+                    data: { labels: labels, datasets: [ { label: 'Target', data: Object.values(chartData).map(item => item.target || 0), borderColor: '#FF6384', tension: 0.3, fill: false }, { label: 'Realisasi' + (isCumulative ? ' Kumulatif' : ''), data: Object.values(chartData).map(item => item.realisasi || 0), borderColor: '#36A2EB', tension: 0.3, fill: false }, { label: 'Kontrak' + (isCumulative ? ' Kumulatif' : ''), data: isCumulative ? Object.values(chartData).map(item => item.terkontrak || 0) : Object.values(chartData).map(item => item.kontrak || 0), borderColor: '#FFCE56', tension: 0.3, fill: false }, { label: 'Ongoing' + (isCumulative ? ' Kumulatif' : ''), data: isCumulative ? Object.values(chartData).map(item => item.ongoing || 0) : Object.values(chartData).map(item => item.ongoing || 0), borderColor: '#4BC0C0', tension: 0.3, fill: false } ] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, legend: { display: true, position: 'top' } } }
                 });
             }
 
-            // Render Doughnut Chart (selalu berdasarkan total summary)
+            // Render Doughnut Chart
             function renderDoughnutChart(canvasId, summaryData, chartTitle) {
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 const sisaTarget = summaryData.total_target - (parseFloat(summaryData.total_realisasi) + parseFloat(summaryData.total_kontrak) + parseFloat(summaryData.total_ongoing));
@@ -516,111 +743,108 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                     type: 'doughnut',
                     data: {
                         labels: ['Realisasi', 'Kontrak', 'Ongoing', 'Sisa Target'],
-                        datasets: [{
-                            data: [summaryData.total_realisasi, summaryData.total_kontrak, summaryData.total_ongoing, sisaTarget > 0 ? sisaTarget : 0],
-                            backgroundColor: ['#4BC0C0', '#36A2EB', '#FFCE56', '#FF6384'],
-                        }]
+                        datasets: [{ data: [summaryData.total_realisasi, summaryData.total_kontrak, summaryData.total_ongoing, sisaTarget > 0 ? sisaTarget : 0], backgroundColor: ['#4BC0C0', '#36A2EB', '#FFCE56', '#FF6384'], }]
                     },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            title: {
-                                display: true,
-                                text: chartTitle,
-                                font: { size: 16 }
-                            },
-                            legend: { 
-                                display: true, 
-                                position: 'bottom' 
-                            } 
-                        } 
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, legend: { display: true, position: 'bottom' } } }
                 });
             }
 
-            // Render Bar Chart (selalu data aktual bulanan)
+            // Render Bar Chart
             function renderBarChart(canvasId, monthlyData, chartTitle) {
                 const ctx = document.getElementById(canvasId).getContext('2d');
                 const labels = Object.values(monthlyData).map(item => item.label);
                 new Chart(ctx, {
                     type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Realisasi per Bulan',
-                            data: Object.values(monthlyData).map(item => item.realisasi || 0),
-                            backgroundColor: '#36A2EB'
-                        }]
-                    },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            title: {
-                                display: true,
-                                text: chartTitle,
-                                font: { size: 16 }
-                            },
-                            legend: { 
-                                display: false 
-                            } 
-                        } 
-                    }
+                    data: { labels: labels, datasets: [{ label: 'Realisasi per Bulan', data: Object.values(monthlyData).map(item => item.realisasi || 0), backgroundColor: '#36A2EB' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, legend: { display: false } } }
                 });
             }
 
-            // Render Pie Chart (berdasarkan kategori)
-            function renderPieChart(canvasId, kategoriData, chartTitle) {
+            // Render Pie Chart
+            function renderPieChart(canvasId, kategoriData, chartTitle, labelKey = 'kategori', valueKey = 'total_realisasi') {
                 const ctx = document.getElementById(canvasId).getContext('2d');
-                const labels = kategoriData.map(item => item.kategori);
-                const data = kategoriData.map(item => item.total_realisasi);
                 new Chart(ctx, {
                     type: 'pie',
                     data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#A6C561', '#D98880', '#F1C40F', '#7D3C98', '#16A085'],
-                        }]
+                        labels: kategoriData.map(item => item[labelKey]),
+                        datasets: [{ data: kategoriData.map(item => item[valueKey]), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#A6C561', '#D98880', '#F1C40F', '#7D3C98', '#16A085'], }]
                     },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            title: {
-                                display: true,
-                                text: chartTitle,
-                                font: { size: 16 }
-                            },
-                            legend: { 
-                                display: true, 
-                                position: 'bottom' 
-                            } 
-                        } 
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, legend: { display: true, position: 'bottom' } } }
                 });
             }
 
-
-            // Initialize all charts
-            // Lemtera: Line (Kumulatif), lainnya (Aktual)
+            // Initialize charts for Lemtera, TC, BUIB
             renderLineChart('lemteraLineChart', lemteraMonthlyCumulative, 'Grafik Kumulatif Pendapatan', true);
             renderDoughnutChart('lemteraDoughnutChart', lemteraSummary, 'Komposisi Pendapatan');
             renderBarChart('lemteraBarChart', lemteraMonthlyActual, 'Realisasi Aktual per Bulan');
             renderPieChart('lemteraPieChart', lemteraKategori, 'Realisasi per Entitas');
 
-            // Training Center: Line (Kumulatif), lainnya (Aktual)
             renderLineChart('trainingCenterLineChart', trainingCenterMonthlyCumulative, 'Grafik Kumulatif Pendapatan', true);
             renderDoughnutChart('trainingCenterDoughnutChart', trainingCenterSummary, 'Komposisi Pendapatan');
             renderBarChart('trainingCenterBarChart', trainingCenterMonthlyActual, 'Realisasi Aktual per Bulan');
             renderPieChart('trainingCenterPieChart', trainingCenterKategori, 'Realisasi per Kategori');
 
-            // BUIB: Semua (Aktual dengan target rata-rata)
             renderLineChart('buibLineChart', buibMonthlyActual, 'Grafik Aktual Pendapatan', false);
             renderDoughnutChart('buibDoughnutChart', buibSummary, 'Komposisi Pendapatan');
             renderBarChart('buibBarChart', buibMonthlyActual, 'Realisasi Aktual per Bulan');
             renderPieChart('buibPieChart', buibKategori, 'Realisasi per Deputy');
 
+            // Initialize charts for BKS
+            renderPieChart('chartBksKlasifikasi', dataBksKlasifikasi, 'Klasifikasi Mitra', 'klasifikasi_mitra', 'jumlah');
+            new Chart(document.getElementById('chartBksJmlDokumen'), { type: 'doughnut', data: { labels: dataBksJmlDokumen.map(item => item.tipe), datasets: [{ data: dataBksJmlDokumen.map(item => item.jumlah), backgroundColor: ['#1f77b4', '#ff7f0e', '#2ca02c'], }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Jumlah Dokumen (MoU, PKS, IA)' } } } });
+            renderPieChart('chartBksBentuk', dataBksBentuk, 'Bentuk Kerja Sama', 'bentuk_kerjasama_bks', 'jumlah');
+            renderPieChart('chartBksJangkaWaktu', dataBksJangkaWaktu, 'Kategori Jangka Waktu Kerjasama', 'kategori_waktu', 'jumlah');
+            new Chart(document.getElementById('chartBksBulanan'), {
+                type: 'bar',
+                data: {
+                    labels: dataBksBulanan.map(item => new Date(item.bulan + '-01').toLocaleString('default', { month: 'short', year: 'numeric' })),
+                    datasets: [
+                        {
+                            label: 'MoU',
+                            data: dataBksBulanan.map(item => parseInt(item.jumlah_mou)),
+                            backgroundColor: '#1f77b4', // Biru
+                        },
+                        {
+                            label: 'PKS',
+                            data: dataBksBulanan.map(item => parseInt(item.jumlah_pks)),
+                            backgroundColor: '#ff7f0e', // Oranye
+                        },
+                        {
+                            label: 'IA',
+                            data: dataBksBulanan.map(item => parseInt(item.jumlah_ia)),
+                            backgroundColor: '#2ca02c', // Hijau
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Jumlah Dokumen (MoU, PKS, IA) per Bulan'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true // Menumpuk bar di sumbu X
+                        },
+                        y: {
+                            stacked: true, // Menumpuk bar di sumbu Y
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1 // Memastikan sumbu Y hanya menampilkan bilangan bulat
+                            }
+                        }
+                    }
+                }
+            });            
+            // Initialize charts for BKI
+            new Chart(document.getElementById('chartMoUDistribusi'), { type: 'doughnut', data: { labels: dataMouNegara.map(item => item.negara || 'Tidak Diketahui'), datasets: [{ data: dataMouNegara.map(item => parseInt(item.jumlah_mou)), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'], }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Distribusi MoU per Negara' } } } });
+            new Chart(document.getElementById('chartMoUvsPKS'), { type: 'bar', data: { labels: dataDokumenBulan.map(item => new Date(item.bulan + '-01').toLocaleString('default', { month: 'short', year: 'numeric' })), datasets: [ { label: 'MoU', data: dataDokumenBulan.map(item => parseInt(item.jumlah_mou)), backgroundColor: '#1f77b4', }, { label: 'PKS', data: dataDokumenBulan.map(item => parseInt(item.jumlah_pks)), backgroundColor: '#ff7f0e', } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Perbandingan MoU vs PKS per Bulan' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } } });
+            new Chart(document.getElementById('chartMitra'), { type: 'pie', data: { labels: dataMitraBki.map(item => item.nama_mitra), datasets: [{ label: 'Jumlah Dokumen', data: dataMitraBki.map(item => parseInt(item.jumlah_dokumen)), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED', '#A6C561', '#D98880', '#F1C40F', '#7D3C98', '#16A085'], }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Jumlah Dokumen per Mitra' } } } });
+
         });
     </script>
+</body>
+</html>

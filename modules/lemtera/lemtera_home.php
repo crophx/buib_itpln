@@ -11,13 +11,28 @@ else {
 	// jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
 	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) { 
 		
-		// Query untuk mengambil semua data dari tbl_rk_lemtera (tanpa join)
-		$main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_entity_lemtera, c.nama_status
-                                    FROM tbl_rk_lemtera as a
-                                    INNER JOIN tbl_entity_lemtera as b ON a.entity_lemtera=b.id_entity
-                                    INNER JOIN tbl_status as c ON a.status_lemtera=c.id_status
-                                    ORDER BY tgl_surat ASC")
-            or die('Error pada query data RK lemtera: '. mysqli_error($mysqli));
+		// Query untuk mengambil semua data dari tbl_rk_lemtera dengan detailnya
+        $main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_entity_lemtera, c.nama_status, d.tanggal_akhir
+                                                    FROM tbl_rk_lemtera as a
+                                                    LEFT JOIN tbl_entity_lemtera as b ON a.entity_lemtera = b.id_entity
+                                                    LEFT JOIN tbl_status as c ON a.status_lemtera = c.id_status
+                                                    LEFT JOIN tbl_detail_lemtera as d ON a.id = d.id_rk_lemtera
+                                                    ORDER BY a.tgl_surat ASC")
+                            or die('Error pada query data RK lemtera: ' . mysqli_error($mysqli));
+
+        // =============================================================================================
+        // >> PERUBAHAN 1: PRE-LOAD DATA TERMIN UNTUK EFISIENSI <<
+        // =============================================================================================
+        $termin_query = mysqli_query($mysqli, "SELECT id_rk_lemtera, COUNT(*) as jumlah_termin, SUM(nominal_termin) as total_nominal
+                                               FROM tbl_termin_pembayaran
+                                               GROUP BY id_rk_lemtera")
+                            or die('Error pada query termin summary: ' . mysqli_error($mysqli));
+        
+        $termin_summary = [];
+        while ($termin_row = mysqli_fetch_assoc($termin_query)) {
+            $termin_summary[$termin_row['id_rk_lemtera']] = $termin_row;
+        }
+        // =============================================================================================
 
         // Data untuk charts dan summary
         $yearly_data = [];
@@ -39,8 +54,67 @@ else {
 
         // Ambil total target tahunan terlebih dahulu
         $yearly_target = 0;
+
         while ($data = mysqli_fetch_assoc($main_query)) {
             $yearly_target += $data['target_nominal'];
+
+            // =============================================================================================
+            // >> PERUBAHAN 2: LOGIKA BARU UNTUK PROGRES TERMIN <<
+            // =============================================================================================
+            $progres_termin = '-';
+            if (isset($termin_summary[$data['id']])) {
+                $summary = $termin_summary[$data['id']];
+                $jumlah = $summary['jumlah_termin'];
+                $total_nominal = number_format($summary['total_nominal'], 0, ',', '.');
+                $progres_termin = "$jumlah Termin ";
+            }
+            $data['progres_termin'] = $progres_termin;
+            // =============================================================================================
+
+
+            // =============================================================================================
+            // >> PERUBAHAN 3: LOGIKA BARU UNTUK SISA WAKTU DENGAN BADGE <<
+            // =============================================================================================
+            $sisa_waktu = '-';
+            if (!empty($data['tanggal_akhir'])) {
+                $today = new DateTime();
+                $deadline = new DateTime($data['tanggal_akhir']);
+                
+                if ($today > $deadline) {
+                    $sisa_waktu = '<span class="badge badge-danger">Lewat Waktu</span>';
+                } else {
+                    $interval = $today->diff($deadline);
+                    $total_days = $interval->days;
+                    
+                    $bulan = $interval->y * 12 + $interval->m;
+                    $hari = $interval->d;
+                    
+                    $sisa_waktu_teks = '';
+                    if ($bulan > 0) {
+                        $sisa_waktu_teks .= $bulan . ' bulan ';
+                    }
+                    if ($hari > 0) {
+                        $sisa_waktu_teks .= $hari . ' hari';
+                    }
+                    if (empty($sisa_waktu_teks)) {
+                        $sisa_waktu_teks = 'Hari Ini';
+                    }
+
+                    $badge_class = 'badge-success'; // Default hijau
+                    if ($total_days < 30) {
+                        $badge_class = 'badge-danger'; // Merah jika < 30 hari
+                    } elseif ($total_days <= 90) {
+                        $badge_class = 'badge-warning'; // Kuning jika <= 90 hari
+                    }
+                    
+                    $sisa_waktu = "<span class='badge {$badge_class}'>{$sisa_waktu_teks}</span>";
+                }
+            }
+            $data['sisa_waktu'] = $sisa_waktu;
+            // =============================================================================================
+
+            // Simpan semua data
+            $table_data[] = $data;
         }
 
         // Hitung target bulanan (total target tahunan dibagi 12)
@@ -111,9 +185,6 @@ else {
             $kategori_data[$kategori_nama]['realisasi'] += $data['realisasi_nominal'];
             $kategori_data[$kategori_nama]['target'] += $data['target_nominal'];
 
-            // Simpan semua data
-            $table_data[] = $data;
-
             // Pisahkan data berdasarkan kondisi
             if ($data['realisasi_nominal'] > 0) {
                 $Realisasi_data[] = $data;
@@ -163,6 +234,7 @@ else {
 
         $persentase_total = $total_target_calc > 0 ? round(($total_realisasi_calc / $total_target_calc) * 100, 2) : 0;
         ?>
+        
         <div class="panel-header">
             <div class="page-inner py-45">
                 <div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
@@ -369,7 +441,6 @@ else {
                     </div>
                 </div>
             </div>
-            <!-- Table DATA REALISASI -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="card-title">
@@ -391,6 +462,8 @@ else {
                                     <th class="text-center">Entity</th>
                                     <th class="text-center">Bulan</th>
                                     <th class="text-center">Nominal Realisasi</th>
+                                    <th class="text-center">Progres Termin</th>
+                                    <th class="text-center">Sisa Waktu</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-center">Dokumen</th> 
                                     <th class="text-center">Aksi</th>
@@ -401,16 +474,16 @@ else {
                             </tbody>
                             <tfoot>
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                    <td class="text-center" colspan="3"><strong>TOTAL REALISASI</strong></td>
-                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp <?php echo number_format($total_realisasi_calc, 0, ',', '.'); ?></strong></td>
-                                    <td class="text-center" colspan="3">-</td>
+                                    <td class="text-center" colspan="4"><strong>TOTAL REALISASI</strong></td>
+                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"></td>
+                                    <td class="text-center" colspan="5">-</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
             </div>
-            <!-- Table Data Kontrak -->
+
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="card-title">
@@ -433,6 +506,8 @@ else {
                                     <th class="text-center">Keterangan</th>
                                     <th class="text-center">Bulan</th>
                                     <th class="text-center">Nominal Kontrak</th>
+                                    <th class="text-center">Progres Termin</th>
+                                    <th class="text-center">Sisa Waktu</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-center">Dokumen</th>
                                     <th class="text-center">Aksi</th>
@@ -444,8 +519,8 @@ else {
                             <tfoot>
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
                                     <td class="text-center" colspan="5"><strong>TOTAL KONTRAK</strong></td>
-                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp <?php echo number_format($total_kontrak_calc, 0, ',', '.'); ?></strong></td>
-                                    <td class="text-center" colspan="3">-</td>
+                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"></td>
+                                    <td class="text-center" colspan="5">-</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -474,6 +549,8 @@ else {
                                     <th class="text-center">Keterangan</th>
                                     <th class="text-center">Bulan</th>
                                     <th class="text-center">Nominal On-Going</th>
+                                    <th class="text-center">Progres Termin</th>
+                                    <th class="text-center">Sisa Waktu</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-center">Dokumen</th>
                                     <th class="text-center">Aksi</th>
@@ -485,8 +562,8 @@ else {
                             <tfoot>
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
                                     <td class="text-center" colspan="4"><strong>TOTAL ONGOING</strong></td>
-                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp <?php echo number_format($total_ongoing_calc, 0, ',', '.'); ?></strong></td>
-                                    <td class="text-center" colspan="3">-</td>
+                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"></td>
+                                    <td class="text-center" colspan="5">-</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -497,7 +574,7 @@ else {
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="card-title">
-                        <i class="fas fa-table mr-2"></i>Rencana Kegiatan 2025
+                        <i class="fas fa-table mr-2"></i>Rencana Kegiatan
                     </div>
                     <div class="ml-md-auto py-2 py-md-0">
                         <a href="?module=form_entri_rk_lemtera" class="btn btn-success btn-round">
@@ -525,7 +602,7 @@ else {
                             <tfoot>
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
                                     <td class="text-center" colspan="3"><strong>TOTAL RENCANA</strong></td>
-                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp <?php echo number_format($total_target_calc, 0, ',', '.'); ?></strong></td>
+                                    <td class="text-right" style="color: #28a745; font-size: 1.1em;"></td>
                                     <td class="text-center" colspan="3">-</td>
                                 </tr>
                             </tfoot>
@@ -866,35 +943,22 @@ else {
                         'kontrak':   { class: 'badge-primary', icon: 'fas fa-file-contract' },
                         'batal':     { class: 'badge-danger',  icon: 'fas fa-ban'}
                     };
-
-                    // Default value jika status tidak ditemukan
                     const defaultStatus = { class: 'badge-secondary', icon: 'fas fa-question-circle' };
-
-                    // Cari status di dalam map (ubah ke huruf kecil), atau gunakan default
-                    const statusInfo = statusMap[namaStatus.toLowerCase()] || defaultStatus;
-                    
-                    // Buat HTML untuk icon dan badge
+                    const statusInfo = statusMap[(namaStatus || '').toLowerCase()] || defaultStatus;
                     const badgeIcon = `<i class="${statusInfo.icon} mr-1"></i>`;
-                    
-                    return `<span class="badge ${statusInfo.class}">${badgeIcon}${namaStatus}</span>`;
+                    return `<span class="badge ${statusInfo.class}">${badgeIcon}${namaStatus || 'N/A'}</span>`;
                 }
 
                 // Function helper untuk membuat tombol link dokumen
                 function getLinkButton(url) {
                     if (url) {
-                        return `
-                            <div class="d-flex justify-content-center">
-                                <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen">
-                                    <i class="fas fa-link"></i>
-                                </a>
-                            </div>
-                        `;
+                        return `<div class="d-flex justify-content-center">
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-sm" title="Buka Dokumen">
+                                        <i class="fas fa-link"></i>
+                                    </a>
+                                </div>`;
                     }
-                    return `
-                        <div class="d-flex justify-content-center">
-                            -
-                        </div>
-                    `;
+                    return `<div class="d-flex justify-content-center">-</div>`;
                 }
 
                 // Update Realisasi table
@@ -909,16 +973,17 @@ else {
                         data.nama_entity_lemtera,
                         new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                         'Rp ' + parseFloat(data.realisasi_nominal).toLocaleString('id-ID'),
+                        data.progres_termin || '-', // Fallback
+                        data.sisa_waktu || '-',     // Fallback
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_lemtera), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_lemtera),
                         getAksiButtons(data.id, 'realisasi')
-                    ]);
+                    ]).draw(false);
                 });
-                realisasiTable.draw();
                 $('#RealisasiDataTable tfoot tr').html(`
                     <td class="text-center" colspan="4"><strong>TOTAL REALISASI</strong></td>
                     <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp ${totalRealisasi.toLocaleString('id-ID')}</strong></td>
-                    <td class="text-center" colspan="3">-</td>
+                    <td class="text-center" colspan="5">-</td>
                 `);
 
                 // Update Kontrak table
@@ -934,16 +999,17 @@ else {
                         data.keterangan_program,
                         new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                         'Rp ' + parseFloat(data.kontrak_nominal).toLocaleString('id-ID'),
+                        data.progres_termin || '-', // Fallback
+                        data.sisa_waktu || '-',     // Fallback
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_lemtera), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_lemtera),
                         getAksiButtons(data.id, 'kontrak')
-                    ]);
+                    ]).draw(false);
                 });
-                kontrakTable.draw();
                 $('#kontrakDataTable tfoot tr').html(`
                     <td class="text-center" colspan="5"><strong>TOTAL KONTRAK</strong></td>
                     <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp ${totalKontrak.toLocaleString('id-ID')}</strong></td>
-                    <td class="text-center" colspan="3">-</td>
+                    <td class="text-center" colspan="6">-</td>
                 `);
 
                 // Update Ongoing table
@@ -958,16 +1024,17 @@ else {
                         data.keterangan_program,
                         new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                         'Rp ' + parseFloat(data.ongoing_nominal).toLocaleString('id-ID'),
+                        data.progres_termin || '-', // Fallback
+                        data.sisa_waktu || '-',     // Fallback
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_lemtera), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_lemtera),
                         getAksiButtons(data.id, 'ongoing')
-                    ]);
+                    ]).draw(false);
                 });
-                ongoingTable.draw();
-                 $('#OngoingDataTable tfoot tr').html(`
+                $('#OngoingDataTable tfoot tr').html(`
                     <td class="text-center" colspan="4"><strong>TOTAL ONGOING</strong></td>
                     <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp ${totalOngoing.toLocaleString('id-ID')}</strong></td>
-                    <td class="text-center" colspan="3">-</td>
+                    <td class="text-center" colspan="5">-</td>
                 `);
 
                 // Update Target table
@@ -981,13 +1048,14 @@ else {
                         data.nama_program,
                         data.keterangan_program,
                         'Rp ' + parseFloat(data.target_nominal).toLocaleString('id-ID'),
+                        //data.progres_termin || '-', // Fallback
+                        //data.sisa_waktu || '-',     // Fallback
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_lemtera), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_lemtera),
                         getAksiButtons(data.id, 'target')
-                    ]);
+                    ]).draw(false);
                 });
-                targetTable.draw();
-                 $('#targetDataTable tfoot tr').html(`
+                $('#targetDataTable tfoot tr').html(`
                     <td class="text-center" colspan="3"><strong>TOTAL RENCANA</strong></td>
                     <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp ${totalTarget.toLocaleString('id-ID')}</strong></td>
                     <td class="text-center" colspan="3">-</td>
@@ -998,6 +1066,9 @@ else {
         function getAksiButtons(id, type) {
             return `
                 <div class="d-flex justify-content-center" style="gap: 5px;">
+                    <a href="?module=detail_lemtera&id=${id}" class="btn btn-icon btn-round btn-primary btn-sm" title="Detail">
+                        <i class="fas fa-eye fa-sm"></i>
+                    </a>
                     <a href="#" class="btn btn-icon btn-round btn-success btn-sm edit-btn" data-id="${id}" data-type="${type}" title="Ubah">
                         <i class="fas fa-pencil-alt fa-sm"></i>
                     </a>
@@ -1074,13 +1145,13 @@ else {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label font-weight-semibold">
-                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak <span class="text-danger">*</span>
+                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak
                                 </label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-warning text-white">Rp</span>
                                     </div>
-                                    <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}" required>
+                                    <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}">
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
@@ -1107,13 +1178,13 @@ else {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label font-weight-semibold">
-                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing <span class="text-danger">*</span>
+                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing
                                 </label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-warning text-white">Rp</span>
                                     </div>
-                                    <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}" required>
+                                    <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}">
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0

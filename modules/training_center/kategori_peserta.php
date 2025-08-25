@@ -92,7 +92,7 @@ else { ?>
             <div class="card-body">
                 <div class="table-responsive">
                     <!-- tabel untuk menampilkan data dari database -->
-                    <table id="basic-datatables" class="display table table-bordered table-striped table-hover">
+                    <table id="kategoriTC-datatables" class="display table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th class="text-center">No.</th>
@@ -246,7 +246,7 @@ else { ?>
     <script>
         $(document).ready(function() {
             // Inisialisasi DataTables
-            $('#basic-datatables').DataTable({
+            $('#kategoriTC-datatables').DataTable({
                 "pageLength": 25
             });
         });

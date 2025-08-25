@@ -29,6 +29,8 @@ else { ?>
             <div class="card-header">
                 <div class="header-content"
                     style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div class="header-content"
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <!--Judul Form-->
                     <div class="card-title" style="margin: 0;">
                         <i class="fas fa-edit mr-2"></i>Entri Data Rencana Kegiatan
@@ -42,6 +44,8 @@ else { ?>
                 </div>
             </div>
             <!--Form Entri Data-->
+            <form action="modules/bks/proses_simpan.php" method="post" enctype="multipart/form-data"
+                class="needs-validation" novalidate>
             <form action="modules/bks/proses_simpan.php" method="post" enctype="multipart/form-data"
                 class="needs-validation" novalidate>
                 <div class="card-body">
@@ -81,6 +85,13 @@ else { ?>
                                     <option value="Non-Akademik">Non Akademik</option>
                                 </select>
                                 <div class="invalid-feedback">Klasifikasi Mitra tidak boleh kosong.</div>
+                                <label>Bentuk Kerjasama</label> <span class="text-danger">*</span></label>
+                                <select name="bentuk_kerjasama" class="form-control select2-single" required>
+                                    <option value="" disabled selected>-- Pilih Bentuk Kerjasama --</option>
+                                    <option value="Akademik">Akademik</option>
+                                    <option value="Non-Akademik">Non Akademik</option>
+                                </select>
+                                <div class="invalid-feedback">Klasifikasi Mitra tidak boleh kosong.</div>
                             </div>
                         </div>
                     </div>
@@ -89,7 +100,11 @@ else { ?>
                         <div class="col-lg-4">
                             <div class="form-group">
                                 <label>Tanggal Input Rencana<span class="text-danger">*</span></label>
+                                <label>Tanggal Input Rencana<span class="text-danger">*</span></label>
                                 <div class="input-group">
+                                    <input type="text" name="tgl_input" class="form-control datepicker"
+                                        placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>"
+                                        required>
                                     <input type="text" name="tgl_input" class="form-control datepicker"
                                         placeholder="dd/mm/yyyy" autocomplete="off" value="<?php echo date('d/m/Y'); ?>"
                                         required>
@@ -100,6 +115,8 @@ else { ?>
                                     </div>
                                 </div>
                                 <div class="invalid-feedback">Tanggal input tidak boleh kosong.</div>
+                                <small class="form-text text-muted">Pilih tanggal input dengan mengklik pada
+                                    kalender</small>
                                 <small class="form-text text-muted">Pilih tanggal input dengan mengklik pada
                                     kalender</small>
                             </div>
@@ -195,8 +212,11 @@ else { ?>
                     </div>
                 </div>
 
+
                 <div class="card-action">
                     <!-- button simpan data -->
+                    <input type="submit" name="simpan_rencana" value="Simpan"
+                        class="btn btn-success btn-round pl-4 pr-4 mr-2">
                     <input type="submit" name="simpan_rencana" value="Simpan"
                         class="btn btn-success btn-round pl-4 pr-4 mr-2">
                     <!-- button reset form -->
@@ -210,6 +230,7 @@ else { ?>
 
     <!-- Script untuk menginisialisasi datepicker dan kalkulasi persentase -->
     <script>
+        $(document).ready(function () {
         $(document).ready(function () {
             // Inisialisasi datepicker
             $('.datepicker').datepicker({
@@ -229,10 +250,12 @@ else { ?>
 
             // Event listener untuk input realisasi
             $('input[name="target_nominal"]').on('keyup', function () {
+            $('input[name="target_nominal"]').on('keyup', function () {
                 hitungPersentase();
             });
 
             // Format angka dengan pemisah ribuan saat input
+            $('input[name="target_nominal"]').on('blur', function () {
             $('input[name="target_nominal"]').on('blur', function () {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 if (value) {
@@ -243,6 +266,7 @@ else { ?>
             });
 
             // Hapus format saat focus untuk memudahkan edit
+            $('input[name="target_nominal"]').on('focus', function () {
             $('input[name="target_nominal"]').on('focus', function () {
                 var value = $(this).val().replace(/[^0-9]/g, '');
                 $(this).val(value);
@@ -255,12 +279,15 @@ else { ?>
             key = event.keyCode;
             if (key == null) return true;
 
+
             // untuk backspace dan delete
             if (key == 0 || key == 8 || key == 9 || key == 13 || key == 27) return true;
+
 
             keychar = String.fromCharCode(key);
             keychar = keychar.toLowerCase();
             goodchars = goodchars.toLowerCase();
+
 
             // cek apakah karakter yang diinput termasuk dalam daftar yang diizinkan
             if (goodchars.indexOf(keychar) != -1)
@@ -268,6 +295,7 @@ else { ?>
             return false;
         }
     </script>
+
 
 <?php }
 ?>

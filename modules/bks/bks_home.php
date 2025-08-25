@@ -4,7 +4,10 @@
 if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
     // alihkan ke halaman error 404
     header('location: 404.html');
+    // alihkan ke halaman error 404
+    header('location: 404.html');
 }
+
 
 // jika file di include oleh file lain, tampilkan isi file
 else {
@@ -375,6 +378,313 @@ else {
                                                                         </div>
                                                                     </div>
 
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Awal</label>
+                                                                                <input type="date" name="tanggal_awal"
+                                                                                    class="form-control"
+                                                                                    value="<?php echo isset($data_mou['tanggal_awal']) ? date('Y-m-d', strtotime($data_mou['tanggal_awal'])) : ''; ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Akhir</label>
+                                                                                <input type="date" name="tanggal_akhir"
+                                                                                    class="form-control"
+                                                                                    value="<?php echo isset($data_mou['tanggal_akhir']) ? date('Y-m-d', strtotime($data_mou['tanggal_akhir'])) : ''; ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>PIC (Bagian / Prodi) <span
+                                                                                class="text-danger">*</span></label>
+                                                                        <select name="pic_bagian_id"
+                                                                            class="form-control select2-single" required>
+                                                                            <option
+                                                                                value="<?php echo $data_mou['pic_bagian_id']; ?>"
+                                                                                selected>
+                                                                                <?php echo htmlspecialchars($data_mou['pic_nama']); ?>
+                                                                            </option>
+                                                                            <?php
+                                                                            $query_pic_modal = mysqli_query($mysqli, "SELECT id, nama_bagian FROM tbl_pic_bagian ORDER BY nama_bagian ASC");
+                                                                            while ($pic_modal = mysqli_fetch_assoc($query_pic_modal)) {
+                                                                                if ($pic_modal['id'] != $data_mou['pic_bagian_id']) {
+                                                                                    echo "<option value='{$pic_modal['id']}'>{$pic_modal['nama_bagian']}</option>";
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>Link Dokumen</label>
+                                                                        <input type="url" name="link_dokumen_bks"
+                                                                            class="form-control" placeholder="https://"
+                                                                            value="<?php echo htmlspecialchars($data_mou['link_dokumen_bks']); ?>">
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-default btn-round"
+                                                                        data-dismiss="modal">Batal</button>
+                                                                    <input type="submit" name="simpan" value="Simpan Perubahan"
+                                                                        class="btn btn-success btn-round">
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Button Hapus -->
+                                                <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal"
+                                                    data-target="#modalHapus<?php echo $data_mou['id']; ?>" data-tooltip="tooltip"
+                                                    data-placement="top" title="Hapus"> <i class="fas fa-trash fa-sm"></i>
+                                                </a>
+                                                <!-- modalHapus -->
+                                                <div class="modal fade" id="modalHapus<?php echo $data_mou['id']; ?>" tabindex="-1"
+                                                    role="dialog" aria-labelledby="modalHapusLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-sm" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="modalHapusLabel"><i
+                                                                        class="fas fa-trash mr-2"></i> Hapus Data</h5>
+                                                            </div>
+                                                            <div class="modal-body text-left">
+                                                                Anda yakin ingin menghapus dokumen dengan nomor MoU
+                                                                <strong>
+                                                                    <?php echo htmlspecialchars($data_mou['no_dokumen']); ?>
+                                                                </strong>? yang bermitra pada
+                                                                <strong>
+                                                                    <?php echo htmlspecialchars($data_mou['nama_mitra']); ?>
+                                                                </strong>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-default btn-round"
+                                                                    data-dismiss="modal">Batal</button>
+                                                                <a href="modules/bks/mou/proses_hapus.php?id=<?php echo $data_mou['id']; ?>"
+                                                                    class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel PKS -->
+        <div class="page-inner mt--5">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-title">Daftar Dokumen PKS</div>
+                    <div>
+                        <!-- Button tambah mitra -->
+                        <a href="?module=mitra_bki" class="btn btn-warning btn-round">
+                            <span class="btn-label"><i class="fas fa-users mr-2"></i></span> Mitra
+                        </a>
+                        <!-- Button tambah jenis dokumen -->
+                        <a href="?module=jenis_dokumen_bki" class="btn btn-primary btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-sitemap mr-2"></i></span> Jenis Dokumen
+                        </a>
+                        <!-- Button tambah dokumen -->
+                        <a href="?module=form_entri_pks_bks" class="btn btn-success btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-edit mr-2"></i></span> Input PKS
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="pks-datatables" class="display table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No.</th>
+                                    <th>No. Dokumen PKS</th>
+                                    <th class="text-center">Bentuk Kerjasama</th>
+                                    <th class="text-center">Tentang</th>
+                                    <th class="text-center">Mitra</th>
+                                    <th class="text-center">Tgl. TTD</th>
+                                    <th class="text-center">Sisa Waktu</th>
+                                    <th class="text-center">PIC</th>
+                                    <th class="text-center">MoU Induk</th>
+                                    <th class="text-center">Link Dokumen PKS</th>
+                                    <th class="text-center">Klasifikasi Mitra</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $no = 1;
+                                $query = mysqli_query($mysqli, "SELECT
+                                    pks.id,
+                                    pks.mitra_id,
+                                    pks.no_dokumen,
+                                    pks.bentuk_kerjasama_bks,
+                                    pks.tentang,
+                                    pks.tanggal_awal,
+                                    pks.tanggal_akhir,
+                                    pks.link_dokumen_pks,
+                                    pks.klasifikasi_mitra,
+                                    mitra.nama_mitra,
+                                    pks.pic_bagian_id,
+                                    pic.nama_bagian AS pic_nama,
+                                    mou.no_dokumen AS mou_induk_nomor
+                                FROM
+                                    tbl_pks_bks AS pks
+                                LEFT JOIN
+                                    tbl_mitra_bki AS mitra ON pks.mitra_id = mitra.id
+                                LEFT JOIN
+                                    tbl_pic_bagian AS pic ON pks.pic_bagian_id = pic.id
+                                LEFT JOIN
+                                    tbl_mou_bks AS mou ON pks.mou_id     = mou.id
+                                ORDER BY
+                                    pks.id DESC;")
+                                    or die('Ada kesalahan pada query tampil data PKS: ' . mysqli_error($mysqli));
+
+                                while ($data_pks = mysqli_fetch_assoc($query)) {
+                                    $masa_berlaku = date('d/m/Y', strtotime($data_pks['tanggal_awal'])) . ' - ' . date('d/m/Y', strtotime($data_pks['tanggal_akhir']));
+                                    $sisa_waktu = hitung_masa_berlaku($data_pks['tanggal_awal'], $data_pks['tanggal_akhir']);
+                                    ?>
+                                    <tr>
+                                        <td width="30" class="text-center"><?php echo $no++; ?></td>
+                                        <td width="120"><?php echo htmlspecialchars($data_pks['no_dokumen']); ?></td>
+                                        <td width="180"><?php echo htmlspecialchars($data_pks['bentuk_kerjasama_bks']); ?></td>
+                                        <td class="truncate-text"><?php echo htmlspecialchars($data_pks['tentang']); ?></td>
+                                        <td width="100" class="text-center"><?php echo htmlspecialchars($data_pks['nama_mitra']); ?>
+                                        </td>
+                                        <td width="200" class="text-center">
+                                            <?php echo htmlspecialchars($data_pks['tanggal_awal']); ?>
+                                        </td>
+                                        <td width="100" class="text-center"><?php echo $sisa_waktu; ?></td>
+                                        <td width="100" class="text-center"><?php echo htmlspecialchars($data_pks['pic_nama']); ?>
+                                        </td>
+                                        <td width="120" class="text-center">
+                                            <?php echo !empty($data_pks['mou_induk_nomor']) ? htmlspecialchars($data_pks['mou_induk_nomor']) : '-'; ?>
+                                        </td>
+                                        <td width="120" class="text-center">
+                                            <?php if (!empty($data_pks['link_dokumen_pks'])) { ?>
+                                                <a href="<?php echo htmlspecialchars($data_pks['link_dokumen_pks']); ?>" target="_blank"
+                                                    class="btn btn-icon btn-info btn-sm" data-toggle="tooltip" data-placement="top"
+                                                    title="Lihat Dokumen">
+                                                    <i class="fas fa-link"></i>
+                                                </a>
+                                            <?php } ?>
+                                        </td>
+                                        <td width="100" class="text-center">
+                                            <?php echo htmlspecialchars($data_pks['klasifikasi_mitra']); ?>
+                                        </td>
+                                        <td width="80" class="text-center">
+                                            <div>
+                                                <!-- Button Ubah -->
+                                                <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1"
+                                                    data-toggle="modal"
+                                                    data-target="#modalUbahpks_bks<?php echo $data_pks['id']; ?>"
+                                                    data-tooltip="tooltip" data-placement="top" title="Ubah"> <i
+                                                        class="fas fa-pencil-alt fa-sm"></i>
+                                                </a>
+                                                <!-- modalUbah -->
+                                                <div class="modal fade" id="modalUbahpks_bks<?php echo $data_pks['id']; ?>"
+                                                    tabindex="-1" data-bs-toogle role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <form action="modules/bks/pks/proses_ubah.php" method="post">
+                                                                <div class="modal-header btn-success">
+                                                                    <h5 class="modal-title"><i class="fas fa-edit mr-2"></i> Ubah
+                                                                        Data PKS</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal"
+                                                                        aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <input type="hidden" name="id"
+                                                                        value="<?php echo $data_pks['id']; ?>">
+
+                                                                    <div class="form-group">
+                                                                        <label>Terhubung ke MoU Induk (Opsional)</label>
+                                                                        <select name="mou_id" class="form-control select2-single">
+                                                                            <option value="">-- Tidak terhubung / Mandiri --
+                                                                            </option>
+                                                                            <?php
+                                                                            // Query untuk mengambil semua opsi MoU
+                                                                            $query_mou_options = mysqli_query($mysqli, "SELECT 
+                                                                                    mou.id, 
+                                                                                    mou.no_dokumen, 
+                                                                                    mitra.nama_mitra 
+                                                                                FROM 
+                                                                                    tbl_mou_bks AS mou
+                                                                                LEFT JOIN 
+                                                                                    tbl_mitra_bki AS mitra ON mou.mitra_id = mitra.id
+                                                                                ORDER BY 
+                                                                                    mitra.nama_mitra ASC");
+
+                                                                            while ($mou_option = mysqli_fetch_assoc($query_mou_options)) {
+                                                                                // Logika ini akan memilih MoU yang sudah terhubung
+                                                                                $selected = (isset($data_ia['mou_id']) && $mou_option['id'] == $data_ia['mou_id']) ? 'selected' : '';
+
+                                                                                echo "<option value='{$mou_option['id']}' {$selected}>
+                                                                                            {$mou_option['no_dokumen']} - {$mou_option['nama_mitra']}
+                                                                                        </option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                    <hr />
+
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Mitra <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="mitra_id"
+                                                                                    class="form-control select2-single" required>
+                                                                                    <option
+                                                                                        value="<?php echo $data_pks['mitra_id']; ?>"
+                                                                                        selected>
+                                                                                        <?php echo htmlspecialchars($data_pks['nama_mitra']); ?>
+                                                                                    </option>
+                                                                                    <?php
+                                                                                    $query_mitra_modal = mysqli_query($mysqli, "SELECT id, nama_mitra FROM tbl_mitra_bki ORDER BY nama_mitra ASC");
+                                                                                    while ($mitra_modal = mysqli_fetch_assoc($query_mitra_modal)) {
+                                                                                        if ($mitra_modal['id'] != $data_pks['mitra_id']) {
+                                                                                            echo "<option value='{$mitra_modal['id']}'>{$mitra_modal['nama_mitra']}</option>";
+                                                                                        }
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>PIC (Bagian / Prodi) <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="pic_bagian_id"
+                                                                                    class="form-control select2-single" required>
+                                                                                    <option
+                                                                                        value="<?php echo $data_pks['pic_bagian_id']; ?>"
+                                                                                        selected>
+                                                                                        <?php echo htmlspecialchars($data_pks['pic_nama']); ?>
+                                                                                    </option>
+                                                                                    <?php
+                                                                                    $query_pic_modal = mysqli_query($mysqli, "SELECT id, nama_bagian FROM tbl_pic_bagian ORDER BY nama_bagian ASC");
+                                                                                    while ($pic_modal = mysqli_fetch_assoc($query_pic_modal)) {
+                                                                                        if ($pic_modal['id'] != $data_pks['pic_bagian_id']) {
+                                                                                            echo "<option value='{$pic_modal['id']}'>{$pic_modal['nama_bagian']}</option>";
+                                                                                        }
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                     <div class="row">
                                                                         <div class="col-md-6">
                                                                             <div class="form-group">

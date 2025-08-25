@@ -38,8 +38,8 @@ else {
         // Konversi format tanggal
         $tgl_input_mysql = convertDateFormat($tgl_surat);
 
-        // Validasi input wajib
-        if (empty($nama_program) || empty($deputy_buib) || empty($realisasi_nominal) || 
+        // -- PERUBAHAN VALIDASI: Menggunakan !is_numeric() untuk nominal --
+        if (empty($nama_program) || empty($deputy_buib) || !is_numeric($realisasi_nominal) || 
             empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
@@ -96,8 +96,8 @@ else {
         // Konversi format tanggal
         $tgl_input_mysql = convertDateFormat($tgl_surat);
 
-        // Validasi input wajib
-        if (empty($nama_program) || empty($deputy_buib) || empty($kontrak_nominal) || 
+        // -- PERUBAHAN VALIDASI: Menggunakan !is_numeric() untuk nominal --
+        if (empty($nama_program) || empty($deputy_buib) || !is_numeric($kontrak_nominal) || 
             empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
@@ -156,8 +156,8 @@ else {
         // Konversi format tanggal
         $tgl_input_mysql = convertDateFormat($tgl_surat);
 
-        // Validasi input wajib
-        if (empty($nama_program) || empty($deputy_buib) || empty($ongoing_nominal) || 
+        // -- PERUBAHAN VALIDASI: Menggunakan !is_numeric() untuk nominal --
+        if (empty($nama_program) || empty($deputy_buib) || !is_numeric($ongoing_nominal) || 
             empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();
@@ -218,8 +218,8 @@ else {
         // Konversi format tanggal
         $tgl_input_mysql = convertDateFormat($tgl_surat);
 
-        // Validasi input wajib
-        if (empty($nama_program) || empty($deputy_buib) || empty($target_nominal) || 
+        // -- PERUBAHAN VALIDASI: Menggunakan !is_numeric() untuk nominal --
+        if (empty($nama_program) || empty($deputy_buib) || !is_numeric($target_nominal) || 
             empty($tgl_input_mysql) || empty($status_buib)) {
             header('location: ../../main.php?module=buib&pesan=7');
             exit();

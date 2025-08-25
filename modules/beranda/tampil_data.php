@@ -12,7 +12,7 @@ else {
     function render_menu_card($title, $module_name, $icon_class, $icon_style_color, $current_user_role, $external_url = null)
     {
         $can_access = false; // Default: tidak bisa akses, akan diubah jika kondisi terpenuhi
-        $full_access_roles = ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'];
+        $full_access_roles = ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan'];
 
         if (in_array($current_user_role, $full_access_roles)) {
             $can_access = true;
@@ -22,11 +22,23 @@ else {
                     if ($module_name === 'bks')
                         $can_access = true;
                     break;
+                case 'ManajerBKS':
+                    if ($module_name === 'bks')
+                        $can_access = true;
+                    break;
                 case 'BKI':
                     if ($module_name === 'bki')
                         $can_access = true;
                     break;
+                case 'ManajerBKI':
+                    if ($module_name === 'bki')
+                        $can_access = true;
+                    break;
                 case 'TrainingCenter':
+                    if ($module_name === 'training_center')
+                        $can_access = true;
+                    break;
+                case 'ManajerTC':
                     if ($module_name === 'training_center')
                         $can_access = true;
                     break;
@@ -36,6 +48,18 @@ else {
                     break;
                 case 'LEMTERA':
                     if ($module_name === 'lemtera')
+                        $can_access = true;
+                    break;
+                case 'ManajerLemtera':
+                    if ($module_name === 'lemtera')
+                        $can_access = true;
+                    break;
+                case 'BUIB':
+                    if ($module_name === 'buib')
+                        $can_access = true;
+                    break;
+                case 'ManajerBUIB':
+                    if ($module_name === 'buib')
                         $can_access = true;
                     break;
             }
@@ -129,7 +153,7 @@ else {
 
         <?php
         // Pengecekan hak akses untuk menampilkan blok menu card ini
-        if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'LEMTERA', 'PusatBisnis'])) { ?>
+        if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS', 'BKI', 'TrainingCenter', 'LEMTERA', 'PusatBisnis', 'ManajerBKS', 'ManajerBKI','ManajerLemtera','ManajerTC', 'ManajerBUIB'])) { ?>
             <div class="row mt-5">
                 <?php
                 render_menu_card('Pusat Bisnis', 'pusat_bisnis', 'fas fa-truck', 'steelblue', $_SESSION['hak_akses']);
