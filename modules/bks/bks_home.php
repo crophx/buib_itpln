@@ -2,1075 +2,1355 @@
 // mencegah direct access file PHP agar file PHP tidak bisa diakses secara langsung dari browser dan hanya dapat dijalankan ketika di include oleh file lain
 // jika file diakses secara langsung
 if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
-	// alihkan ke halaman error 404
-	header('location: 404.html');
+    // alihkan ke halaman error 404
+    header('location: 404.html');
 }
+
 // jika file di include oleh file lain, tampilkan isi file
 else {
-	// pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
-	// jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
-	if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BKS', 'Pimpinan', 'SekretarisPimpinan'])) { 
-		
-		// Query untuk mengambil semua data dari tbl_rk_bks (tanpa join)
-		$main_query = mysqli_query($mysqli, "SELECT * FROM tbl_rk_bks ORDER BY tgl_surat DESC")
-										  or die('Error pada query data RK bks: ' . mysqli_error($mysqli));
-		
-		// Data untuk charts dan summary
-		$yearly_data = [];
-		$monthly_data = [];
-		$program_data = [];
-		$keterangan_data = [];
-		$total_target_calc = 0;
-		$total_realisasi_calc = 0;
-		$total_doc_calc = 0;
-		$table_data = [];
-		$realized_data = [];
-		$target_data = [];
-		
-		// Reset pointer query
-		mysqli_data_seek($main_query, 0);
-		
-		while ($data = mysqli_fetch_assoc($main_query)) {
-			$tahun = date('Y', strtotime($data['tgl_surat']));
-			$bulan = date('Y-m', strtotime($data['tgl_surat']));
-			$bulan_nama = date('M Y', strtotime($data['tgl_surat']));
-			$persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-			
-			// Kumpulkan data untuk summary cards
-			$total_target_calc += $data['target_nominal'];
-			$total_realisasi_calc += $data['realisasi_nominal'];
-			$total_doc_calc++;
-			
-			// Kumpulkan data untuk chart tahunan
-			if (!isset($yearly_data[$tahun])) {
-				$yearly_data[$tahun] = ['target' => 0, 'realisasi' => 0];
-			}
-			$yearly_data[$tahun]['target'] += $data['target_nominal'];
-			$yearly_data[$tahun]['realisasi'] += $data['realisasi_nominal'];
-			
-			// Kumpulkan data untuk chart bulanan (hanya realisasi)
-			if (!isset($monthly_data[$bulan])) {
-				$monthly_data[$bulan] = ['realisasi' => 0, 'label' => $bulan_nama];
-			}
-			$monthly_data[$bulan]['realisasi'] += $data['realisasi_nominal'];
-			
-			// Kumpulkan data untuk chart per program
-			if (!isset($program_data[$data['nama_program']])) {
-				$program_data[$data['nama_program']] = ['target' => 0, 'realisasi' => 0];
-			}
-			$program_data[$data['nama_program']]['target'] += $data['target_nominal'];
-			$program_data[$data['nama_program']]['realisasi'] += $data['realisasi_nominal'];
-			
-			// Kumpulkan data berdasarkan keterangan_program
-			if (!empty($data['keterangan_program'])) {
-				if (!isset($keterangan_data[$data['keterangan_program']])) {
-					$keterangan_data[$data['keterangan_program']] = ['realisasi' => 0];
-				}
-				$keterangan_data[$data['keterangan_program']]['realisasi'] += $data['realisasi_nominal'];
-			}
-			
-			// Pisahkan data untuk tabel berdasarkan status realisasi
-			if ($data['realisasi_nominal'] > 0) {
-				$realized_data[] = $data;
-			}
-			if ($data['target_nominal'] > $data['realisasi_nominal']) {
-				$target_data[] = $data;
-			}
-			
-			// Simpan data untuk tabel
-			$table_data[] = $data;
-		}
-		
-		$persentase_total = $total_target_calc > 0 ? round(($total_realisasi_calc / $total_target_calc) * 100, 2) : 0;
-		?>
-		<div class="panel-header">
-			<div class="page-inner py-45">
-				<div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
-					<div class="page-header">
-						<!-- judul halaman -->
-						<h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> bks</h4>
-						<!-- breadcrumbs -->
-						<ul class="breadcrumbs">
-							<li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
-							<li class="separator"><i class="flaticon-right-arrow"></i></li>
-							<li class="nav-item"><a href="?module=beranda">Beranda</a></li>
-							<li class="separator"><i class="flaticon-right-arrow"></i></li>
-							<li class="nav-item"><a>Data RK bks</a></li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
+    // pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
+    // jika hak akses = SuperAdmin atau hak akses = Pimpinan, atau hak akses = SekretarisPimpinan, tampilkan konten
+    if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'BKS'])) {
 
+        // Fungsi helper untuk menghitung sisa waktu
+        function hitung_masa_berlaku($tanggal_awal, $tanggal_akhir)
+        {
+            if (empty($tanggal_awal) || empty($tanggal_akhir) || $tanggal_awal == '0000-00-00' || $tanggal_akhir == '0000-00-00') {
+                return '<span class="badge badge-secondary">Tidak Terdefinisi</span>';
+            }
+
+            $awal = new DateTime($tanggal_awal);
+            $akhir = new DateTime($tanggal_akhir);
+
+            // Jika akhir lebih kecil dari awal
+            if ($akhir < $awal) {
+                return '<span class="badge badge-danger">Tanggal tidak valid</span>';
+            }
+
+            $selisih = $awal->diff($akhir);
+
+            if ($selisih->y > 0)
+                return '<span class="badge badge-success">' . $selisih->y . ' Tahun ' . $selisih->m . ' Bulan ' . $selisih->d . ' Hari</span>';
+            elseif ($selisih->m > 0)
+                return '<span class="badge badge-warning">' . $selisih->m . ' Bulan ' . $selisih->d . ' Hari</span>';
+            else
+                return '<span class="badge badge-info">' . $selisih->d . ' Hari</span>';
+        }
+
+        ?>
+        <style>
+            .truncate-text {
+                max-width: 250px;
+                /* Atur lebar maksimum kolom */
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        </style>
+        <div class="panel-header">
+            <div class="page-inner py-45">
+                <div class="d-flex align-items-left align-items-md-top flex-column flex-md-row">
+                    <div class="page-header">
+                        <!-- judul halaman -->
+                        <h4 class="page-title"><i class="fas fa-folder-open mr-2"></i> Bagian Kerjasama (BKS)</h4>
+                        <!-- breadcrumbs -->
+                        <ul class="breadcrumbs">
+                            <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
+                            <li class="separator"><i class="flaticon-right-arrow"></i></li>
+                            <li class="nav-item"><a href="?module=beranda">Beranda</a></li>
+                            <li class="separator"><i class="flaticon-right-arrow"></i></li>
+                            <li class="nav-item"><a>BKS</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Tabel MoU -->
         <div class="page-inner mt--5">
-        <!-- Filter Section -->
-        <div class="row mb-0">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-3">
-                                <label for="filterTahun" class="form-label">Filter Tahun:</label>
-                                <select class="form-control" id="filterTahun" onchange="updateCharts()">
-                                    <option value="all">Semua Tahun</option>
-                                    <?php
-                                    // Query untuk mendapatkan daftar tahun
-                                    $tahun_query = mysqli_query($mysqli, "SELECT DISTINCT YEAR(tgl_surat) as tahun FROM tbl_rk_bks ORDER BY tahun DESC")
-                                                                 or die('Error pada query tahun: ' . mysqli_error($mysqli));
-                                    while($tahun_data = mysqli_fetch_assoc($tahun_query)) {
-                                        echo "<option value='".$tahun_data['tahun']."'>".$tahun_data['tahun']."</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filterProgram" class="form-label">Filter Program:</label>
-                                <select class="form-control" id="filterProgram" onchange="updateCharts()">
-                                    <option value="all">Semua Program</option>
-                                    <?php
-                                    // Query untuk mendapatkan daftar program unik dari tbl_rk_bks
-                                    $program_query = mysqli_query($mysqli, "SELECT DISTINCT nama_program FROM tbl_rk_bks WHERE nama_program IS NOT NULL AND nama_program != '' ORDER BY nama_program")
-                                                                 or die('Error pada query program: ' . mysqli_error($mysqli));
-                                    while($program_data_option = mysqli_fetch_assoc($program_query)) {
-                                        echo "<option value='".$program_data_option['nama_program']."'>".$program_data_option['nama_program']."</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filterPeriode" class="form-label">Tampilan Periode:</label>
-                                <select class="form-control" id="filterPeriode" onchange="toggleChartPeriode()">
-                                    <option value="yearly">Per Tahun</option>
-                                    <option value="monthly">Per Bulan</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 text-right">
-                                <button class="btn btn-primary" onclick="refreshData()">
-                                    <i class="fas fa-sync-alt mr-2"></i>Refresh Data
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-title">Data Memorandum of Understanding (MoU)</div>
 
-        <!-- Summary Cards -->
-        <div class="row mb-0">
-            <div class="col-md-3 mb-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body p-3">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big icon-success bubble-shadow-small">
-                                    <i class="fas fa-bullseye"></i>
-                                </div> 
-                            </div>
-                            <div class="col">
-                                <div class="numbers">
-                                    <p class="card-category mb-1">Total Target</p>
-                                    <h4 class="card-title mb-0">Rp <?php echo number_format($total_target_calc, 0, ',', '.'); ?></h4>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <!-- Button tambah mitra -->
+                        <a href="?module=mitra_bki" class="btn btn-warning btn-round">
+                            <span class="btn-label"><i class="fas fa-users mr-2"></i></span> Mitra
+                        </a>
+                        <!-- Button tambah jenis dokumen -->
+                        <a href="?module=jenis_dokumen_bki" class="btn btn-primary btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-sitemap mr-2"></i></span> Jenis Dokumen
+                        </a>
+                        <!-- Button tambah dokumen -->
+                        <a href="?module=form_entri_MoU_bks" class="btn btn-success btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-edit mr-2"></i></span> Input MoU
+                        </a>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-3 mb-3">
-                <div class="card card-stats card-round shadow-sm">
-                    <div class="card-body p-3">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big bubble-shadow-small icon-primary">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="numbers">
-                                    <p class="card-category text-muted mb-1">Total Realisasi</p>
-                                    <h4 class="card-title mb-0">Rp <?php echo number_format($total_realisasi_calc, 0, ',', '.'); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3 mb-3">
-                <div class="card card-stats card-round shadow-sm">
-                    <div class="card-body p-3">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big bubble-shadow-small icon-warning">
-                                    <i class="fas fa-percentage"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="numbers">
-                                    <p class="card-category text-muted mb-1">Persentase Capaian</p>
-                                    <h4 class="card-title mb-0"><?php echo $persentase_total; ?>%</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3 mb-3">
-                <div class="card card-stats card-round shadow-sm">
-                    <div class="card-body p-3">
-                        <div class="row align-items-center">
-                            <div class="col-icon">
-                                <div class="icon-big bubble-shadow-small icon-secondary">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="numbers">
-                                    <p class="card-category text-muted mb-1">Total Dokumen RK</p>
-                                    <h4 class="card-title mb-0"><?php echo number_format($total_doc_calc, 0, ',', '.'); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                <div class="card-body">
 
-        <!-- Charts Section -->
-        <div class="row mb-4">
-            <!-- Line Chart - Realisasi Kumulatif per Bulan -->
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-chart-line mr-2"></i>Realisasi Kumulatif per Bulan
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="lineChart" style="width: 100%; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Doughnut Chart - Persentase Capaian -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-chart-pie mr-2"></i>Capaian vs Target
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="doughnutChart" style="width: 100%; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 2 -->
-        <div class="row mb-4">
-            <!-- Bar Chart - Target vs Realisasi per Program -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-chart-bar mr-2"></i>Target vs Realisasi per Deputy bks
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="barChart" style="width: 100%; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Bar Chart - Realisasi per Keterangan Program -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-chart-bar mr-2"></i>Realisasi per Keterangan Program
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="keteranganChart" style="width: 100%; height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tables Section --->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="fas fa-table mr-2"></i>Detail Data Realisasi Jan-April 2025
-                </div>
-                <div class="ml-md-auto py-2 py-md-0">
-                    <!-- button entri data -->
-                    <a href="?module=form_entri_realisasi_bks" class="btn btn-success btn-round">
-                        <span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data Realisasi
-                    </a>
-				</div>
-            </div>
-        <!-- Tampil Data Realisasi -->
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="realizedDataTable" class="display table table-bordered table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No.</th>
-                                <th class="text-center">Deputy bks</th>
-                                <th class="text-center">Kegiatan</th>
-                                <th class="text-center">Realisasi</th>
-                                <th class="text-center">Bulan</th>
-                                <!-- <th class="text-center">Status</th> -->
-                                <th class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $no1 = 1;
-                            foreach ($realized_data as $data) {
-                                $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-                                $status = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
-                                $status_class = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
-                                
-                                ?>
+                    <div class="table-responsive">
+                        <!-- tabel untuk menampilkan data dari database -->
+                        <table id="mou-datatables" class="display table table-bordered table-striped table-hover">
+                            <thead>
                                 <tr>
-                                    <td width="30" class="text-center"><?php echo $no1++; ?></td>
-                                    <td><span class="badge badge-<?php echo $deputy_class; ?>"><?php echo htmlspecialchars($data['nama_program']); ?></span></td>
-                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['realisasi_nominal'], 0, ',', '.'); ?></td>
-                                    <td width="100" class="text-center"><?php echo date('M-Y', strtotime($data['tgl_surat'])); ?></td>
-                                    <!--<td width="120" class="text-center">
-                                        <span class="badge badge-<?php echo $status_class; ?>"><?php echo $status; ?></span>
-                                    </td> -->
-                                    <td width="80" class="text-center">
-                                        <a href="?module=form_ubah_rk_bks&id=<?php echo $data['id']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-tooltip="tooltip" title="Ubah">
-                                            <i class="fas fa-pencil-alt fa-sm"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusRealized<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
-                                            <i class="fas fa-trash fa-sm"></i>
-                                        </a>
-                                        
-                                        <!-- Modal Hapus -->
-                                        <div class="modal fade" id="modalHapusRealized<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data RK bks</h5>
+                                    <th class="text-center">No.</th>
+                                    <th class="text-center">No. Dokumen</th>
+                                    <th class="text-center">Bentuk Kerjasama</th>
+                                    <th class="text-center">Jenis Dokumen</th>
+                                    <th class="text-center">Mitra</th>
+                                    <th class="text-center">Tentang</th>
+                                    <th class="text-center">Siswa Waktu</th>
+                                    <th class="text-center">Tanggal Penandatanganan</th>
+                                    <th class="text-center">PIC</th>
+                                    <th class="text-center">Link Dokumen</th>
+                                    <th class="text-center">Klasifikasi Mitra</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                // variabel untuk nomor urut tabel
+                                $no = 1;
+                                // sql statement untuk menampilkan data dari tabel "tbl_bki" dan "tbl_jenis_dokumen_bki" dan "tbl_mitra_bki"
+                                $query = mysqli_query($mysqli, "SELECT
+                                    bks.id,
+                                    bks.mitra_id,
+                                    bks.no_dokumen,
+                                    bks.tentang,
+                                    bks.tanggal_awal,
+                                    bks.tanggal_akhir,
+                                    bks.link_dokumen_bks,
+                                    bks.bentuk_kerjasama_bks,
+                                    bks.jenis_dokumen_bks,
+                                    bks.klasifikasi_mitra,
+                                    bks.pic_bagian_id,
+                                    
+                                    -- Mengambil nama_mitra dan kategori dari tabel tbl_mitra_bki
+                                    mitra.nama_mitra,
+                                    
+                                    -- Mengambil nama_bagian dari tbl_pic_bagian
+                                    pic.nama_bagian AS pic_nama
+                                FROM
+                                    tbl_mou_bks AS bks
+                                LEFT JOIN
+                                    tbl_mitra_bki AS mitra ON bks.mitra_id = mitra.id
+                                LEFT JOIN
+                                    tbl_pic_bagian AS pic ON bks.pic_bagian_id = pic.id
+                                ORDER BY
+                                    bks.id DESC;")
+                                    or die('Ada kesalahan pada query tampil data BKS: ' . mysqli_error($mysqli));
+
+                                // ambil data hasil query
+                                while ($data_mou = mysqli_fetch_assoc($query)) {
+                                    $masa_berlaku = date('d/m/Y', strtotime($data_mou['tanggal_awal'])) . ' - ' . date('d/m/Y', strtotime($data_mou['tanggal_akhir']));
+                                    $sisa_waktu = hitung_masa_berlaku($data_mou['tanggal_awal'], $data_mou['tanggal_akhir']);
+                                    ?>
+                                    <!-- tampilkan data -->
+                                    <tr>
+
+                                        <td width="30" class="text-center"><?php echo $no++; ?>
+                                        </td>
+                                        <td width="80" class="text-center">
+                                            <?php echo $data_mou['no_dokumen']; ?>
+                                        </td>
+                                        <td width="80" class="text-center">
+                                            <?php echo $data_mou['bentuk_kerjasama_bks']; ?>
+                                        </td>
+                                        <td width="100" class="text-center"><?php echo $data_mou['jenis_dokumen_bks']; ?>
+                                        </td>
+                                        <td width="100" class="text-center"><?php echo $data_mou['nama_mitra']; ?>
+                                        </td>
+                                        <td width="80" class="text-center truncate-text"><?php echo $data_mou['tentang']; ?>
+                                        </td>
+                                        <td width="80" class="text-center"><?php echo $sisa_waktu; ?></td>
+                                        <td width="80" class="text-center"><?php echo $data_mou['tanggal_awal']; ?></td>
+                                        <td width="80" class="text-center"><?php echo $data_mou['pic_nama']; ?></td>
+                                        <td class="text-center">
+                                            <?php if (!empty($data_mou['link_dokumen_bks'])): ?>
+                                                <a href="<?php echo htmlspecialchars($data_mou['link_dokumen_bks']); ?>" target="_blank"
+                                                    class="btn btn-info btn-sm" title="Lihat Dokumen"><i class="fas fa-link"></i></a>
+                                            <?php else: ?>-<?php endif; ?>
+                                        </td>
+                                        <td width="80" class="text-center"><?php echo $data_mou['klasifikasi_mitra']; ?></td>
+
+                                        <td width="80" class="text-center">
+                                            <div>
+                                                <!-- Button Ubah -->
+                                                <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1"
+                                                    data-toggle="modal" data-target="#modalUbahMoU<?php echo $data_mou['id']; ?>"
+                                                    title="Ubah Data">
+                                                    <i class="fas fa-pencil-alt fa-sm"></i>
+                                                </a>
+
+                                                <!-- modalUbah -->
+                                                <div class="modal fade" id="modalUbahMoU<?php echo $data_mou['id']; ?>"
+                                                    tabindex="-1" role="dialog" aria-labelledby="modalUbahLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <form action="modules/bks/mou/proses_ubah.php" method="post">
+                                                                <div class="modal-header btn-success">
+                                                                    <h5 class="modal-title"><i class="fas fa-edit mr-2"></i> Ubah
+                                                                        Data Dokumen BKS</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal"
+                                                                        aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <input type="hidden" name="id"
+                                                                        value="<?php echo $data_mou['id']; ?>">
+
+                                                                    <div class=" form-group">
+                                                                        <label>No Dokumen MoU</label>
+                                                                        <input type="text" name="no_dokumen" class="form-control"
+                                                                            placeholder=""
+                                                                            value="<?php echo htmlspecialchars($data_mou['no_dokumen']); ?>"
+                                                                            selected readonly>
+                                                                    </div>
+
+                                                                    <div class=" row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Klasifikasi Mitra <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="klasifikasi_mitra"
+                                                                                    class="form-control select2-single" required>
+                                                                                    <option value="" disabled>-- Pilih Klasifikasi
+                                                                                        --</option>
+                                                                                    <?php
+                                                                                    $klasifikasi_options = ['Industri', 'PLN Group', 'Pemerintahan', 'Start-Up', 'Perusahaan Multinasional', 'Perguruan Tinggi', 'Institusi/Organisasi Multilateral'];
+                                                                                    foreach ($klasifikasi_options as $option) {
+                                                                                        $selected = ($data_mou['klasifikasi_mitra'] == $option) ? 'selected' : '';
+                                                                                        echo "<option value='{$option}' {$selected}>{$option}</option>";
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group ">
+                                                                                <label>Mitra<span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="mitra_id"
+                                                                                    class="form-control select2-single" required>
+                                                                                    <option
+                                                                                        value="<?php echo $data_mou['mitra_id']; ?>"
+                                                                                        selected>
+                                                                                        <?php echo htmlspecialchars($data_mou['nama_mitra']); ?>
+                                                                                    </option>
+                                                                                    <?php
+                                                                                    $query_mitra_modal = mysqli_query($mysqli, "SELECT id, nama_mitra FROM tbl_mitra_bki ORDER BY nama_mitra ASC");
+                                                                                    while ($mitra_modal = mysqli_fetch_assoc($query_mitra_modal)) {
+                                                                                        if ($mitra_modal['id'] != $data_mou['mitra_id']) {
+                                                                                            echo "<option value='{$mitra_modal['id']}'>{$mitra_modal['nama_mitra']}</option>";
+                                                                                        }
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>Tentang (Judul Kerjasama) <span
+                                                                                class="text-danger">*</span></label>
+                                                                        <textarea name="tentang" class="form-control" rows="3"
+                                                                            required><?php echo htmlspecialchars($data_mou['tentang']); ?></textarea>
+                                                                    </div>
+
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Bentuk Kerjasama <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="bentuk_kerjasama_bks"
+                                                                                    class="form-control" required>
+                                                                                    <option value="Akademik" <?php echo ($data_mou['bentuk_kerjasama_bks'] == 'Akademik') ? 'selected' : ''; ?>>Akademik</option>
+                                                                                    <option value="Non-Akademik" <?php echo ($data_mou['bentuk_kerjasama_bks'] == 'Non-Akademik') ? 'selected' : ''; ?>>Non-Akademik</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Jenis Dokumen <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="jenis_dokumen_bks"
+                                                                                    class="form-control" required>
+                                                                                    <option value="MoU" <?php echo ($data_mou['jenis_dokumen_bks'] == 'MoU') ? 'selected' : ''; ?>>MoU</option>
+
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Awal</label>
+                                                                                <input type="date" name="tanggal_awal"
+                                                                                    class="form-control"
+                                                                                    value="<?php echo isset($data_mou['tanggal_awal']) ? date('Y-m-d', strtotime($data_mou['tanggal_awal'])) : ''; ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Akhir</label>
+                                                                                <input type="date" name="tanggal_akhir"
+                                                                                    class="form-control"
+                                                                                    value="<?php echo isset($data_mou['tanggal_akhir']) ? date('Y-m-d', strtotime($data_mou['tanggal_akhir'])) : ''; ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>PIC (Bagian / Prodi) <span
+                                                                                class="text-danger">*</span></label>
+                                                                        <select name="pic_bagian_id"
+                                                                            class="form-control select2-single" required>
+                                                                            <option
+                                                                                value="<?php echo $data_mou['pic_bagian_id']; ?>"
+                                                                                selected>
+                                                                                <?php echo htmlspecialchars($data_mou['pic_nama']); ?>
+                                                                            </option>
+                                                                            <?php
+                                                                            $query_pic_modal = mysqli_query($mysqli, "SELECT id, nama_bagian FROM tbl_pic_bagian ORDER BY nama_bagian ASC");
+                                                                            while ($pic_modal = mysqli_fetch_assoc($query_pic_modal)) {
+                                                                                if ($pic_modal['id'] != $data_mou['pic_bagian_id']) {
+                                                                                    echo "<option value='{$pic_modal['id']}'>{$pic_modal['nama_bagian']}</option>";
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>Link Dokumen</label>
+                                                                        <input type="url" name="link_dokumen_bks"
+                                                                            class="form-control" placeholder="https://"
+                                                                            value="<?php echo htmlspecialchars($data_mou['link_dokumen_bks']); ?>">
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-default btn-round"
+                                                                        data-dismiss="modal">Batal</button>
+                                                                    <input type="submit" name="simpan" value="Simpan Perubahan"
+                                                                        class="btn btn-success btn-round">
+                                                                </div>
+                                                            </form>
+                                                        </div>
                                                     </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data RK bks <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/rk_bks/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                </div>
+                                                <!-- Button Hapus -->
+                                                <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal"
+                                                    data-target="#modalHapus<?php echo $data_mou['id']; ?>" data-tooltip="tooltip"
+                                                    data-placement="top" title="Hapus"> <i class="fas fa-trash fa-sm"></i>
+                                                </a>
+                                                <!-- modalHapus -->
+                                                <div class="modal fade" id="modalHapus<?php echo $data_mou['id']; ?>" tabindex="-1"
+                                                    role="dialog" aria-labelledby="modalHapusLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-sm" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="modalHapusLabel"><i
+                                                                        class="fas fa-trash mr-2"></i> Hapus Data</h5>
+                                                            </div>
+                                                            <div class="modal-body text-left">
+                                                                Anda yakin ingin menghapus dokumen dengan nomor MoU
+                                                                <strong>
+                                                                    <?php echo htmlspecialchars($data_mou['no_dokumen']); ?>
+                                                                </strong>? yang bermitra pada
+                                                                <strong>
+                                                                    <?php echo htmlspecialchars($data_mou['nama_mitra']); ?>
+                                                                </strong>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-default btn-round"
+                                                                    data-dismiss="modal">Batal</button>
+                                                                <a href="modules/bks/mou/proses_hapus.php?id=<?php echo $data_mou['id']; ?>"
+                                                                    class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel PKS -->
+        <div class="page-inner mt--5">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-title">Daftar Dokumen PKS</div>
+                    <div>
+                        <!-- Button tambah mitra -->
+                        <a href="?module=mitra_bki" class="btn btn-warning btn-round">
+                            <span class="btn-label"><i class="fas fa-users mr-2"></i></span> Mitra
+                        </a>
+                        <!-- Button tambah jenis dokumen -->
+                        <a href="?module=jenis_dokumen_bki" class="btn btn-primary btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-sitemap mr-2"></i></span> Jenis Dokumen
+                        </a>
+                        <!-- Button tambah dokumen -->
+                        <a href="?module=form_entri_pks_bks" class="btn btn-success btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-edit mr-2"></i></span> Input PKS
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="pks-datatables" class="display table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No.</th>
+                                    <th>No. Dokumen PKS</th>
+                                    <th class="text-center">Bentuk Kerjasama</th>
+                                    <th class="text-center">Tentang</th>
+                                    <th class="text-center">Mitra</th>
+                                    <th class="text-center">Tgl. TTD</th>
+                                    <th class="text-center">Sisa Waktu</th>
+                                    <th class="text-center">PIC</th>
+                                    <th class="text-center">MoU Induk</th>
+                                    <th class="text-center">Link Dokumen PKS</th>
+                                    <th class="text-center">Klasifikasi Mitra</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
-                            <?php } ?>
-                        </tbody>
-                        <tfoot>
-                            <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                <td class="text-center" colspan="3">
-                                    <strong>TOTAL REALISASI</strong>
-                                </td>
-                                <td class="text-right" style="color: #28a745; font-size: 1.1em;">
-                                    <strong>Rp <?php echo number_format($total_realisasi_calc, 0, ',', '.'); ?></strong>
-                                </td>
-                                <td class="text-center">-</td>
-                                <td class="text-center">-</td>
-                            </tr>
-                        </tfoot>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $no = 1;
+                                $query = mysqli_query($mysqli, "SELECT
+                                    pks.id,
+                                    pks.mitra_id,
+                                    pks.no_dokumen,
+                                    pks.bentuk_kerjasama_bks,
+                                    pks.tentang,
+                                    pks.tanggal_awal,
+                                    pks.tanggal_akhir,
+                                    pks.link_dokumen_pks,
+                                    pks.klasifikasi_mitra,
+                                    mitra.nama_mitra,
+                                    pks.pic_bagian_id,
+                                    pic.nama_bagian AS pic_nama,
+                                    mou.no_dokumen AS mou_induk_nomor
+                                FROM
+                                    tbl_pks_bks AS pks
+                                LEFT JOIN
+                                    tbl_mitra_bki AS mitra ON pks.mitra_id = mitra.id
+                                LEFT JOIN
+                                    tbl_pic_bagian AS pic ON pks.pic_bagian_id = pic.id
+                                LEFT JOIN
+                                    tbl_mou_bks AS mou ON pks.mou_id     = mou.id
+                                ORDER BY
+                                    pks.id DESC;")
+                                    or die('Ada kesalahan pada query tampil data PKS: ' . mysqli_error($mysqli));
+
+                                while ($data_pks = mysqli_fetch_assoc($query)) {
+                                    $masa_berlaku = date('d/m/Y', strtotime($data_pks['tanggal_awal'])) . ' - ' . date('d/m/Y', strtotime($data_pks['tanggal_akhir']));
+                                    $sisa_waktu = hitung_masa_berlaku($data_pks['tanggal_awal'], $data_pks['tanggal_akhir']);
+                                    ?>
+                                    <tr>
+                                        <td width="30" class="text-center"><?php echo $no++; ?></td>
+                                        <td width="120"><?php echo htmlspecialchars($data_pks['no_dokumen']); ?></td>
+                                        <td width="180"><?php echo htmlspecialchars($data_pks['bentuk_kerjasama_bks']); ?></td>
+                                        <td class="truncate-text"><?php echo htmlspecialchars($data_pks['tentang']); ?></td>
+                                        <td width="100" class="text-center"><?php echo htmlspecialchars($data_pks['nama_mitra']); ?>
+                                        </td>
+                                        <td width="200" class="text-center">
+                                            <?php echo htmlspecialchars($data_pks['tanggal_awal']); ?>
+                                        </td>
+                                        <td width="100" class="text-center"><?php echo $sisa_waktu; ?></td>
+                                        <td width="100" class="text-center"><?php echo htmlspecialchars($data_pks['pic_nama']); ?>
+                                        </td>
+                                        <td width="120" class="text-center">
+                                            <?php echo !empty($data_pks['mou_induk_nomor']) ? htmlspecialchars($data_pks['mou_induk_nomor']) : '-'; ?>
+                                        </td>
+                                        <td width="120" class="text-center">
+                                            <?php if (!empty($data_pks['link_dokumen_pks'])) { ?>
+                                                <a href="<?php echo htmlspecialchars($data_pks['link_dokumen_pks']); ?>" target="_blank"
+                                                    class="btn btn-icon btn-info btn-sm" data-toggle="tooltip" data-placement="top"
+                                                    title="Lihat Dokumen">
+                                                    <i class="fas fa-link"></i>
+                                                </a>
+                                            <?php } ?>
+                                        </td>
+                                        <td width="100" class="text-center">
+                                            <?php echo htmlspecialchars($data_pks['klasifikasi_mitra']); ?>
+                                        </td>
+                                        <td width="80" class="text-center">
+                                            <div>
+                                                <!-- Button Ubah -->
+                                                <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1"
+                                                    data-toggle="modal"
+                                                    data-target="#modalUbahpks_bks<?php echo $data_pks['id']; ?>"
+                                                    data-tooltip="tooltip" data-placement="top" title="Ubah"> <i
+                                                        class="fas fa-pencil-alt fa-sm"></i>
+                                                </a>
+                                                <!-- modalUbah -->
+                                                <div class="modal fade" id="modalUbahpks_bks<?php echo $data_pks['id']; ?>"
+                                                    tabindex="-1" data-bs-toogle role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <form action="modules/bks/pks/proses_ubah.php" method="post">
+                                                                <div class="modal-header btn-success">
+                                                                    <h5 class="modal-title"><i class="fas fa-edit mr-2"></i> Ubah
+                                                                        Data PKS</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal"
+                                                                        aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <input type="hidden" name="id"
+                                                                        value="<?php echo $data_pks['id']; ?>">
+
+                                                                    <div class="form-group">
+                                                                        <label>Terhubung ke MoU Induk (Opsional)</label>
+                                                                        <select name="mou_id" class="form-control select2-single">
+                                                                            <option value="">-- Tidak terhubung / Mandiri --
+                                                                            </option>
+                                                                            <?php
+                                                                            // Query untuk mengambil semua opsi MoU
+                                                                            $query_mou_options = mysqli_query($mysqli, "SELECT 
+                                                                                    mou.id, 
+                                                                                    mou.no_dokumen, 
+                                                                                    mitra.nama_mitra 
+                                                                                FROM 
+                                                                                    tbl_mou_bks AS mou
+                                                                                LEFT JOIN 
+                                                                                    tbl_mitra_bki AS mitra ON mou.mitra_id = mitra.id
+                                                                                ORDER BY 
+                                                                                    mitra.nama_mitra ASC");
+
+                                                                            while ($mou_option = mysqli_fetch_assoc($query_mou_options)) {
+                                                                                // Logika ini akan memilih MoU yang sudah terhubung
+                                                                                $selected = (isset($data_ia['mou_id']) && $mou_option['id'] == $data_ia['mou_id']) ? 'selected' : '';
+
+                                                                                echo "<option value='{$mou_option['id']}' {$selected}>
+                                                                                            {$mou_option['no_dokumen']} - {$mou_option['nama_mitra']}
+                                                                                        </option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                    <hr />
+
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Mitra <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="mitra_id"
+                                                                                    class="form-control select2-single" required>
+                                                                                    <option
+                                                                                        value="<?php echo $data_pks['mitra_id']; ?>"
+                                                                                        selected>
+                                                                                        <?php echo htmlspecialchars($data_pks['nama_mitra']); ?>
+                                                                                    </option>
+                                                                                    <?php
+                                                                                    $query_mitra_modal = mysqli_query($mysqli, "SELECT id, nama_mitra FROM tbl_mitra_bki ORDER BY nama_mitra ASC");
+                                                                                    while ($mitra_modal = mysqli_fetch_assoc($query_mitra_modal)) {
+                                                                                        if ($mitra_modal['id'] != $data_pks['mitra_id']) {
+                                                                                            echo "<option value='{$mitra_modal['id']}'>{$mitra_modal['nama_mitra']}</option>";
+                                                                                        }
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>PIC (Bagian / Prodi) <span
+                                                                                        class="text-danger">*</span></label>
+                                                                                <select name="pic_bagian_id"
+                                                                                    class="form-control select2-single" required>
+                                                                                    <option
+                                                                                        value="<?php echo $data_pks['pic_bagian_id']; ?>"
+                                                                                        selected>
+                                                                                        <?php echo htmlspecialchars($data_pks['pic_nama']); ?>
+                                                                                    </option>
+                                                                                    <?php
+                                                                                    $query_pic_modal = mysqli_query($mysqli, "SELECT id, nama_bagian FROM tbl_pic_bagian ORDER BY nama_bagian ASC");
+                                                                                    while ($pic_modal = mysqli_fetch_assoc($query_pic_modal)) {
+                                                                                        if ($pic_modal['id'] != $data_pks['pic_bagian_id']) {
+                                                                                            echo "<option value='{$pic_modal['id']}'>{$pic_modal['nama_bagian']}</option>";
+                                                                                        }
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>No. Dokumen PKS</label>
+                                                                        <input type="text" name="no_dokumen" class="form-control"
+                                                                            value="<?php echo htmlspecialchars($data_pks['no_dokumen']); ?>"
+                                                                            required>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>Tentang (Judul PKS)</label>
+                                                                        <textarea name="tentang" class="form-control" rows="3"
+                                                                            required><?php echo htmlspecialchars($data_pks['tentang']); ?></textarea>
+                                                                    </div>
+
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Penandatanganan (Awal)</label>
+                                                                                <input type="date" name="tanggal_awal"
+                                                                                    class="form-control"
+                                                                                    value="<?php echo $data_pks['tanggal_awal']; ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Berakhir</label>
+                                                                                <input type="date" name="tanggal_akhir"
+                                                                                    class="form-control"
+                                                                                    value="<?php echo $data_pks['tanggal_akhir']; ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <div class="form-group">
+                                                                            <label>Klasifikasi Mitra <span
+                                                                                    class="text-danger">*</span></label>
+                                                                            <select name="klasifikasi_mitra"
+                                                                                class="form-control select2-single" required>
+                                                                                <option value="" disabled>-- Pilih Klasifikasi
+                                                                                    --</option>
+                                                                                <?php
+                                                                                $klasifikasi_options = ['Industri', 'PLN Group', 'Pemerintahan', 'Start-Up', 'Perusahaan Multinasional', 'Perguruan Tinggi', 'Institusi/Organisasi Multilateral'];
+                                                                                foreach ($klasifikasi_options as $option) {
+                                                                                    $selected = ($data_mou['klasifikasi_mitra'] == $option) ? 'selected' : '';
+                                                                                    echo "<option value='{$option}' {$selected}>{$option}</option>";
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label>Link Dokumen PKS</label>
+                                                                        <input type="url" name="link_dokumen_pks"
+                                                                            class="form-control" placeholder="https://"
+                                                                            value="<?php echo htmlspecialchars($data_pks['link_dokumen_pks']); ?>">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-default btn-round"
+                                                                        data-dismiss="modal">Batal</button>
+                                                                    <input type="submit" name="simpan" value="Simpan Perubahan"
+                                                                        class="btn btn-success btn-round">
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Button Hapus -->
+                                                <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal"
+                                                    data-target="#modalHapus<?php echo $data_pks['id']; ?>" data-tooltip="tooltip"
+                                                    data-placement="top" title="Hapus"> <i class="fas fa-trash fa-sm"></i>
+                                                </a>
+                                                <!-- modalHapus -->
+                                                <div class="modal fade" id="modalHapus<?php echo $data_pks['id']; ?>" tabindex="-1"
+                                                    role="dialog" aria-labelledby="modalHapusLabel" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="modalHapusLabel"><i
+                                                                        class="fas fa-exclamation-triangle mr-2"></i> Konfirmasi
+                                                                    Hapus</h5>
+                                                                <button type="button" class="close" data-dismiss="modal"
+                                                                    aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Anda yakin ingin menghapus data PKS dengan nomor
+                                                                    <strong><?php echo htmlspecialchars($data_pks['no_dokumen']); ?></strong>?
+                                                                </p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary btn-round"
+                                                                    data-dismiss="modal">Batal</button>
+                                                                <a href="modules/bks/pks/proses_hapus.php?id=<?php echo $data_pks['id']; ?>"
+                                                                    class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Implementation of Arrangement-->
+        <div class="page-inner mt--5">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-title">Daftar Dokumen Implementation of Arrangement</div>
+                    <div>
+                        <!-- Button tambah mitra -->
+                        <a href="?module=mitra_bki" class="btn btn-warning btn-round">
+                            <span class="btn-label"><i class="fas fa-users mr-2"></i></span> Mitra
+                        </a>
+                        <!-- Button tambah jenis dokumen -->
+                        <a href="?module=jenis_dokumen_bki" class="btn btn-primary btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-sitemap mr-2"></i></span> Jenis Dokumen
+                        </a>
+                        <!-- Button tambah dokumen -->
+                        <a href="?module=form_entri_ia_bks" class="btn btn-success btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-edit mr-2"></i></span> Input IA
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="ia-datatables" class="display table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No.</th>
+                                    <th>No. Dokumen </th>
+                                    <th class="text-center">Bentuk Kerjasama</th>
+                                    <th class="text-center">Tentang</th>
+                                    <th class="text-center">Mitra</th>
+                                    <th class="text-center">Tgl. TTD</th>
+                                    <th class="text-center">Sisa Waktu</th>
+                                    <th class="text-center">PIC</th>
+                                    <th class="text-center">MoU Induk</th>
+                                    <th class="text-center">Link Dokumen IA</th>
+                                    <th class="text-center">Klasifikasi Mitra</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $no = 1;
+                                // Query yang sudah kita buat tadi
+                                $query = mysqli_query($mysqli, "SELECT
+                                    ia.id,
+                                    ia.no_dokumen,
+                                    ia.mitra_id,
+                                    ia.pic_bagian_id,
+                                    ia.bentuk_kerjasama_bks,
+                                    ia.tentang,
+                                    ia.tanggal_awal,
+                                    ia.tanggal_akhir,
+                                    ia.link_dokumen_ia,
+                                    ia.klasifikasi_mitra,
+                                    
+                                    -- Mengambil data dari tabel yang di-JOIN
+                                    mitra.nama_mitra,
+                                    pic.nama_bagian AS pic_nama,
+                                    mou.no_dokumen AS mou_induk_nomor
+                                FROM
+                                    tbl_i_a AS ia
+                                LEFT JOIN
+                                    tbl_mitra_bki AS mitra ON ia.mitra_id = mitra.id
+                                LEFT JOIN
+                                    tbl_pic_bagian AS pic ON ia.pic_bagian_id = pic.id
+                                LEFT JOIN
+                                    tbl_mou_bks AS mou ON ia.mou_id = mou.id
+                                ORDER BY
+                                    ia.id DESC;")
+                                    or die('Ada kesalahan pada query tampil data PKS: ' . mysqli_error($mysqli));
+
+                                while ($data_ia = mysqli_fetch_assoc($query)) {
+                                    $masa_berlaku = date('d/m/Y', strtotime($data_ia['tanggal_awal'])) . ' - ' . date('d/m/Y', strtotime($data_ia['tanggal_akhir']));
+                                    $sisa_waktu = hitung_masa_berlaku($data_ia['tanggal_awal'], $data_ia['tanggal_akhir']);
+                                    ?>
+                                    <tr>
+                                        <td width="30" class="text-center"><?php echo $no++; ?></td>
+                                        <td width="120"><?php echo htmlspecialchars($data_ia['no_dokumen']); ?></td>
+                                        <td width="180"><?php echo htmlspecialchars($data_ia['bentuk_kerjasama_bks']); ?></td>
+                                        <td><?php echo htmlspecialchars($data_ia['tentang']); ?></td>
+                                        <td width="100" class="text-center"><?php echo htmlspecialchars($data_ia['nama_mitra']); ?>
+                                        </td>
+                                        <td width="200" class="text-center">
+                                            <?php echo htmlspecialchars($data_ia['tanggal_awal']); ?>
+                                        </td>
+                                        <td width="100" class="text-center"><?php echo $sisa_waktu; ?></td>
+                                        <td width="100" class="text-center"><?php echo htmlspecialchars($data_ia['pic_nama']); ?>
+                                        </td>
+                                        <td width="120" class="text-center">
+                                            <?php echo !empty($data_ia['mou_induk_nomor']) ? htmlspecialchars($data_ia['mou_induk_nomor']) : '-'; ?>
+                                        </td>
+                                        <td width="120" class="text-center">
+                                            <?php if (!empty($data_ia['link_dokumen_ia'])) { ?>
+                                                <a href="<?php echo htmlspecialchars($data_ia['link_dokumen_ia']); ?>" target="_blank"
+                                                    class="btn btn-icon btn-info btn-sm" data-toggle="tooltip" data-placement="top"
+                                                    title="Lihat Dokumen">
+                                                    <i class="fas fa-link"></i>
+                                                </a>
+                                            <?php } ?>
+                                        </td>
+                                        <td width="100" class="text-center">
+                                            <?php echo htmlspecialchars($data_ia['klasifikasi_mitra']); ?>
+                                        </td>
+                                        <td width="80" class="text-center">
+                                            <div>
+                                                <!-- Button Ubah -->
+                                                <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1"
+                                                    data-toggle="modal" data-target="#modalUbahIA_bks<?php echo $data_ia['id']; ?>"
+                                                    data-tooltip="tooltip" data-placement="top" title="Ubah"> <i
+                                                        class="fas fa-pencil-alt fa-sm"></i>
+                                                </a>
+                                                <!-- modalUbah -->
+                                                <div class="modal fade" id="modalUbahIA_bks<?php echo $data_ia['id']; ?>"
+                                                    tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <form action="modules//bks/implemenation_arrangement/proses_ubah.php"
+                                                                method="post">
+                                                                <div class="modal-header btn-success">
+                                                                    <h5 class="modal-title"><i class="fas fa-edit mr-2"></i> Ubah
+                                                                        Data Implementation of Arrangement (IA)</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal"
+                                                                        aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <input type="hidden" name="id"
+                                                                        value="<?php echo $data_ia['id']; ?>">
+
+                                                                    <div class="form-group">
+                                                                        <label>Terhubung ke MoU Induk (Opsional)</label>
+                                                                        <select name="mou_id" class="form-control select2-single">
+                                                                            <option value="">-- Tidak terhubung / Mandiri --
+                                                                            </option>
+                                                                            <?php
+                                                                            // Query untuk mengambil semua opsi MoU
+                                                                            $query_mou_options = mysqli_query($mysqli, "SELECT 
+                                                                                    mou.id, 
+                                                                                    mou.no_dokumen, 
+                                                                                    mitra.nama_mitra 
+                                                                                FROM 
+                                                                                    tbl_mou_bks AS mou
+                                                                                LEFT JOIN 
+                                                                                    tbl_mitra_bki AS mitra ON mou.mitra_id = mitra.id
+                                                                                ORDER BY 
+                                                                                    mitra.nama_mitra ASC");
+
+                                                                            while ($mou_option = mysqli_fetch_assoc($query_mou_options)) {
+                                                                                // Logika ini akan memilih MoU yang sudah terhubung
+                                                                                $selected = (isset($data_ia['mou_id']) && $mou_option['id'] == $data_ia['mou_id']) ? 'selected' : '';
+
+                                                                                echo "<option value='{$mou_option['id']}' {$selected}>
+                                                                                            {$mou_option['no_dokumen']} - {$mou_option['nama_mitra']}
+                                                                                        </option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <hr />
+
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>Mitra <span class="text-danger">*</span></label>
+                                                                            <select name="mitra_id"
+                                                                                class="form-control select2-single" required>
+                                                                                <option value="<?php echo $data_ia['mitra_id']; ?>"
+                                                                                    selected>
+                                                                                    <?php echo htmlspecialchars($data_ia['nama_mitra']); ?>
+                                                                                </option>
+                                                                                <?php
+                                                                                $query_mitra_modal = mysqli_query($mysqli, "SELECT id, nama_mitra FROM tbl_mitra_bki ORDER BY nama_mitra ASC");
+                                                                                while ($mitra_modal = mysqli_fetch_assoc($query_mitra_modal)) {
+                                                                                    if ($mitra_modal['id'] != $data_ia['mitra_id']) {
+                                                                                        echo "<option value='{$mitra_modal['id']}'>{$mitra_modal['nama_mitra']}</option>";
+                                                                                    }
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>PIC (Bagian / Prodi) <span
+                                                                                    class="text-danger">*</span></label>
+                                                                            <select name="pic_bagian_id"
+                                                                                class="form-control select2-single" required>
+                                                                                <option
+                                                                                    value="<?php echo $data_ia['pic_bagian_id']; ?>"
+                                                                                    selected>
+                                                                                    <?php echo htmlspecialchars($data_ia['pic_nama']); ?>
+                                                                                </option>
+                                                                                <?php
+                                                                                $query_pic_modal = mysqli_query($mysqli, "SELECT id, nama_bagian FROM tbl_pic_bagian ORDER BY nama_bagian ASC");
+                                                                                while ($pic_modal = mysqli_fetch_assoc($query_pic_modal)) {
+                                                                                    if ($pic_modal['id'] != $data_ia['pic_bagian_id']) {
+                                                                                        echo "<option value='{$pic_modal['id']}'>{$pic_modal['nama_bagian']}</option>";
+                                                                                    }
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label>No. Dokumen IA</label>
+                                                                    <input type="text" name="no_dokumen" class="form-control"
+                                                                        value="<?php echo htmlspecialchars($data_ia['no_dokumen']); ?>"
+                                                                        required>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label>Tentang (Judul IA)</label>
+                                                                    <textarea name="tentang" class="form-control" rows="3"
+                                                                        required><?php echo htmlspecialchars($data_ia['tentang']); ?></textarea>
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>Tanggal Penandatanganan (Awal)</label>
+                                                                            <input type="date" name="tanggal_awal"
+                                                                                class="form-control"
+                                                                                value="<?php echo $data_ia['tanggal_awal']; ?>"
+                                                                                required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label>Tanggal Berakhir</label>
+                                                                            <input type="date" name="tanggal_akhir"
+                                                                                class="form-control"
+                                                                                value="<?php echo $data_ia['tanggal_akhir']; ?>"
+                                                                                required>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+
+                                                                <div class="form-group">
+                                                                    <div class="form-group">
+                                                                        <label>Klasifikasi Mitra <span
+                                                                                class="text-danger">*</span></label>
+                                                                        <select name="klasifikasi_mitra"
+                                                                            class="form-control select2-single" required>
+                                                                            <option value="" disabled>-- Pilih Klasifikasi
+                                                                                --</option>
+                                                                            <?php
+                                                                            $klasifikasi_options = ['Industri', 'PLN Group', 'Pemerintahan', 'Start-Up', 'Perusahaan Multinasional', 'Perguruan Tinggi', 'Institusi/Organisasi Multilateral'];
+                                                                            foreach ($klasifikasi_options as $option) {
+                                                                                $selected = ($data_ia['klasifikasi_mitra'] == $option) ? 'selected' : '';
+                                                                                echo "<option value='{$option}' {$selected}>{$option}</option>";
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label>Link Dokumen PKS</label>
+                                                                    <input type="url" name="link_dokumen_ia" class="form-control"
+                                                                        placeholder="https://"
+                                                                        value="<?php echo htmlspecialchars($data_ia['link_dokumen_ia']); ?>">
+                                                                </div>
+
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-default btn-round"
+                                                                        data-dismiss="modal">Batal</button>
+                                                                    <input type="submit" name="simpan" value="Simpan Perubahan"
+                                                                        class="btn btn-success btn-round">
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Button Hapus -->
+                                            <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal"
+                                                data-target="#modalHapus<?php echo $data_ia['id']; ?>" data-tooltip="tooltip"
+                                                data-placement="top" title="Hapus"> <i class="fas fa-trash fa-sm"></i>
+                                            </a>
+                                            <!-- modalHapus -->
+                                            <div class="modal fade" id="modalHapus<?php echo $data_ia['id']; ?>" tabindex="-1"
+                                                role="dialog" aria-labelledby="modalHapusLabel" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalHapusLabel"><i
+                                                                    class="fas fa-exclamation-triangle mr-2"></i> Konfirmasi
+                                                                Hapus</h5>
+                                                            <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Anda yakin ingin menghapus data IA dengan nomor
+                                                                <strong><?php echo htmlspecialchars($data_ia['no_dokumen']); ?></strong>?
+                                                            </p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary btn-round"
+                                                                data-dismiss="modal">Batal</button>
+                                                            <a href="modules/bks/implementation_arrangement/proses_hapus.php?id=<?php echo $data_ia['id']; ?>"
+                                                                class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Rencana -->
+        <div class="page-inner mt--5">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-title mb-0">Data Rencana Kegiatan BKS</div>
+                    <div>
+                        <!-- Button tambah dokumen -->
+                        <a href="?module=form_entri_rk_bks" data-target="" class="btn btn-success btn-round ml-2">
+                            <span class="btn-label"><i class="fas fa-edit mr-2"></i></span> Input
+                            Data Rencana</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <!-- tabel untuk menampilkan data dari database -->
+                        <table id="rencana-datatables" class="display table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No.</th>
+                                    <th class="text-center">Rencana Mitra</th>
+                                    <th class="text-center">Klasifikasi Mitra</th>
+                                    <th class="text-center">Bentuk Kerjasama</th>
+                                    <th class="text-center">Keterangan</th>
+                                    <th class="text-center">Bulan Target Realisasi</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                // variabel untuk nomor urut tabel
+                                $no = 1;
+                                // sql statement untuk menampilkan data dari tabel "tbl_bki" dan "tbl_jenis_dokumen_bki" dan "tbl_mitra_bki"
+                                $query = mysqli_query($mysqli, "SELECT 
+										rk.id,
+                                        rk.mitra_id,
+                                        rk.bentuk_kerjasama,
+                                        rk.klasifikasi_mitra,
+                                        rk.target_realisasi,
+										m.nama_mitra AS nama_mitra,
+										m.negara,
+										rk.tentang,
+										-- Menggunakan DATE_FORMAT untuk mengubah format tanggal
+										DATE_FORMAT(rk.target_realisasi, '%M %Y') AS bulan_target_realisasi
+										FROM 
+											tbl_rk_bks AS rk
+										JOIN 
+											tbl_mitra_bki AS m ON rk.mitra_id = m.id
+										ORDER BY 
+											rk.target_realisasi ASC;")
+                                    or die('Ada kesalahan pada query tampil data : ' . mysqli_error($mysqli));
+                                // ambil data hasil query
+                                while ($data = mysqli_fetch_assoc($query)) {
+                                    ?>
+                                    <!-- tampilkan data -->
+                                    <tr>
+                                        <td width="30" class="text-center"><?php echo $no++; ?>
+                                        </td>
+                                        <td width="80">
+                                            <?php echo $data['nama_mitra']; ?>
+                                        </td>
+                                        <td width="100" class="text-center"><?php echo $data['klasifikasi_mitra']; ?></td>
+                                        <td width="100" class="text-center"><?php echo $data['bentuk_kerjasama']; ?></td>
+                                        <td width="120" class="text-center"><?php echo $data['tentang']; ?></td>
+                                        <td width="80" class="text-center">
+                                            <?php echo $data['bulan_target_realisasi']; ?>
+                                        </td>
+                                        <td width="10" class="text-center">
+                                            <div>
+                                                <!-- Button Ubah -->
+                                                <a href="#" class="btn btn-icon btn-round btn-success btn-sm mr-md-1"
+                                                    data-toggle="modal"
+                                                    data-target="#modalUbahRencana_bks<?php echo $data['id']; ?>"
+                                                    data-tooltip="tooltip" data-placement="top" title="Ubah"> <i
+                                                        class="fas fa-pencil-alt fa-sm"></i>
+                                                </a>
+                                                <!-- modalUbah -->
+                                                <div class="modal fade" id="modalUbahRencana_bks<?php echo $data['id']; ?>"
+                                                    tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <form action="modules/bks/proses_ubah.php" method="post">
+                                                                <div class="modal-header btn-success">
+                                                                    <h5 class="modal-title"><i class="fas fa-edit mr-2"></i> Ubah
+                                                                        Data Rencana</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal"
+                                                                        aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <input type="hidden" name="id"
+                                                                        value="<?php echo $data['id']; ?>">
+
+                                                                    <div class="form-group">
+                                                                        <label>Rencana Mitra <span
+                                                                                class="text-danger">*</span></label>
+                                                                        <select name="mitra_id" class="form-control select2-single"
+                                                                            required>
+                                                                            <option
+                                                                                value="<?php echo htmlspecialchars($data['mitra_id']); ?>"
+                                                                                selected>
+                                                                                <?php echo htmlspecialchars($data['nama_mitra']); ?>
+                                                                            </option>
+                                                                            <?php
+                                                                            $query_mitra_modal = mysqli_query($mysqli, "SELECT id, nama_mitra FROM tbl_mitra_bki ORDER BY nama_mitra ASC");
+                                                                            while ($mitra_modal = mysqli_fetch_assoc($query_mitra_modal)) {
+                                                                                if ($mitra_modal['id'] != $data['mitra_id']) {
+                                                                                    echo "<option value='{$mitra_modal['id']}'>{$mitra_modal['nama_mitra']}</option>";
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+
+
+                                                                    <div class="form-group">
+                                                                        <label>Bulan Target Realisasi <span
+                                                                                class="text-danger">*</span></label>
+                                                                        <input type="date" name="target_realisasi"
+                                                                            class="form-control"
+                                                                            value="<?php echo $data['target_realisasi']; ?>"
+                                                                            required>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label>Perihal <span
+                                                                            class="text-danger">*</span></label>
+                                                                    <textarea name="tentang" class="form-control" rows="3"
+                                                                        required><?php echo htmlspecialchars($data['tentang']); ?></textarea>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label>Klasifikasi Mitra<span
+                                                                            class="text-danger">*</span></label>
+                                                                    <select name="klasifikasi_mitra"
+                                                                        class="form-control select2-single" required>
+                                                                        <option
+                                                                            value="<?php echo htmlspecialchars($data['klasifikasi_mitra']); ?>"
+                                                                            disabled selected>-- Pilih Klasifikasi --
+                                                                        </option>
+                                                                        <option value="Industri">Industri</option>
+                                                                        <option value="PLN Group">PLN Group</option>
+                                                                        <option value="Pemerintahan">Pemerintahan</option>
+                                                                        <option value="Start-Up">Start-Up</option>
+                                                                        <option value="Perusahaan Multinasional">Perusahaan
+                                                                            Multinasional
+                                                                        </option>
+                                                                        <option value="Perguruan Tinggi">Perguruan Tinggi</option>
+                                                                        <option value="Institusi/Organisasi Multilateral">
+                                                                            Institusi/Organisasi Multilateral</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label>Bentuk Kerjasama <span
+                                                                            class="text-danger">*</span></label>
+                                                                    <select name="bentuk_kerjasama"
+                                                                        class="form-control select2-single" required>
+                                                                        <option
+                                                                            value="<?php echo htmlspecialchars($data['bentuk_kerjasama']); ?>"
+                                                                            disabled selected>-- Pilih Bentuk Kerjasama
+                                                                            --
+                                                                        </option>
+                                                                        <option value="Akademik">Akademik</option>
+                                                                        <option value="Non-Akademik">Non-Akademik</option>
+                                                                    </select>
+                                                                </div>
+                                                                <hr />
+
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-default btn-round"
+                                                                        data-dismiss="modal">Batal</button>
+                                                                    <input type="submit" name="simpan" value="Simpan Perubahan"
+                                                                        class="btn btn-success btn-round">
+                                                                </div>
+                                                        </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Button Hapus -->
+                                            <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal"
+                                                data-target="#modalHapus<?php echo $data['id']; ?>" data-tooltip="tooltip"
+                                                data-placement="top" title="Hapus"> <i class="fas fa-trash fa-sm"></i>
+                                            </a>
+                                            <!-- modalHapus -->
+                                            <div class="modal fade" id="modalHapus<?php echo $data['id']; ?>" tabindex="-1"
+                                                role="dialog" aria-labelledby="modalHapusLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-sm" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalHapusLabel"><i
+                                                                    class="fas fa-trash mr-2"></i> Hapus Data
+                                                            </h5>
+                                                        </div>
+                                                        <div class="modal-body text-left">
+                                                            Anda yakin ingin menghapus rencana pada mitra
+                                                            <strong>
+                                                                <?php echo htmlspecialchars($data['nama_mitra']); ?>
+                                                            </strong>
+                                                            dengan bentuk kerjasama
+                                                            <strong>
+                                                                <?php echo htmlspecialchars($data['bentuk_kerjasama']); ?>
+                                                            </strong>?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-default btn-round"
+                                                                data-dismiss="modal">Batal</button>
+                                                            <a href="modules/bks/proses_hapus.php?id=<?php echo $data['id']; ?>"
+                                                                class="btn btn-danger btn-round">Ya, Hapus</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                        </div>
+                        </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
                     </table>
                 </div>
             </div>
         </div>
-        
-        <!-- Tables Section --->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="fas fa-table mr-2"></i>Rencana Kegiatan 2025
-                </div>
-                <div class="ml-md-auto py-2 py-md-0">
-                    <!-- button entri data -->
-                    <a href="?module=form_entri_rk_bks" class="btn btn-success btn-round">
-                        <span class="btn-label"><i class="fa fa-plus mr-2"></i></span> Entri Data RK
-                    </a>
-				</div>
-            </div>
-        <!-- Tampil Data Table Rencana Kegiatan 2025 --> 
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="targetDataTable" class="display table table-bordered table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No.</th>
-                                <th class="text-center">Deputy bks</th>
-                                <th class="text-center">Kegiatan</th>
-                                <th class="text-center">Target</th>
-                                <!-- <th class="text-center">Sisa Target</th> -->
-                                <!-- <th class="text-center">Tanggal</th> -->
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $no2 = 1;
-                            foreach ($target_data as $data) {
-                                $sisa_target = $data['target_nominal'] - $data['realisasi_nominal'];
-                                $persentase_item = $data['target_nominal'] > 0 ? round(($data['realisasi_nominal'] / $data['target_nominal']) * 100, 2) : 0;
-                                $status = $persentase_item >= 100 ? 'Tercapai' : ($persentase_item >= 80 ? 'Hampir Tercapai' : 'Belum Tercapai');
-                                $status_class = $persentase_item >= 100 ? 'success' : ($persentase_item >= 80 ? 'warning' : 'danger');
-                                // Tentukan deputy class
-                                
-                                ?>
-                                <tr>
-                                    <td width="30" class="text-center"><?php echo $no2++; ?></td>
-                                    <td>
-                                        <span class="badge badge-<?php echo $deputy_class; ?>"><?php echo htmlspecialchars($data['nama_program']); ?></span>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($data['keterangan_program']); ?></td>
-                                    <td class="text-right">Rp <?php echo number_format($data['target_nominal'], 0, ',', '.'); ?></td>
-                                    <!-- <td class="text-right">Rp <?php echo number_format($sisa_target, 0, ',', '.'); ?></td> 
-                                    <td width="100" class="text-center"><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></td>-->
-                                    <td width="120" class="text-center">
-                                        <span class="badge badge-<?php echo $status_class; ?>"><?php echo $status; ?></span>
-                                    </td>
-                                    <td width="80" class="text-center">
-                                        <a href="?module=form_ubah_rk_bks&id=<?php echo $data['id']; ?>" class="btn btn-icon btn-round btn-success btn-sm mr-1" data-tooltip="tooltip" title="Ubah">
-                                            <i class="fas fa-pencil-alt fa-sm"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-icon btn-round btn-danger btn-sm" data-toggle="modal" data-target="#modalHapusTarget<?php echo $data['id']; ?>" data-tooltip="tooltip" title="Hapus">
-                                            <i class="fas fa-trash fa-sm"></i>
-                                        </a>
-                                        
-                                        <!-- Modal Hapus -->
-                                        <div class="modal fade" id="modalHapusTarget<?php echo $data['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"><i class="fas fa-trash mr-2"></i>Hapus Data RK bks</h5>
-                                                    </div>
-                                                    <div class="modal-body text-left">Anda yakin ingin menghapus data RK bks <strong><?php echo $data['nama_program']; ?></strong> Tanggal <strong><?php echo date('d/m/Y', strtotime($data['tgl_surat'])); ?></strong>?</div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Batal</button>
-                                                        <a href="modules/rk_bks/proses_hapus.php?id=<?php echo $data['id']; ?>" class="btn btn-danger btn-round">Ya, Hapus</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php } ?>
-                        </tbody>
-                        <tfoot>
-                            <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                <td class="text-center" colspan="3">
-                                    <strong>TOTAL RENCANA</strong>
-                                </td>
-                                <td class="text-right" style="color: #28a745; font-size: 1.1em;">
-                                    <strong>Rp <?php echo number_format($total_target_calc, 0, ',', '.'); ?></strong>
-                                </td>
-                                <td class="text-center">-</td>
-                                <td class="text-center">-</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
         </div>
-        
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // Data untuk charts dari PHP
-        const yearlyData = <?php echo json_encode($yearly_data); ?>;
-        const monthlyData = <?php echo json_encode($monthly_data); ?>;
-        const programData = <?php echo json_encode($program_data); ?>;
-        const keteranganData = <?php echo json_encode($keterangan_data); ?>;
 
-        // Variabel untuk menyimpan instance chart
-        let lineChart, doughnutChart, barChart, keteranganChart;
-
-        // Function untuk inisialisasi semua chart
-        function initializeCharts() {
-            // Destroy existing charts jika ada
-            if (lineChart) lineChart.destroy();
-            if (doughnutChart) doughnutChart.destroy();
-            if (barChart) barChart.destroy();
-            if (keteranganChart) keteranganChart.destroy();
-
-            // Siapkan data untuk line chart (hanya realisasi per bulan)
-            const months = Object.keys(monthlyData).sort();
-            const lineChartLabels = months.map(month => monthlyData[month].label);
-            const lineChartData = months.map(month => monthlyData[month].realisasi);
-
-            // Line Chart - Realisasi Kumulatif per Bulan
-            const lineCtx = document.getElementById('lineChart').getContext('2d');
-            lineChart = new Chart(lineCtx, {
-                type: 'line',
-                data: {
-                    labels: lineChartLabels,
-                    datasets: [{
-                        label: 'Realisasi',
-                        data: lineChartData,
-                        borderColor: '#36A2EB',
-                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'Rp ' + value.toLocaleString('id-ID');
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Doughnut Chart - Capaian vs Target
-            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
-            const totalTarget = <?php echo $total_target_calc; ?>;
-            const totalRealisasi = <?php echo $total_realisasi_calc; ?>;
-            const sisaTarget = totalTarget - totalRealisasi;
-
-            doughnutChart = new Chart(doughnutCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Tercapai', 'Belum Tercapai'],
-                    datasets: [{
-                        data: [totalRealisasi, sisaTarget > 0 ? sisaTarget : 0],
-                        backgroundColor: ['#4BC0C0', '#FFE0E0'],
-                        borderColor: ['#36A2EB', '#FF6384'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const percentage = ((context.parsed / totalTarget) * 100).toFixed(1);
-                                    return context.label + ': Rp ' + context.parsed.toLocaleString('id-ID') + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Bar Chart - Target vs Realisasi per Program
-            const programLabels = Object.keys(programData);
-            const programTargetData = programLabels.map(program => programData[program].target);
-            const programRealisasiData = programLabels.map(program => programData[program].realisasi);
-
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: programLabels,
-                    datasets: [{
-                        label: 'Target',
-                        data: programTargetData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                        borderColor: '#FF6384',
-                        borderWidth: 1
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // Inisialisasi DataTables untuk setiap tabel
+                $('#mou-datatables').DataTable({
+                    "pageLength": 10,
+                    "ordering": false
+                });
+                $('#pks-datatables').DataTable({
+                    "pageLength": 10,
+                    "ordering": false
+                });
+                $('#ia-datatables').DataTable({
+                    "pageLength": 10,
+                    "ordering": false
+                });
+                $('#rencana-datatables').DataTable({
+                    "pageLength": 10,
+                    "ordering": false
+                });
+                // dapatkan parameter URL
+                let queryString = window.location.search;
+                let urlParams = new URLSearchParams(queryString);
+                // ambil data dari URL
+                let pesan = urlParams.get('pesan');
+                let nomor = urlParams.get('nomor');
+                // menampilkan pesan sesuai dengan proses yang dijalankan
+                // jika pesan = 1
+                if (pesan === '1') {
+                    // tampilkan pesan sukses simpan data
+                    $.notify({
+                        title: '<h5 class="text-success font-weight-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Sukses!</h5>',
+                        message: 'Data pada BKS berhasil disimpan.'
                     }, {
-                        label: 'Realisasi',
-                        data: programRealisasiData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: '#36A2EB',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {  
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'Rp ' + value.toLocaleString('id-ID');
-                                }
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 0
-                            }
-                        }
-                    }
+                        type: 'success'
+                    });
+                }
+                // jika pesan = 2
+                else if (pesan === '2') {
+                    // tampilkan pesan sukses ubah data
+                    $.notify({
+                        title: '<h5 class="text-success font-weight-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Sukses!</h5>',
+                        message: 'Data dokumen BKS berhasil diubah.'
+                    }, {
+                        type: 'success'
+                    });
+                }
+                // jika pesan = 3
+                else if (pesan === '3') {
+                    // tampilkan pesan sukses hapus data
+                    $.notify({
+                        title: '<h5 class="text-success font-weight-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Sukses!</h5>',
+                        message: 'Data dokumen BKS berhasil dihapus.'
+                    }, {
+                        type: 'success'
+                    });
+                }
+                // jika pesan = 4
+                else if (pesan === '4') {
+                    // tampilkan pesan gagal unggah file
+                    $.notify({
+                        title: '<h5 class="text-danger font-weight-bold mb-1"><i class="fas fa-times-circle mr-2"></i>Gagal!</h5>',
+                        message: 'Data MoU tidak dapat dihapus dikarenakan <strong>masih ada PKS yang terhubung</strong> pada MoU yang ingin.'
+                    }, {
+                        type: 'danger'
+                    });
+                }
+                // jika pesan = 5
+                else if (pesan === '5') {
+                    // tampilkan pesan gagal unggah file
+                    $.notify({
+                        title: '<h5 class="text-danger font-weight-bold mb-1"><i class="fas fa-times-circle mr-2"></i>Gagal!</h5>',
+                        message: 'Ukuran file dokumen lebih dari 10 Mb. Harap unggah file dokumen yang memiliki ukuran <strong>maksimal 10 Mb</strong>.'
+                    }, {
+                        type: 'danger'
+                    });
+                }
+                // jika pesan = 6
+                else if (pesan === '6') {
+                    // tampilkan pesan gagal unggah file
+                    $.notify({
+                        title: '<h5 class="text-danger font-weight-bold mb-1"><i class="fas fa-times-circle mr-2"></i>Gagal!</h5>',
+                        message: 'Anda tidak berhak untuk menghapus atau mengakses file ini.'
+                    }, {
+                        type: 'danger'
+                    });
                 }
             });
-
-            // Initialize keterangan chart
-            initializeKeteranganChart();
-        }
-
-        // Function untuk inisialisasi chart realisasi per keterangan program
-        function initializeKeteranganChart() {
-            // Pastikan ada element canvas untuk keterangan chart
-            const keteranganCanvas = document.getElementById('keteranganChart');
-            if (!keteranganCanvas) {
-                console.warn('Canvas element untuk keteranganChart tidak ditemukan');
-                return;
-            }
-
-            // Filter data keterangan yang memiliki realisasi > 0
-            const filteredKeteranganData = {};
-            Object.keys(keteranganData).forEach(keterangan => {
-                const realisasi = keteranganData[keterangan].realisasi || 0;
-                if (realisasi > 0) {
-                    filteredKeteranganData[keterangan] = keteranganData[keterangan];
-                }
-            });
-
-            // Siapkan data untuk keterangan chart (hanya yang realisasi > 0)
-            const keteranganLabels = Object.keys(filteredKeteranganData);
-            const keteranganRealisasiData = keteranganLabels.map(keterangan => filteredKeteranganData[keterangan].realisasi);
-            
-            // Generate warna untuk setiap keterangan
-            const colors = generateColors(keteranganLabels.length);
-
-            const keteranganCtx = keteranganCanvas.getContext('2d');
-            keteranganChart = new Chart(keteranganCtx, {
-                type: 'pie',
-                data: {
-                    labels: keteranganLabels,
-                    datasets: [{
-                        label: 'Realisasi per Keterangan',
-                        data: keteranganRealisasiData,
-                        backgroundColor: colors.background,
-                        borderColor: colors.border,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                boxWidth: 12,
-                                padding: 10,
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    if (data.labels.length && data.datasets.length) {
-                                        return data.labels.map((label, i) => {
-                                            const value = data.datasets[0].data[i];
-                                            const total = data.datasets[0].data.reduce((sum, val) => sum + val, 0);
-                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                            
-                                            return {
-                                                text: `${label} (${percentage}%)`,
-                                                fillStyle: data.datasets[0].backgroundColor[i],
-                                                strokeStyle: data.datasets[0].borderColor[i],
-                                                lineWidth: data.datasets[0].borderWidth,
-                                                hidden: isNaN(data.datasets[0].data[i]) || chart.getDatasetMeta(0).data[i].hidden,
-                                                index: i
-                                            };
-                                        });
-                                    }
-                                    return [];
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
-                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                                    return context.label + ': Rp ' + context.parsed.toLocaleString('id-ID') + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Function untuk generate warna chart
-        function generateColors(count) {
-            const baseColors = [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
-                '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-            ];
-            
-            const backgroundColors = [];
-            const borderColors = [];
-            
-            for (let i = 0; i < count; i++) {
-                const baseColor = baseColors[i % baseColors.length];
-                backgroundColors.push(baseColor + '80'); // Add transparency
-                borderColors.push(baseColor);
-            }
-            
-            return {
-                background: backgroundColors,
-                border: borderColors
-            };
-        }
-
-        // Function untuk toggle chart keterangan antara pie dan horizontal bar
-        function toggleKeteranganChartType() {
-            const currentType = keteranganChart.config.type;
-            const newType = currentType === 'pie' ? 'horizontalBar' : 'pie';
-            
-            // Destroy chart yang ada
-            if (keteranganChart) {
-                keteranganChart.destroy();
-            }
-            
-            // Siapkan data (filter yang realisasi > 0)
-            const filteredKeteranganData = {};
-            Object.keys(keteranganData).forEach(keterangan => {
-                const realisasi = keteranganData[keterangan].realisasi || 0;
-                if (realisasi > 0) {
-                    filteredKeteranganData[keterangan] = keteranganData[keterangan];
-                }
-            });
-            
-            const keteranganLabels = Object.keys(filteredKeteranganData);
-            const keteranganRealisasiData = keteranganLabels.map(keterangan => filteredKeteranganData[keterangan].realisasi);
-            const colors = generateColors(keteranganLabels.length);
-            
-            const keteranganCtx = document.getElementById('keteranganChart').getContext('2d');
-            
-            if (newType === 'horizontalBar') {
-                // Horizontal Bar Chart
-                keteranganChart = new Chart(keteranganCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: keteranganLabels,
-                        datasets: [{
-                            label: 'Realisasi',
-                            data: keteranganRealisasiData,
-                            backgroundColor: colors.background,
-                            borderColor: colors.border,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.dataset.label + ': Rp ' + context.parsed.x.toLocaleString('id-ID');
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Rp ' + value.toLocaleString('id-ID');
-                                    }
-                                }
-                            },
-                            y: {
-                                ticks: {
-                                    maxRotation: 0,
-                                    minRotation: 0
-                                }
-                            }
-                        }
-                    }
-                });
-            } else {
-                // Pie Chart (default)
-                initializeKeteranganChart();
-            }
-            
-            // Update button text
-            const toggleBtn = document.getElementById('toggleKeteranganChart');
-            if (toggleBtn) {
-                toggleBtn.textContent = newType === 'pie' ? 'Switch to Bar' : 'Switch to Pie';
-            }
-        }
-
-        // Function untuk filter keterangan chart berdasarkan program
-        function filterKeteranganByProgram(programName) {
-            if (!keteranganData) return;
-            
-            let filteredData = {};
-            
-            if (programName === 'all') {
-                // Filter semua data yang realisasi > 0
-                Object.keys(keteranganData).forEach(keterangan => {
-                    const realisasi = keteranganData[keterangan].realisasi || 0;
-                    if (realisasi > 0) {
-                        filteredData[keterangan] = keteranganData[keterangan];
-                    }
-                });
-            } else {
-                // Filter berdasarkan program tertentu dan realisasi > 0
-                Object.keys(keteranganData).forEach(keterangan => {
-                    const realisasi = keteranganData[keterangan].realisasi || 0;
-                    if (keteranganData[keterangan].program === programName && realisasi > 0) {
-                        filteredData[keterangan] = keteranganData[keterangan];
-                    }
-                });
-            }
-            
-            // Update chart dengan data yang sudah difilter
-            updateKeteranganChart(filteredData);
-        }
-
-        // Function untuk update keterangan chart dengan data baru
-        function updateKeteranganChart(newData) {
-            if (!keteranganChart) return;
-            
-            // Filter data yang realisasi > 0
-            const filteredData = {};
-            Object.keys(newData).forEach(key => {
-                const realisasi = newData[key].realisasi || 0;
-                if (realisasi > 0) {
-                    filteredData[key] = newData[key];
-                }
-            });
-            
-            const labels = Object.keys(filteredData);
-            const data = labels.map(label => filteredData[label].realisasi);
-            const colors = generateColors(labels.length);
-            
-            keteranganChart.data.labels = labels;
-            keteranganChart.data.datasets[0].data = data;
-            keteranganChart.data.datasets[0].backgroundColor = colors.background;
-            keteranganChart.data.datasets[0].borderColor = colors.border;
-            
-            keteranganChart.update();
-        }
-
-        // Function untuk export keterangan chart data ke CSV
-        function exportKeteranganData() {
-            if (!keteranganData) {
-                alert('Tidak ada data keterangan untuk diekspor');
-                return;
-            }
-            
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Keterangan,Realisasi,Program\n";
-            
-            Object.keys(keteranganData).forEach(keterangan => {
-                const row = [
-                    keterangan,
-                    keteranganData[keterangan].realisasi || 0,
-                    keteranganData[keterangan].program || ''
-                ].join(',');
-                csvContent += row + "\n";
-            });
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "realisasi_keterangan_program.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Function untuk toggle periode chart
-        function toggleChartPeriode() {
-            const filterPeriode = document.getElementById('filterPeriode').value;
-            const chartTitle = document.getElementById('chartPeriodeTitle');
-            
-            currentPeriode = filterPeriode;
-            
-            if (filterPeriode === 'monthly') {
-                chartTitle.textContent = 'Target vs Realisasi Kumulatif per Bulan';
-            } else {
-                chartTitle.textContent = 'Target vs Realisasi Kumulatif per Tahun';
-            }
-            
-            initializeCharts();
-        }
-
-        // Utility functions
-        function updateCharts() {
-            // Implementasi filter charts berdasarkan tahun dan program
-            console.log('Updating charts...');
-            initializeCharts();
-        }
-
-        function refreshData() {
-            location.reload();
-        }
-
-        function toggleDetailView() {
-            const icon = document.getElementById('detailToggleIcon');
-            const text = document.getElementById('detailToggleText');
-            
-            if (icon.classList.contains('fa-expand-alt')) {
-                icon.classList.remove('fa-expand-alt');
-                icon.classList.add('fa-compress-alt');
-                text.textContent = 'Simple View';
-            } else {
-                icon.classList.remove('fa-compress-alt');
-                icon.classList.add('fa-expand-alt');
-                text.textContent = 'Detail View';
-            }
-        }
-
-        // Initialize semua saat DOM ready
-        $(document).ready(function() {
-            // Initialize DataTable dengan destroy option untuk refresh
-            if ($.fn.DataTable.isDataTable('#rkbksDataTable')) {
-                $('#rkbksDataTable').DataTable().destroy();
-            }
-            
-            $('#rkbksDataTable').DataTable({
-                "pageLength": 25,
-                "order": [[ 5, "desc" ]],
-                "columnDefs": [
-                    { "orderable": false, "targets": [0, 8] }
-                ]
-            });
-
-            // Initialize charts
-            initializeCharts();
-        });
-    </script>
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            // dapatkan parameter URL
-            let queryString = window.location.search;
-            let urlParams = new URLSearchParams(queryString);
-            // ambil data dari URL
-            let pesan = urlParams.get('pesan');
-            let nomor = urlParams.get('nomor');
-
-            // menampilkan pesan sesuai dengan proses yang dijalankan
-            // jika pesan = 1
-            if (pesan === '1') {
-                // tampilkan pesan sukses simpan data
-                $.notify({
-                    title: '<h5 class="text-success font-weight-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Sukses!</h5>',
-                    message: 'Data berhasil disimpan.'
-                }, {
-                    type: 'success'
-                });
-                
-                // Refresh halaman setelah notifikasi untuk memperbarui chart dan tabel
-                setTimeout(function() {
-                    // Hapus parameter dari URL dan refresh
-                    window.history.replaceState({}, document.title, window.location.pathname + '?module=bks');
-                    location.reload();
-                }, 2000);
-            }
-            // jika pesan = 2
-            else if (pesan === '2') {
-                // tampilkan pesan sukses ubah data
-                $.notify({
-                    title: '<h5 class="text-success font-weight-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Sukses!</h5>',
-                    message: 'Data dokumen berhasil diubah.'
-                }, {
-                    type: 'success'
-                });
-                
-                // Refresh halaman setelah notifikasi
-                setTimeout(function() {
-                    window.history.replaceState({}, document.title, window.location.pathname + '?module=bks');
-                    location.reload();
-                }, 2000);
-            }
-            // jika pesan = 3
-            else if (pesan === '3') {
-                // tampilkan pesan sukses hapus data
-                $.notify({
-                    title: '<h5 class="text-success font-weight-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Sukses!</h5>',
-                    message: 'Data dokumen berhasil dihapus.'
-                }, {
-                    type: 'success'
-                });
-                
-                // Refresh halaman setelah notifikasi
-                setTimeout(function() {
-                    window.history.replaceState({}, document.title, window.location.pathname + '?module=bks');
-                    location.reload();
-                }, 2000);
-            }
-            // jika pesan = 4
-            else if (pesan === '4') {
-                // tampilkan pesan gagal unggah file
-                $.notify({
-                    title: '<h5 class="text-danger font-weight-bold mb-1"><i class="fas fa-times-circle mr-2"></i>Gagal!</h5>',
-                    message: 'Tipe file dokumen tidak sesuai. Harap unggah file dokumen yang memiliki tipe <strong>*.pdf</strong>.'
-                }, {
-                    type: 'danger'
-                });
-            }
-            // jika pesan = 5
-            else if (pesan === '5') {
-                // tampilkan pesan gagal unggah file
-                $.notify({
-                    title: '<h5 class="text-danger font-weight-bold mb-1"><i class="fas fa-times-circle mr-2"></i>Gagal!</h5>',
-                    message: 'Ukuran file dokumen lebih dari 10 Mb. Harap unggah file dokumen yang memiliki ukuran <strong>maksimal 10 Mb</strong>.'
-                }, {
-                    type: 'danger'
-                });
-            }
-        });
-    </script>
-
-
-<?php } 
+        </script>
+        <?php
+    }
 }
 ?>

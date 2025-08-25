@@ -1128,13 +1128,13 @@ $months_data = [];
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label font-weight-semibold">
-                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak <span class="text-danger">*</span>
+                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak
                             </label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-warning text-white">Rp</span>
                                 </div>
-                                <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}" required>
+                                <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}">
                             </div>
                             <small class="form-text text-muted">
                                 <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
@@ -1161,13 +1161,13 @@ $months_data = [];
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label font-weight-semibold">
-                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing <span class="text-danger">*</span>
+                                <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing
                             </label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-warning text-white">Rp</span>
                                 </div>
-                                <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}" required>
+                                <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}">
                             </div>
                             <small class="form-text text-muted">
                                 <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0

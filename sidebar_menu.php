@@ -9,7 +9,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
 	// pengecekan hak akses untuk menampilkan menu sesuai dengan hak akses
 	// jika hak akses = SuperAdmin, tampilkan menu
-	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan'])) {
+	if (isset($_SESSION['hak_akses']) && in_array($_SESSION['hak_akses'], ['SuperAdmin','Pimpinan', 'SekretarisPimpinan', 'ManajerBKS', 'ManajerBKI','ManajerLemtera','ManajerTC', 'ManajerBUIB'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>
@@ -130,7 +130,7 @@ else {
 				</a>
 			</li>
 			<li class="nav-item ">
-				<a href="?module=pengajuan_surat">
+				<a href="?module=riwayat_pengajuan">
 					<i class="fas fa-folder"></i>
 					<p>Riwayat Pengajuan</p>
 				</a>
@@ -159,7 +159,7 @@ else {
 				</a>
 			</li>
 			<li class="nav-item ">
-				<a href="?module=pengajuan_surat">
+				<a href="?module=riwayat_pengajuan">
 					<i class="fas fa-folder"></i>
 					<p>Riwayat Pengajuan</p>
 				</a>
@@ -259,7 +259,7 @@ else {
 		}
 	}
 	// jika hak akses = BKS, TraiingCenter, PusatBisnis, Lemtera, tampilkan menu
-	elseif (in_array($_SESSION['hak_akses'], ['BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA'])) {
+	elseif (in_array($_SESSION['hak_akses'], ['BKS', 'TrainingCenter', 'PusatBisnis', 'LEMTERA', 'BUIB'])) {
 		// pengecekan menu aktif
 		// jika menu beranda dipilih, menu beranda aktif
 		if ($_GET['module'] == 'beranda') { ?>

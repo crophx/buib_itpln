@@ -9,7 +9,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 else {
     // pengecekan hak akses untuk menampilkan konten sesuai dengan hak akses
     // jika hak akses = Administrator atau hak akses = Bendahara, tampilkan konten
-    if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'buib', 'Pimpinan', 'SekretarisPimpinan'])) {
+    if (in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'ManajerBUIB'])) {
 
         // Query untuk mengambil semua data dari tbl_rk_buib (tanpa join)
         $main_query = mysqli_query($mysqli, "SELECT a.*, b.nama_deputy, c.nama_status
@@ -233,7 +233,7 @@ else {
             </div>
 
             <div class="row mb-0">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card card-stats card-round">
                         <div class="card-body p-3">
                             <div class="row align-items-center">
@@ -253,7 +253,7 @@ else {
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card card-stats card-round shadow-sm">
                         <div class="card-body p-3">
                             <div class="row align-items-center">
@@ -273,7 +273,49 @@ else {
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
+                    <div class="card card-stats card-round shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="row align-items-center">
+                                <div class="col-icon">
+                                    <div class="icon-big bubble-shadow-small" style="background-color: #6861ce;">
+                                        <i class="fas fa-file-signature text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="numbers">
+                                        <p class="card-category text-muted mb-1">Total Kontrak</p>
+                                        <h4 class="card-title mb-0" id="totalKontrak">Rp <?php echo number_format($total_kontrak_calc, 0, ',', '.'); ?></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-0">
+                <div class="col-md-4 mb-3">
+                    <div class="card card-stats card-round shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="row align-items-center">
+                                <div class="col-icon">
+                                    <div class="icon-big bubble-shadow-small" style="background-color: #ffad46;">
+                                        <i class="fas fa-cogs text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="numbers">
+                                        <p class="card-category text-muted mb-1">Total On-Going</p>
+                                        <h4 class="card-title mb-0" id="totalOngoing">Rp <?php echo number_format($total_ongoing_calc, 0, ',', '.'); ?></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
                     <div class="card card-stats card-round shadow-sm">
                         <div class="card-body p-3">
                             <div class="row align-items-center">
@@ -293,7 +335,7 @@ else {
                     </div>
                 </div>
 
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card card-stats card-round shadow-sm">
                         <div class="card-body p-3">
                             <div class="row align-items-center">
@@ -313,7 +355,6 @@ else {
                     </div>
                 </div>
             </div>
-
             <div class="row mb-4">
                 <div class="col-md-8">
                     <div class="card">
@@ -369,7 +410,6 @@ else {
                     </div>
                 </div>
             </div>
-            <!-- Table DATA REALISASI -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="card-title">
@@ -401,7 +441,7 @@ else {
                             </tbody>
                             <tfoot>
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
-                                    <td class="text-center" colspan="3"><strong>TOTAL REALISASI</strong></td>
+                                    <td class="text-center" colspan="4"><strong>TOTAL REALISASI</strong></td>
                                     <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp <?php echo number_format($total_realisasi_calc, 0, ',', '.'); ?></strong></td>
                                     <td class="text-center" colspan="3">-</td>
                                 </tr>
@@ -410,7 +450,6 @@ else {
                     </div>
                 </div>
             </div>
-            <!-- Table Data Kontrak -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="card-title">
@@ -480,7 +519,7 @@ else {
                                 </tr>
                             </thead>
                             <tbody>
-                                <
+                                
                             </tbody>
                             <tfoot>
                                 <tr style="background-color: #f8f9fa; font-weight: bold;">
@@ -651,11 +690,17 @@ else {
                 
                 const totalTarget = filteredData.totals.target;
                 const totalRealisasi = filteredData.totals.realisasi;
+                // PERUBAHAN JAVASCRIPT: Ambil nilai total kontrak dan ongoing
+                const totalKontrak = filteredData.totals.kontrak;
+                const totalOngoing = filteredData.totals.ongoing;
                 const persentaseCapaian = totalTarget > 0 ? ((totalRealisasi / totalTarget) * 100).toFixed(2) : 0;
                 const totalDokumen = filteredData.filteredTableData.length;
                 
+                // PERUBAHAN JAVASCRIPT: Update nilai pada card baru
                 $('#totalTarget').text('Rp ' + totalTarget.toLocaleString('id-ID'));
                 $('#totalRealisasi').text('Rp ' + totalRealisasi.toLocaleString('id-ID'));
+                $('#totalKontrak').text('Rp ' + totalKontrak.toLocaleString('id-ID'));
+                $('#totalOngoing').text('Rp ' + totalOngoing.toLocaleString('id-ID'));
                 $('#persentaseCapaian').text(persentaseCapaian + '%');
                 $('#totalDokumen').text(totalDokumen.toLocaleString('id-ID'));
                 
@@ -760,7 +805,7 @@ else {
             
 
 
-            // PERBAIKAN: Fungsi updateTables diperbarui untuk menambahkan kolom link dokumen
+            // PERBAIKAN: Fungsi updateTables diperbarui untuk menampilkan data dengan nominal 0
             function updateTables(filteredData) {
                 // function warna badge nama_status
                 function createStatusBadge(namaStatus) {
@@ -807,7 +852,8 @@ else {
                 const realisasiTable = $('#RealisasiDataTable').DataTable();
                 realisasiTable.clear();
                 let totalRealisasi = 0;
-                filteredData.filter(d => parseFloat(d.realisasi_nominal) > 0).forEach((data, index) => {
+                // --- PERUBAHAN 1: Filter berdasarkan status 'realisasi' ---
+                filteredData.filter(d => d.nama_status.toLowerCase() === 'realisasi').forEach((data, index) => {
                     totalRealisasi += parseFloat(data.realisasi_nominal);
                     realisasiTable.row.add([
                         index + 1,
@@ -816,7 +862,7 @@ else {
                         new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                         'Rp ' + parseFloat(data.realisasi_nominal).toLocaleString('id-ID'),
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_buib), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_buib),
                         getAksiButtons(data.id, 'realisasi')
                     ]);
                 });
@@ -824,14 +870,15 @@ else {
                 $('#RealisasiDataTable tfoot tr').html(`
                     <td class="text-center" colspan="4"><strong>TOTAL REALISASI</strong></td>
                     <td class="text-right" style="color: #28a745; font-size: 1.1em;"><strong>Rp ${totalRealisasi.toLocaleString('id-ID')}</strong></td>
-                    <td class="text-center" colspan="4">-</td>
+                    <td class="text-center" colspan="3">-</td>
                 `);
 
                 // Update Kontrak table
                 const kontrakTable = $('#kontrakDataTable').DataTable();
                 kontrakTable.clear();
                 let totalKontrak = 0;
-                filteredData.filter(d => parseFloat(d.kontrak_nominal) > 0).forEach((data, index) => {
+                // --- PERUBAHAN 2: Filter berdasarkan status 'kontrak' ---
+                filteredData.filter(d => d.nama_status.toLowerCase() === 'kontrak').forEach((data, index) => {
                     totalKontrak += parseFloat(data.kontrak_nominal);
                     kontrakTable.row.add([
                         index + 1,
@@ -841,7 +888,7 @@ else {
                         new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                         'Rp ' + parseFloat(data.kontrak_nominal).toLocaleString('id-ID'),
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_buib), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_buib),
                         getAksiButtons(data.id, 'kontrak')
                     ]);
                 });
@@ -856,7 +903,8 @@ else {
                 const ongoingTable = $('#OngoingDataTable').DataTable();
                 ongoingTable.clear();
                 let totalOngoing = 0;
-                filteredData.filter(d => parseFloat(d.ongoing_nominal) > 0).forEach((data, index) => {
+                // --- PERUBAHAN 3: Filter berdasarkan status 'on-going' ---
+                filteredData.filter(d => d.nama_status.toLowerCase() === 'on-going').forEach((data, index) => {
                     totalOngoing += parseFloat(data.ongoing_nominal);
                     ongoingTable.row.add([
                         index + 1,
@@ -865,7 +913,7 @@ else {
                         new Date(data.tgl_surat).toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
                         'Rp ' + parseFloat(data.ongoing_nominal).toLocaleString('id-ID'),
                         createStatusBadge(data.nama_status),                        
-                        getLinkButton(data.dokumen_rk_buib), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_buib),
                         getAksiButtons(data.id, 'ongoing')
                     ]);
                 });
@@ -880,7 +928,8 @@ else {
                 const targetTable = $('#targetDataTable').DataTable();
                 targetTable.clear();
                 let totalTarget = 0;
-                filteredData.filter(d => parseFloat(d.target_nominal) > 0).forEach((data, index) => {
+                // --- PERUBAHAN 4: Filter berdasarkan status 'rencana' ---
+                filteredData.filter(d => d.nama_status.toLowerCase() === 'rencana').forEach((data, index) => {
                     totalTarget += parseFloat(data.target_nominal);
                     targetTable.row.add([
                         index + 1,
@@ -888,7 +937,7 @@ else {
                         data.nama_deputy,
                         'Rp ' + parseFloat(data.target_nominal).toLocaleString('id-ID'),
                         createStatusBadge(data.nama_status),
-                        getLinkButton(data.dokumen_rk_buib), // DITAMBAHKAN
+                        getLinkButton(data.dokumen_rk_buib),
                         getAksiButtons(data.id, 'target')
                     ]);
                 });
@@ -963,13 +1012,13 @@ else {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label font-weight-semibold">
-                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Realisasi <span class="text-danger">*</span>
+                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Realisasi
                                 </label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-warning text-white">Rp</span>
                                     </div>
-                                    <input type="text" class="form-control currency" name="realisasi_nominal" value="${Number(item.realisasi_nominal || 0).toLocaleString('id-ID')}" required>
+                                    <input type="text" class="form-control currency" name="realisasi_nominal" value="${Number(item.realisasi_nominal || 0).toLocaleString('id-ID')}">
                                 </div>
                             </div>
                         </div>
@@ -980,13 +1029,13 @@ else {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label font-weight-semibold">
-                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak <span class="text-danger">*</span>
+                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Kontrak
                                 </label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-warning text-white">Rp</span>
                                     </div>
-                                    <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}" required>
+                                    <input type="text" class="form-control currency" name="kontrak_nominal" value="${Number(item.kontrak_nominal || 0).toLocaleString('id-ID')}">
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
@@ -1013,13 +1062,13 @@ else {
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="form-label font-weight-semibold">
-                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing <span class="text-danger">*</span>
+                                    <i class="fas fa-money-bill-wave mr-1 text-warning"></i>Nominal Ongoing
                                 </label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text bg-warning text-white">Rp</span>
                                     </div>
-                                    <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}" required>
+                                    <input type="text" class="form-control currency" name="ongoing_nominal" value="${Number(item.ongoing_nominal || 0).toLocaleString('id-ID')}">
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle mr-1"></i>Jika sudah terealisasi, isi dengan 0
