@@ -19,9 +19,6 @@ if (file_exists('vendor/autoload.php')) {
     require_once 'vendor/autoload.php';
 }
 
-// Gunakan class Fpdi yang benar untuk impor PDF
-use setasign\Fpdi\Fpdi;
-
 // Cek hak akses
 if (!isset($_SESSION['hak_akses']) || !in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan'])) {
     echo "<script>alert('Akses ditolak!');</script>";
@@ -30,30 +27,26 @@ if (!isset($_SESSION['hak_akses']) || !in_array($_SESSION['hak_akses'], ['SuperA
 }
 
 /**
- * Menggabungkan gambar tanda tangan dengan dokumen PDF menggunakan koordinat canvas.
- *
- * @param string $original_pdf Path absolut ke file PDF asli.
- * @param string $signature_image Path absolut ke file gambar tanda tangan.
- * @param array $signature_area Array dengan startX, startY, endX, endY, dan pageNumber.
- * @param float $canvas_width Lebar canvas tempat area dipilih.
- * @param float $canvas_height Tinggi canvas tempat area dipilih.
- * @param string $output_path Path absolut untuk menyimpan PDF yang sudah ditandatangani.
- * @return array Hasil operasi, berisi status sukses dan pesan.
+ * Menggabungkan gambar tanda tangan dengan dokumen PDF menggunakan mPDF.
+ * (Fungsi ini telah diperbaiki untuk mengatasi error TypeError final)
  */
-// *** PERUBAHAN PHP KUNCI: Fungsi mergeSignatureWithPDF diperbarui ***
-function mergeSignatureWithPDF($original_pdf, $signature_image, $signature_area, $canvas_width, $canvas_height, $output_path)
-{
-    // Validasi input penting dari area tanda tangan
-    if (!isset($signature_area['pageNumber']) || (int) $signature_area['pageNumber'] <= 0) {
+/**
+ * Menggabungkan gambar tanda tangan dengan dokumen PDF menggunakan mPDF.
+ * (Fungsi ini telah diperbaiki dengan pemanggilan AddPage() yang akurat)
+ */
+function mergeSignatureWithPDF($original_pdf, $signature_image, $signature_area, $canvas_width, $canvas_height, $output_path) {
+    // Validasi input area tanda tangan
+    if (!isset($signature_area['pageNumber']) || (int)$signature_area['pageNumber'] <= 0) {
         return ['success' => false, 'message' => 'Error: Nomor halaman untuk tanda tangan tidak valid.'];
     }
     $target_page_number = (int) $signature_area['pageNumber'];
 
-    if (!class_exists('setasign\Fpdi\Fpdi')) {
-        return ['success' => false, 'message' => 'Error: Library FPDI tidak ditemukan.'];
+    if (!class_exists(\Mpdf\Mpdf::class)) {
+        return ['success' => false, 'message' => 'Error: Library mPDF tidak ditemukan. Jalankan "composer update".'];
     }
-
-    $pdf = new Fpdi();
+    
+    // Inisialisasi mPDF
+    $pdf = new \Mpdf\Mpdf();
 
     // Validasi file input
     if (!file_exists($original_pdf) || !is_readable($original_pdf)) {
@@ -74,15 +67,18 @@ function mergeSignatureWithPDF($original_pdf, $signature_image, $signature_area,
 
         for ($page = 1; $page <= $page_count; $page++) {
             $template_id = $pdf->importPage($page);
-            $size = $pdf->getTemplateSize($template_id);
+            
+            // Tambahkan halaman kosong standar
+            $pdf->AddPage();
 
-            $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
-            $pdf->useTemplate($template_id);
+            // Gunakan template, dan biarkan mPDF menyesuaikan ukuran halaman secara otomatis
+            $pdf->useTemplate($template_id, 0, 0, null, null, true);
 
-            // *** PERUBAHAN PHP: Tanda tangan diletakkan pada halaman yang dipilih, bukan hanya halaman terakhir ***
+            // Letakkan tanda tangan HANYA jika ini adalah halaman yang ditargetkan
             if ($page === $target_page_number) {
-                $pdfWidth = $size['width'];
-                $pdfHeight = $size['height'];
+                // Gunakan properti publik $pdf->w dan $pdf->h untuk mendapatkan ukuran halaman
+                $pdfWidth = $pdf->w;
+                $pdfHeight = $pdf->h;
 
                 $scaleX = $pdfWidth / $canvas_width;
                 $scaleY = $pdfHeight / $canvas_height;
@@ -92,6 +88,7 @@ function mergeSignatureWithPDF($original_pdf, $signature_image, $signature_area,
                 $width = abs($signature_area['endX'] - $signature_area['startX']) * $scaleX;
                 $height = abs($signature_area['endY'] - $signature_area['startY']) * $scaleY;
 
+                // Batasi posisi dan ukuran agar tidak keluar halaman
                 $x = max(0, $x);
                 $y = max(0, $y);
                 if ($x + $width > $pdfWidth)
@@ -99,7 +96,16 @@ function mergeSignatureWithPDF($original_pdf, $signature_image, $signature_area,
                 if ($y + $height > $pdfHeight)
                     $height = $pdfHeight - $y;
 
+                // ==================================================================
+                // === SOLUSI: Nonaktifkan auto page break sebelum menaruh gambar ===
+                $pdf->SetAutoPageBreak(false, 0);
+
+                // Tempatkan gambar tanda tangan pada koordinat yang tepat
                 $pdf->Image($signature_image, $x, $y, $width, $height, 'PNG');
+                
+                // Aktifkan kembali auto page break ke mode default (praktik terbaik)
+                $pdf->SetAutoPageBreak(true);
+                // ==================================================================
             }
         }
 
@@ -117,13 +123,13 @@ function mergeSignatureWithPDF($original_pdf, $signature_image, $signature_area,
         return ['success' => true, 'file_path' => $output_path];
 
     } catch (Exception $e) {
-        error_log("PDF merge error: " . $e->getMessage());
+        error_log("PDF merge error: " . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
         return ['success' => false, 'message' => 'Error saat memproses PDF: ' . $e->getMessage()];
     }
 }
 
-// ... (Sisa kode PHP awal Anda untuk mengambil data, tidak perlu diubah) ...
-$id_pengajuan = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+// ... (Sisa kode Anda tidak perlu diubah, tetap sama seperti sebelumnya) ...
+$id_pengajuan = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id_pengajuan <= 0) {
     header('location: ?module=antrian_surat');
     exit;

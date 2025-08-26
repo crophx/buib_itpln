@@ -205,7 +205,7 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
     }
     
     // =================================================================
-    // REVISI: KODE UNTUK DATA BKS (BAGIAN KERJA SAMA)
+    // KODE UNTUK DATA BKS (BAGIAN KERJA SAMA)
     // =================================================================
     $year_filter_bks_main = ($selected_year == 'all') ? '' : 'WHERE YEAR(tanggal_awal) = ' . (int)$selected_year;
 
@@ -291,7 +291,6 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
     while($row = mysqli_fetch_assoc($query_bks_jangka_waktu)){ $data_bks_jangka_waktu[] = $row; }
     
     // 6. Query untuk menghitung total mitra unik BKS
-    // CATATAN: Query ini mengasumsikan nama kolom untuk mitra adalah 'nama_mitra'. Sesuaikan jika nama kolomnya berbeda.
     $query_bks_total_mitra = mysqli_query($mysqli, "
         SELECT COUNT(DISTINCT mitra_id) as total FROM (
             SELECT mitra_id FROM tbl_mou_bks $year_filter_bks_main
@@ -304,8 +303,88 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
     $data_bks_total_mitra = mysqli_fetch_assoc($query_bks_total_mitra);
 
     // =================================================================
-    // AKHIR DARI KODE REVISI UNTUK BKS
+    // REVISI: KODE UNTUK DATA GABUNGAN (LEMTERA, TC, BUIB)
     // =================================================================
+
+    // 1. Data untuk Pie Chart Komposisi
+    $data_gabungan_komposisi = [
+        ['kategori' => 'Lembaga Terapan', 'total_realisasi' => $lemtera_summary['total_realisasi'] ?? 0],
+        ['kategori' => 'Training Center', 'total_realisasi' => $training_center_summary['total_realisasi'] ?? 0],
+        ['kategori' => 'BUIB', 'total_realisasi' => $buib_summary['total_realisasi'] ?? 0],
+    ];
+
+    // 2. Data untuk Line Chart Perbandingan Aktual per Bagian
+    $all_months = array_keys($lemtera_monthly_actual) + array_keys($training_center_monthly_actual) + array_keys($buib_monthly_actual);
+    sort($all_months);
+    $unique_months = array_unique($all_months);
+
+    $labels_perbandingan = [];
+    $data_lemtera = [];
+    $data_tc = [];
+    $data_buib = [];
+
+    foreach ($unique_months as $month) {
+        $labels_perbandingan[] = date('M Y', strtotime($month . '-01'));
+        $data_lemtera[] = $lemtera_monthly_actual[$month]['realisasi'] ?? 0;
+        $data_tc[] = $training_center_monthly_actual[$month]['realisasi'] ?? 0;
+        $data_buib[] = $buib_monthly_actual[$month]['realisasi'] ?? 0;
+    }
+
+    $data_perbandingan_aktual = [
+        'labels' => $labels_perbandingan,
+        'datasets' => [
+            ['label' => 'Realisasi Lemtera', 'data' => $data_lemtera, 'borderColor' => '#4BC0C0', 'tension' => 0.3, 'fill' => false],
+            ['label' => 'Realisasi TC', 'data' => $data_tc, 'borderColor' => '#36A2EB', 'tension' => 0.3, 'fill' => false],
+            ['label' => 'Realisasi BUIB', 'data' => $data_buib, 'borderColor' => '#FFCE56', 'tension' => 0.3, 'fill' => false],
+        ]
+    ];
+
+    // 3. Data untuk Bar Chart Target vs Pencapaian per Bagian (Revisi Stacked)
+    $data_target_vs_pencapaian = [
+        'labels' => ['Lembaga Terapan', 'Training Center', 'BUIB'],
+        'datasets' => [
+            [
+                'label' => 'Target',
+                'data' => [
+                    $lemtera_summary['total_target'] ?? 0,
+                    $training_center_summary['total_target'] ?? 0,
+                    $buib_summary['total_target'] ?? 0
+                ],
+                'backgroundColor' => '#FF6384', // Warna Merah untuk Target (konsisten)
+                'stack' => 'Target' // Diberi stack terpisah agar tidak menumpuk dengan yang lain
+            ],
+            [
+                'label' => 'Realisasi',
+                'data' => [
+                    $lemtera_summary['total_realisasi'] ?? 0,
+                    $training_center_summary['total_realisasi'] ?? 0,
+                    $buib_summary['total_realisasi'] ?? 0
+                ],
+                'backgroundColor' => '#4BC0C0', // Warna Hijau/Teal untuk Realisasi (konsisten)
+                'stack' => 'Pencapaian' // Kunci agar menumpuk dengan Kontrak & Ongoing
+            ],
+            [
+                'label' => 'Kontrak',
+                'data' => [
+                    $lemtera_summary['total_kontrak'] ?? 0,
+                    $training_center_summary['total_kontrak'] ?? 0,
+                    $buib_summary['total_kontrak'] ?? 0
+                ],
+                'backgroundColor' => '#36A2EB', // Warna Biru untuk Kontrak (konsisten)
+                'stack' => 'Pencapaian' // Kunci agar menumpuk dengan Realisasi & Ongoing
+            ],
+            [
+                'label' => 'Ongoing',
+                'data' => [
+                    $lemtera_summary['total_ongoing'] ?? 0,
+                    $training_center_summary['total_ongoing'] ?? 0,
+                    $buib_summary['total_ongoing'] ?? 0
+                ],
+                'backgroundColor' => '#FFCE56', // Warna Kuning untuk Ongoing (konsisten)
+                'stack' => 'Pencapaian' // Kunci agar menumpuk dengan Realisasi & Kontrak
+            ]
+        ]
+    ];
 
     // Menyiapkan data untuk Summary Card BKS dan BKI
     // Proses data BKS
@@ -565,6 +644,30 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
+                        <div class="card-title text-center"><h3 class="card-title text-dark"><i class="fas fa-chart-pie mr-2"></i>Grafik Gabungan (Lemtera, TC & BUIB)</h3></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <canvas id="gabunganLineChartPerbandingan" style="height: 300px;"></canvas>
+                            </div>
+                            <div class="col-md-4">
+                                <canvas id="gabunganPieChart" style="height: 300px;"></canvas>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <canvas id="gabunganBarChartTarget" style="height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
                         <div class="card-title text-center"><h3 class="card-title text-success"><i class="fas fa-leaf mr-2"></i>Lembaga Terapan (Lemtera)</h3></div>
                     </div>
                     <div class="card-body">
@@ -712,6 +815,11 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
             const lemteraKategori = <?php echo json_encode($lemtera_kategori); ?>;
             const trainingCenterKategori = <?php echo json_encode($training_center_kategori); ?>;
             const buibKategori = <?php echo json_encode($buib_kategori); ?>;
+
+            // Data Gabungan Revisi
+            const dataGabunganKomposisi = <?php echo json_encode($data_gabungan_komposisi); ?>;
+            const dataPerbandinganAktual = <?php echo json_encode($data_perbandingan_aktual); ?>;
+            const dataTargetVsPencapaian = <?php echo json_encode($data_target_vs_pencapaian); ?>;
             
             const dataMouNegara = <?php echo json_encode($data_mou_negara); ?>;
             const dataDokumenBulan = <?php echo json_encode($data_dokumen_bulan); ?>;
@@ -772,6 +880,37 @@ if (empty($_SESSION['username']) && empty($_SESSION['password'])) {
                     options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: chartTitle, font: { size: 16 } }, legend: { display: true, position: 'bottom' } } }
                 });
             }
+
+            // Inisialisasi Chart Gabungan (Versi Revisi)
+            // 1. Pie Chart Komposisi
+            renderPieChart('gabunganPieChart', dataGabunganKomposisi, 'Komposisi Realisasi Gabungan', 'kategori', 'total_realisasi');
+
+            // 2. Line Chart Perbandingan Realisasi Aktual
+            new Chart(document.getElementById('gabunganLineChartPerbandingan'), {
+                type: 'line',
+                data: dataPerbandinganAktual,
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'Perbandingan Realisasi Aktual per Bagian' } }
+                }
+            });
+
+            // 3. Bar Chart Perbandingan Target vs Pencapaian
+            new Chart(document.getElementById('gabunganBarChartTarget'), {
+                type: 'bar',
+                data: dataTargetVsPencapaian,
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'Perbandingan Target vs Pencapaian per Bagian' } },
+                    scales: { 
+                        x: { stacked: true },
+                        y: { 
+                            stacked: true,
+                            beginAtZero: true 
+                        } 
+                    }
+                }
+            });
 
             // Initialize charts for Lemtera, TC, BUIB
             renderLineChart('lemteraLineChart', lemteraMonthlyCumulative, 'Grafik Kumulatif Pendapatan', true);
