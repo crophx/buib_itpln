@@ -19,21 +19,21 @@ else {
         $query_detail = mysqli_query($mysqli, "SELECT * FROM tbl_detail_lemtera WHERE id_rk_lemtera = '$id_rk_lemtera'") or die('Error: ' . mysqli_error($mysqli));
         $data_detail = mysqli_fetch_assoc($query_detail);
 
-        // **BARU**: Query dan kalkulasi total
+        // Query dan kalkulasi total
         $total_termin = 0;
         $query_termins = mysqli_query($mysqli, "SELECT * FROM tbl_termin_pembayaran WHERE id_rk_lemtera = '$id_rk_lemtera' ORDER BY tanggal_termin ASC");
         while($row = mysqli_fetch_assoc($query_termins)) { $total_termin += $row['nominal_termin']; }
-        mysqli_data_seek($query_termins, 0); // Reset pointer
+        mysqli_data_seek($query_termins, 0);
 
         $total_operasional = 0;
         $query_operasional = mysqli_query($mysqli, "SELECT * FROM tbl_biaya_operasional WHERE id_rk_lemtera = '$id_rk_lemtera' ORDER BY tanggal_biaya ASC");
         while($row = mysqli_fetch_assoc($query_operasional)) { $total_operasional += $row['jumlah_biaya']; }
-        mysqli_data_seek($query_operasional, 0); // Reset pointer
+        mysqli_data_seek($query_operasional, 0);
         
         $total_penalty = 0;
         $query_penalties = mysqli_query($mysqli, "SELECT * FROM tbl_penalty_program WHERE id_rk_lemtera = '$id_rk_lemtera' ORDER BY tanggal_penalty ASC");
         while($row = mysqli_fetch_assoc($query_penalties)) { $total_penalty += $row['jumlah_penalty']; }
-        mysqli_data_seek($query_penalties, 0); // Reset pointer
+        mysqli_data_seek($query_penalties, 0);
 
         $profit = $total_termin - ($total_operasional + $total_penalty);
 
@@ -53,7 +53,10 @@ else {
                     <li class="nav-item"><a>Detail Program Lemtera</a></li>
                 </ul>
                 </div>
-                <div class="ml-md-auto py-2 py-md-0"><a href="?module=lemtera" class="btn btn-secondary btn-round"><span class="btn-label"><i class="fa fa-arrow-left mr-2"></i></span>Kembali</a></div>
+                <div class="ml-md-auto py-2 py-md-0">
+                    <a href="?module=pihak_ketiga&id=<?php echo $id_rk_lemtera; ?>" class="btn btn-primary btn-round"><span class="btn-label"><i class="fas fa-users mr-2"></i></span>Kelola Pihak Ketiga</a>
+                    <a href="?module=lemtera" class="btn btn-secondary btn-round"><span class="btn-label"><i class="fa fa-arrow-left mr-2"></i></span>Kembali</a>
+                </div>
             </div>
         </div>
     </div>
@@ -72,132 +75,143 @@ else {
             <input type="hidden" name="id_detail" value="<?php echo isset($data_detail['id_detail']) ? $data_detail['id_detail'] : ''; ?>">
 
             <div class="card">
-                <div class="card-header"><div class="card-title"><i class="fas fa-folder-open mr-2"></i>Dokumen & Jadwal</div></div>
+                <div class="card-header">
+                    <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pills-dokumen-tab" data-toggle="pill" href="#pills-dokumen" role="tab" aria-controls="pills-dokumen" aria-selected="true"><i class="fas fa-folder-open mr-2"></i>Dokumen & Jadwal</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-masuk-tab" data-toggle="pill" href="#pills-masuk" role="tab" aria-controls="pills-masuk" aria-selected="false"><i class="fas fa-arrow-down mr-2"></i>Keuangan Masuk</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="pills-keluar-tab" data-toggle="pill" href="#pills-keluar" role="tab" aria-controls="pills-keluar" aria-selected="false"><i class="fas fa-arrow-up mr-2"></i>Keuangan Keluar</a>
+                        </li>
+                        <div class="ml-md-auto py-2 py-md-0">
+                            <a href="?module=pihak_ketiga&id=<?php echo $id_rk_lemtera; ?>" class="btn btn-primary btn-round"><span class="btn-label"><i class="fas fa-users mr-2"></i></span>Kelola Pihak Ketiga</a>
+                        </div>
+                    </ul>
+                    
+                </div>
+                
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label>Link LOI</label>
-                            <div class="input-group">
-                                <input type="text" name="loi_url" class="form-control" value="<?php echo htmlspecialchars($data_detail['loi_url'] ?? ''); ?>">
-                                <?php if (!empty($data_detail['loi_url'])) : ?>
-                                <div class="input-group-append">
-                                    <a href="<?php echo htmlspecialchars($data_detail['loi_url']); ?>" target="_blank" class="btn btn-info btn-sm" title="Buka Link di Tab Baru"><i class="fas fa-external-link-alt"></i></a>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <label>Link SPK/PKS</label>
-                            <div class="input-group">
-                                <input type="text" name="spk_pks_url" class="form-control" value="<?php echo htmlspecialchars($data_detail['spk_pks_url'] ?? ''); ?>">
-                                <?php if (!empty($data_detail['spk_pks_url'])) : ?>
-                                <div class="input-group-append">
-                                    <a href="<?php echo htmlspecialchars($data_detail['spk_pks_url']); ?>" target="_blank" class="btn btn-info btn-sm" title="Buka Link di Tab Baru"><i class="fas fa-external-link-alt"></i></a>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <label>Tanggal Akhir (Deadline)</label>
-                            <input type="date" name="tanggal_akhir" class="form-control" value="<?php echo $data_detail['tanggal_akhir'] ?? ''; ?>">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="card-title"><i class="fas fa-arrow-down mr-2"></i>Termin Pembayaran (Uang Masuk)</div>
-                        <button type="button" id="add-termin" class="btn btn-light btn-round btn-sm"><i class="fa fa-plus"></i> Tambah Termin</button>
-                    </div>
-                </div>
-                <div class="card-body" id="termin-container">
-                    <?php while ($termin = mysqli_fetch_assoc($query_termins)) : ?>
-                    <div class="termin-item p-3 mb-3 border rounded">
-                        <div class="row">
-                            <div class="col-md-3 form-group"><label>Tanggal</label><input type="date" name="tanggal_termin[]" class="form-control" value="<?php echo htmlspecialchars($termin['tanggal_termin']); ?>"></div>
-                            <div class="col-md-3 form-group"><label>Nominal</label><input type="text" name="nominal_termin[]" class="form-control currency" value="<?php echo number_format($termin['nominal_termin'], 0, ',', '.'); ?>"></div>
-                            <div class="col-md-5 form-group"><label>Keterangan</label><input type="text" name="keterangan_termin[]" class="form-control" value="<?php echo htmlspecialchars($termin['keterangan_termin']); ?>"></div>
-                            <div class="col-md-1 d-flex align-items-end form-group"><button type="button" class="btn btn-danger btn-sm remove-termin"><i class="fas fa-trash"></i></button></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 form-group mb-0">
-                                <label>Link Bukti Bayar</label>
-                                <div class="input-group">
-                                    <input type="text" name="bukti_termin[]" class="form-control" value="<?php echo htmlspecialchars($termin['bukti_pembayaran_termin']); ?>">
-                                    <?php if (!empty($termin['bukti_pembayaran_termin'])) : ?>
-                                    <div class="input-group-append">
-                                        <a href="<?php echo htmlspecialchars($termin['bukti_pembayaran_termin']); ?>" target="_blank" class="btn btn-info btn-sm" title="Buka Link di Tab Baru"><i class="fas fa-external-link-alt"></i></a>
+                    <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-dokumen" role="tabpanel" aria-labelledby="pills-dokumen-tab">
+                            <div class="row">
+                                <div class="col-md-4 form-group">
+                                    <label>Link LOI</label>
+                                    <div class="input-group">
+                                        <input type="text" name="loi_url" class="form-control" value="<?php echo htmlspecialchars($data_detail['loi_url'] ?? ''); ?>">
+                                        <?php if (!empty($data_detail['loi_url'])) : ?>
+                                        <div class="input-group-append">
+                                            <a href="<?php echo htmlspecialchars($data_detail['loi_url']); ?>" target="_blank" class="btn btn-info btn-sm" title="Buka Link di Tab Baru"><i class="fas fa-external-link-alt"></i></a>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
-                                    <?php endif; ?>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Link SPK/PKS</label>
+                                    <div class="input-group">
+                                        <input type="text" name="spk_pks_url" class="form-control" value="<?php echo htmlspecialchars($data_detail['spk_pks_url'] ?? ''); ?>">
+                                        <?php if (!empty($data_detail['spk_pks_url'])) : ?>
+                                        <div class="input-group-append">
+                                            <a href="<?php echo htmlspecialchars($data_detail['spk_pks_url']); ?>" target="_blank" class="btn btn-info btn-sm" title="Buka Link di Tab Baru"><i class="fas fa-external-link-alt"></i></a>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Tanggal Akhir (Deadline)</label>
+                                    <input type="date" name="tanggal_akhir" class="form-control" value="<?php echo $data_detail['tanggal_akhir'] ?? ''; ?>">
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <?php endwhile; ?>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header bg-warning">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="card-title font-weight-bold"><i class="fas fa-arrow-up mr-2"></i>Biaya Operasional (Uang Keluar)</div>
-                        <button type="button" id="add-operasional" class="btn btn-dark btn-round btn-sm"><i class="fa fa-plus"></i> Tambah Biaya</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead><tr><th width="20%">Tanggal</th><th width="45%">Deskripsi Biaya</th><th width="25%">Jumlah (Rp)</th><th width="10%">Aksi</th></tr></thead>
-                            <tbody id="operasional-container">
-                                <?php while ($biaya = mysqli_fetch_assoc($query_operasional)) : ?>
-                                <tr>
-                                    <td><input type="date" name="tanggal_biaya[]" class="form-control" value="<?php echo htmlspecialchars($biaya['tanggal_biaya']); ?>"></td>
-                                    <td><input type="text" name="deskripsi_biaya[]" class="form-control" value="<?php echo htmlspecialchars($biaya['deskripsi_biaya']); ?>"></td>
-                                    <td><input type="text" name="jumlah_biaya[]" class="form-control currency" value="<?php echo number_format($biaya['jumlah_biaya'], 0, ',', '.'); ?>"></td>
-                                    <td><button type="button" class="btn btn-danger btn-sm remove-operasional"><i class="fas fa-trash"></i></button></td>
-                                </tr>
+                        
+                        <div class="tab-pane fade" id="pills-masuk" role="tabpanel" aria-labelledby="pills-masuk-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Termin Pembayaran</h5>
+                                <button type="button" id="add-termin" class="btn btn-success btn-round btn-sm"><i class="fa fa-plus"></i> Tambah Termin</button>
+                            </div>
+                            <div id="termin-container">
+                                <?php while ($termin = mysqli_fetch_assoc($query_termins)) : ?>
+                                <div class="termin-item p-3 mb-3 border rounded bg-light">
+                                    <div class="row">
+                                        <div class="col-md-3 form-group"><label>Tanggal</label><input type="date" name="tanggal_termin[]" class="form-control" value="<?php echo htmlspecialchars($termin['tanggal_termin']); ?>"></div>
+                                        <div class="col-md-3 form-group"><label>Nominal</label><input type="text" name="nominal_termin[]" class="form-control currency" value="<?php echo number_format($termin['nominal_termin'], 0, ',', '.'); ?>"></div>
+                                        <div class="col-md-5 form-group"><label>Keterangan</label><input type="text" name="keterangan_termin[]" class="form-control" value="<?php echo htmlspecialchars($termin['keterangan_termin']); ?>"></div>
+                                        <div class="col-md-1 d-flex align-items-end form-group"><button type="button" class="btn btn-danger btn-sm remove-termin"><i class="fas fa-trash"></i></button></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 form-group mb-0">
+                                            <label>Link Bukti Bayar</label>
+                                            <div class="input-group">
+                                                <input type="text" name="bukti_termin[]" class="form-control" value="<?php echo htmlspecialchars($termin['bukti_pembayaran_termin']); ?>">
+                                                <?php if (!empty($termin['bukti_pembayaran_termin'])) : ?>
+                                                <div class="input-group-append">
+                                                    <a href="<?php echo htmlspecialchars($termin['bukti_pembayaran_termin']); ?>" target="_blank" class="btn btn-info btn-sm" title="Buka Link di Tab Baru"><i class="fas fa-external-link-alt"></i></a>
+                                                </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <?php endwhile; ?>
-                            </tbody>
-                            <tfoot><tr class="bg-light"><td colspan="2" class="text-right"><strong>Total Biaya Operasional</strong></td><td class="text-right"><strong id="total-operasional-display">Rp <?php echo number_format($total_operasional, 0, ',', '.'); ?></strong></td><td></td></tr></tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                         <div class="card-title"><i class="fas fa-arrow-up mr-2"></i>Penalty / Denda</div>
-                         <button type="button" id="add-penalty" class="btn btn-light btn-round btn-sm"><i class="fa fa-plus"></i> Tambah Penalty</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead><tr><th width="20%">Tanggal</th><th width="45%">Deskripsi Penalty</th><th width="25%">Jumlah (Rp)</th><th width="10%">Aksi</th></tr></thead>
-                            <tbody id="penalty-container">
-                                <?php while ($penalty = mysqli_fetch_assoc($query_penalties)) : ?>
-                                <tr>
-                                    <td><input type="date" name="tanggal_penalty[]" class="form-control" value="<?php echo htmlspecialchars($penalty['tanggal_penalty']); ?>"></td>
-                                    <td><input type="text" name="deskripsi_penalty[]" class="form-control" value="<?php echo htmlspecialchars($penalty['deskripsi_penalty']); ?>"></td>
-                                    <td><input type="text" name="jumlah_penalty[]" class="form-control currency" value="<?php echo number_format($penalty['jumlah_penalty'], 0, ',', '.'); ?>"></td>
-                                    <td><button type="button" class="btn btn-danger btn-sm remove-penalty"><i class="fas fa-trash"></i></button></td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                            <tfoot><tr class="bg-light"><td colspan="2" class="text-right"><strong>Total Penalty</strong></td><td class="text-right"><strong id="total-penalty-display">Rp <?php echo number_format($total_penalty, 0, ',', '.'); ?></strong></td><td></td></tr></tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                            </div>
+                        </div>
 
-            <div class="card"><div class="card-action"><button type="submit" name="simpan_detail" class="btn btn-success btn-round"><i class="fas fa-save mr-2"></i>Simpan Semua Perubahan</button><a href="?module=lemtera" class="btn btn-default btn-round">Batal</a></div></div>
-        </form>
+                        <div class="tab-pane fade" id="pills-keluar" role="tabpanel" aria-labelledby="pills-keluar-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="card-title mb-0">Biaya Operasional</h5>
+                                <button type="button" id="add-operasional" class="btn btn-warning btn-round btn-sm"><i class="fa fa-plus"></i> Tambah Biaya</button>
+                            </div>
+                            <div class="table-responsive mb-4">
+                                <table class="table table-bordered">
+                                    <thead><tr><th width="20%">Tanggal</th><th width="45%">Deskripsi Biaya</th><th width="25%">Jumlah (Rp)</th><th width="10%">Aksi</th></tr></thead>
+                                    <tbody id="operasional-container">
+                                        <?php while ($biaya = mysqli_fetch_assoc($query_operasional)) : ?>
+                                        <tr>
+                                            <td><input type="date" name="tanggal_biaya[]" class="form-control" value="<?php echo htmlspecialchars($biaya['tanggal_biaya']); ?>"></td>
+                                            <td><input type="text" name="deskripsi_biaya[]" class="form-control" value="<?php echo htmlspecialchars($biaya['deskripsi_biaya']); ?>"></td>
+                                            <td><input type="text" name="jumlah_biaya[]" class="form-control currency" value="<?php echo number_format($biaya['jumlah_biaya'], 0, ',', '.'); ?>"></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm remove-operasional"><i class="fas fa-trash"></i></button></td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                    <tfoot><tr class="bg-light"><td colspan="2" class="text-right"><strong>Total Biaya Operasional</strong></td><td class="text-right"><strong id="total-operasional-display">Rp <?php echo number_format($total_operasional, 0, ',', '.'); ?></strong></td><td></td></tr></tfoot>
+                                </table>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                                <h5 class="card-title mb-0">Penalty / Denda</h5>
+                                <button type="button" id="add-penalty" class="btn btn-danger btn-round btn-sm"><i class="fa fa-plus"></i> Tambah Penalty</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead><tr><th width="20%">Tanggal</th><th width="45%">Deskripsi Penalty</th><th width="25%">Jumlah (Rp)</th><th width="10%">Aksi</th></tr></thead>
+                                    <tbody id="penalty-container">
+                                        <?php while ($penalty = mysqli_fetch_assoc($query_penalties)) : ?>
+                                        <tr>
+                                            <td><input type="date" name="tanggal_penalty[]" class="form-control" value="<?php echo htmlspecialchars($penalty['tanggal_penalty']); ?>"></td>
+                                            <td><input type="text" name="deskripsi_penalty[]" class="form-control" value="<?php echo htmlspecialchars($penalty['deskripsi_penalty']); ?>"></td>
+                                            <td><input type="text" name="jumlah_penalty[]" class="form-control currency" value="<?php echo number_format($penalty['jumlah_penalty'], 0, ',', '.'); ?>"></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm remove-penalty"><i class="fas fa-trash"></i></button></td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                    <tfoot><tr class="bg-light"><td colspan="2" class="text-right"><strong>Total Penalty</strong></td><td class="text-right"><strong id="total-penalty-display">Rp <?php echo number_format($total_penalty, 0, ',', '.'); ?></strong></td><td></td></tr></tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" name="simpan_detail" class="btn btn-success btn-round"><i class="fas fa-save mr-2"></i>Simpan Semua Perubahan</button>
+                    <a href="?module=lemtera" class="btn btn-default btn-round">Batal</a>
+                </div>
+            </div>
+            </form>
     </div>
 
-    <div id="termin-template" style="display: none;"><div class="termin-item p-3 mb-3 border rounded"><div class="row"><div class="col-md-3 form-group"><label>Tanggal</label><input type="date" name="tanggal_termin[]" class="form-control"></div><div class="col-md-3 form-group"><label>Nominal</label><input type="text" name="nominal_termin[]" class="form-control currency"></div><div class="col-md-5 form-group"><label>Keterangan</label><input type="text" name="keterangan_termin[]" class="form-control"></div><div class="col-md-1 d-flex align-items-end form-group"><button type="button" class="btn btn-danger btn-sm remove-termin"><i class="fas fa-trash"></i></button></div></div><div class="row"><div class="col-md-12 form-group mb-0"><label>Link Bukti Bayar</label><input type="text" name="bukti_termin[]" class="form-control"></div></div></div></div>
+    <div id="termin-template" style="display: none;"><div class="termin-item p-3 mb-3 border rounded bg-light"><div class="row"><div class="col-md-3 form-group"><label>Tanggal</label><input type="date" name="tanggal_termin[]" class="form-control"></div><div class="col-md-3 form-group"><label>Nominal</label><input type="text" name="nominal_termin[]" class="form-control currency"></div><div class="col-md-5 form-group"><label>Keterangan</label><input type="text" name="keterangan_termin[]" class="form-control"></div><div class="col-md-1 d-flex align-items-end form-group"><button type="button" class="btn btn-danger btn-sm remove-termin"><i class="fas fa-trash"></i></button></div></div><div class="row"><div class="col-md-12 form-group mb-0"><label>Link Bukti Bayar</label><input type="text" name="bukti_termin[]" class="form-control"></div></div></div></div>
     <table style="display: none;"><tbody id="operasional-template"><tr><td><input type="date" name="tanggal_biaya[]" class="form-control"></td><td><input type="text" name="deskripsi_biaya[]" class="form-control"></td><td><input type="text" name="jumlah_biaya[]" class="form-control currency"></td><td><button type="button" class="btn btn-danger btn-sm remove-operasional"><i class="fas fa-trash"></i></button></td></tr></tbody></table>
     <table style="display: none;"><tbody id="penalty-template"><tr><td><input type="date" name="tanggal_penalty[]" class="form-control"></td><td><input type="text" name="deskripsi_penalty[]" class="form-control"></td><td><input type="text" name="jumlah_penalty[]" class="form-control currency"></td><td><button type="button" class="btn btn-danger btn-sm remove-penalty"><i class="fas fa-trash"></i></button></td></tr></tbody></table>
 
@@ -212,19 +226,17 @@ else {
             }
             initCurrency('.currency');
 
-            // Termin Logic
+            // Logic di bawah ini tidak perlu diubah sama sekali
             $('#add-termin').on('click', function() { $('#termin-container').append($('#termin-template').html()); initCurrency('#termin-container .termin-item:last-child .currency'); });
             $('#termin-container').on('click', '.remove-termin', function() { $(this).closest('.termin-item').remove(); });
 
-            // Operasional Logic
             $('#add-operasional').on('click', function() { $('#operasional-container').append($('#operasional-template').html()); initCurrency('#operasional-container tr:last-child .currency'); });
             $('#operasional-container').on('click', '.remove-operasional', function() { $(this).closest('tr').remove(); calculateTotal('operasional-container', 'total-operasional-display'); });
-            $('#operasional-container').on('blur', '.currency', function() { calculateTotal('operasional-container', 'total-operasional-display'); });
+            $('body').on('blur', '#operasional-container .currency', function() { calculateTotal('operasional-container', 'total-operasional-display'); });
 
-            // Penalty Logic
             $('#add-penalty').on('click', function() { $('#penalty-container').append($('#penalty-template').html()); initCurrency('#penalty-container tr:last-child .currency'); });
             $('#penalty-container').on('click', '.remove-penalty', function() { $(this).closest('tr').remove(); calculateTotal('penalty-container', 'total-penalty-display'); });
-            $('#penalty-container').on('blur', '.currency', function() { calculateTotal('penalty-container', 'total-penalty-display'); });
+            $('body').on('blur', '#penalty-container .currency', function() { calculateTotal('penalty-container', 'total-penalty-display'); });
         });
     </script>
 

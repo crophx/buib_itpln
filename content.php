@@ -153,7 +153,12 @@ else {
 	elseif ($_GET['module'] == 'detail_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil detail lemtera
 		include "modules/lemtera/detail_lemtera.php";
-	} elseif ($_GET['module'] == 'kategori_entity' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
+	} 
+	elseif ($_GET['module'] == 'pihak_ketiga' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// panggil file tampil detail lemtera
+		include "modules/lemtera/pihak_ketiga.php";
+	} 
+	elseif ($_GET['module'] == 'kategori_entity' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil data KATEGORI ENTITY LEMTERA
 		include "modules/lemtera/kategori_entity.php";
 	}
