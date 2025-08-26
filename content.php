@@ -149,12 +149,12 @@ else {
 	}
 
 	// -- MODULE LEMTERA -- //
-	elseif ($_GET['module'] == 'lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin','Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
+	elseif ($_GET['module'] == 'lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
 		// panggil file tampil home lemtera
 		include "modules/lemtera/lemtera_home.php";
 	}
 	// jika module yang dipilih "form entri realisasi lemtera"
-	elseif ($_GET['module'] == 'form_entri_realisasi_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin','Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
+	elseif ($_GET['module'] == 'form_entri_realisasi_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'Pimpinan', 'SekretarisPimpinan', 'LEMTERA'])) {
 		// panggil file tampil entri data buib
 		include "modules/lemtera/form_entri_realisasi.php";
 	}
@@ -172,9 +172,8 @@ else {
 	elseif ($_GET['module'] == 'form_entri_ongoing_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil entri data lemtera
 		include "modules/lemtera/form_entri_ongoing.php";
-	// jika module yang dipilih "form entri ongoing lemtera"
-	}
-	elseif ($_GET['module'] == 'detail_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
+		// jika module yang dipilih "form entri ongoing lemtera"
+	} elseif ($_GET['module'] == 'detail_lemtera' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
 		// panggil file tampil detail lemtera
 		include "modules/lemtera/detail_lemtera.php";
 	} elseif ($_GET['module'] == 'kategori_entity' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'LEMTERA', 'Pimpinan', 'SekretarisPimpinan'])) {
@@ -252,25 +251,22 @@ else {
 	elseif ($_GET['module'] == 'pengajuan_surat') {
 		// panggil file pengajuan surat
 		include "modules/pengajuan_surat/tampil_data.php";
-	}
-	elseif ($_GET['module'] == 'riwayat_pengajuan') {
+	} elseif ($_GET['module'] == 'riwayat_pengajuan') {
 		// panggil file form ubah jenis
 		include "modules/pengajuan_surat/riwayat_pengajuan.php";
-	}
-	elseif ($_GET['module'] == 'form_entri_pengajuan') {
+	} elseif ($_GET['module'] == 'form_entri_pengajuan') {
 		// panggil file form entri pengajuan surat
 		include "modules/pengajuan_surat/form_entri_pengajuan.php";
-	}
-	elseif ($_GET['module'] == 'detail_antrian') {
+	} elseif ($_GET['module'] == 'detail_antrian') {
 		// panggil file detail antrian surat
 		include "modules/antrian_surat/detail_antrian.php";
 	}
 	// jika module yang dipilih "antrian_surat" dan hak akses "SuperAdmin", "BUIB", "Pimpinan", "SekretarisPimpinan"
-	elseif ($_GET['module'] == 'antrian_surat' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'ManajerBKS', 'ManajerBKI','ManajerLemtera','ManajerTC', 'ManajerBUIB'])) {
+	elseif ($_GET['module'] == 'antrian_surat' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB', 'Pimpinan', 'SekretarisPimpinan', 'ManajerBKS', 'ManajerBKI', 'ManajerLemtera', 'ManajerTC', 'ManajerBUIB'])) {
 		// panggil file tampil data profil
 		include "modules/antrian_surat/tampil_data.php";
 	}
-	
+
 	// jika module yang dipilih "profil" dan hak akses "SuperAdmin", "BUIB"
 	elseif ($_GET['module'] == 'profil' && in_array($_SESSION['hak_akses'], ['SuperAdmin', 'BUIB'])) {
 		// panggil file tampil data profil

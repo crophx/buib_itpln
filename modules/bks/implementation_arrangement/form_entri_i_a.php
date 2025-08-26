@@ -7,7 +7,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
         <div class="panel-header">
             <div class="page-inner py-4">
                 <div class="page-header">
-                    <h4 class="page-title"><i class="fas fa-file-signature mr-2"></i> Entri Dokumen PKS</h4>
+                    <h4 class="page-title"><i class="fas fa-file-signature mr-2"></i> Entri Dokumen IA</h4>
                     <ul class="breadcrumbs">
                         <li class="nav-home"><a href="?module=beranda"><i class="flaticon-home"></i></a></li>
                         <li class="separator"><i class="flaticon-right-arrow"></i></li>
